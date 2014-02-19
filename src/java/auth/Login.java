@@ -256,6 +256,13 @@ public class Login extends HttpServlet {
                     System.err.println("Problem when retrieving Charity info, Password doesn't match.");
                 }
                 
+                //Close the Database
+                try {
+                    connection.close();
+                }catch (SQLException exceptionObject) {
+                    System.out.println("Problem with closing up " + exceptionObject.getMessage()); 
+                }
+                
                 //If hashedd passwords didnt match, re-output login form
                 if(passwordMismatch){
                     processRequest(request, response);

@@ -16,8 +16,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import json.Charity;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
+import utilities.DirectoryManager;
 
 /**
  * Handles Charity Sign-up, checking for duplicates and
@@ -52,6 +54,8 @@ public class Signup extends HttpServlet {
     private boolean usernameDuplication;
     /* Indicates if the chose charity name already exists in the DB */
     private boolean charityNameDuplication;
+    
+    
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -66,7 +70,9 @@ public class Signup extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         
+        /* Root directory of project - "Charity" in this case */
         String servletContext = request.getContextPath();
+        /* Path of the Servlet - "/Signup" in this case */
         String servletPath = request.getServletPath();
         
         try (PrintWriter out = response.getWriter()) {
@@ -137,6 +143,10 @@ public class Signup extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        StringBuffer servletURL = request.getRequestURL();
+        
+        System.out.println("ServletURL: " + servletURL.toString());
         
         //initialize context sensitive help booleans
         unenteredInput      = false;
@@ -272,6 +282,18 @@ public class Signup extends HttpServlet {
                         session.setAttribute("username"   , cleanInputMap.get("username"));
                         session.setAttribute("authorised" , true);
                         
+                        //Create new directory structure for this Charity
+                        DirectoryManager dirManager = new DirectoryManager(cleanInputMap.get("charityName"));
+                        
+                        String servletContext = request.getServletContext().getRealPath("/");
+                        System.out.print("ServletContext: " + servletContext );
+                        //Creates the DirStructure, placing the file in the Document Root, accessable through the browser
+                        dirManager.createDirStructure(servletContext);
+                        
+                        //Create the JSON File for the Charity
+                        Charity charity = new Charity(cleanInputMap.get("charityName"),"","","","","","");
+                        charity.createCharityJSONFile(servletContext);
+                        
                         //Redirect to basic registration of info page
                         response.sendRedirect("./Register");
                     }
@@ -281,6 +303,7 @@ public class Signup extends HttpServlet {
                 }
                 
             }else{
+                //Passwords did not match, re-output form
                 passwordMismatch = true;
                 processRequest(request,response);
             }
