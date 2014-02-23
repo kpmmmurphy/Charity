@@ -43,12 +43,13 @@ public class Charity extends CustomJSONObject{
     private String facebook = "";
     private String twitter = "";
     private String googleplus = "";
+    private String logo = "";
     
     
     /*
      * Constructor
      */
-    public Charity( String name, String description, String address, String telephone, String facebook, String twitter, String googleplus) {
+    public Charity( String name, String description, String address, String telephone, String facebook, String twitter, String googleplus, String logo) {
         super();
         this.name = name;
         this.description = description;
@@ -57,6 +58,7 @@ public class Charity extends CustomJSONObject{
         this.facebook = facebook;
         this.twitter = twitter;
         this.googleplus = googleplus;
+        this.logo = logo;
     }
     
     public static void main(String[] args) throws FileNotFoundException{
@@ -68,11 +70,11 @@ public class Charity extends CustomJSONObject{
      */
     private static void testCharityClass() throws FileNotFoundException{
         Path currentRelativePath = Paths.get("");
-        jsonPath = currentRelativePath.toAbsolutePath().toString() + "/$charity.json";
+        jsonPath = currentRelativePath.toAbsolutePath().toString() + "/charity.json";
         System.out.println("Write/Read Path: " + jsonPath);
         
         //Creating a Charity Object
-        Charity charity = new Charity("Concern", "Concern worldwide","Co.Cork, Ireland", "001121","facebookurl","twitterurl","googleplusurl");
+        Charity charity = new Charity("Concern", "Concern worldwide","Co.Cork, Ireland", "001121","facebookurl","twitterurl","googleplusurl", "");
         //Writes it to a file
         charity.createCharityJSONFile(jsonPath);
         
@@ -113,6 +115,7 @@ public class Charity extends CustomJSONObject{
         charityHashMap.put("facebook", this.facebook);
         charityHashMap.put("twitter", this.twitter);
         charityHashMap.put("googleplus", this.googleplus);
+        charityHashMap.put("logo", this.logo);
         charityObj.put("charity", charityHashMap);
         if(DEBUG_ON){
             String charityJSONString = JSONValue.toJSONString(charityObj);
@@ -153,8 +156,9 @@ public class Charity extends CustomJSONObject{
         String face = jsonCharity.get("facebook").toString();
         String twit = jsonCharity.get("twitter").toString();
         String google = jsonCharity.get("googleplus").toString();
+        String logo = jsonCharity.get("logo").toString();
         
-        return new Charity(charityName, desc, address, tele, face, twit, google);
+        return new Charity(charityName, desc, address, tele, face, twit, google, logo);
     }
     
      public static JSONObject parseJSON(String nameOfCharity, String servletContext){
@@ -163,8 +167,10 @@ public class Charity extends CustomJSONObject{
         String lowerCaseName = nameOfCharity.toLowerCase().trim().replaceAll("\\s+","");
         
         //The path where the JSON file will be output to
-        String jsonFilePath = servletContext + "/charities/" + lowerCaseName + "/json/charity.json";
-        
+        String jsonFilePath = servletContext + "charities/" + lowerCaseName + "/json/charity.json";
+        if(DEBUG_ON){
+            System.out.println("JSON file Path: " + jsonFilePath);
+        }
         JSONObject jsonCharity = readJsonFile(jsonFilePath);
         
         
@@ -247,6 +253,13 @@ public class Charity extends CustomJSONObject{
      */
     public void setGoogleplus(String googleplus) {
         this.googleplus = googleplus;
+    }
+    
+    /**
+     * @param filename filename of the logo
+     */
+    public void setLogo(String filename) {
+        this.logo = filename;
     }
 
     /**

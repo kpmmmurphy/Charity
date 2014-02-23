@@ -8,8 +8,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -166,11 +164,11 @@ public class Login extends HttpServlet {
             Connection connection = dbConnect.getConnection();
             
             //PreparedStatement to check for matching username
-            PreparedStatement usernameStatement;
+            PreparedStatement usernameStatement = null;
             //PreparedStatement to retrieve salt value belonging to the supplied username
-            PreparedStatement saltStatement;
+            PreparedStatement saltStatement = null;
             //PreparedStatement to select all charity details
-            PreparedStatement selectDetailsStatement;
+            PreparedStatement selectDetailsStatement = null;
             
             //Result set to for usernameStatement
             ResultSet usernameResultSet;
@@ -192,10 +190,16 @@ public class Login extends HttpServlet {
                 usernameStatement = connection.prepareStatement(usernameQuery);
                 usernameStatement.setString(1, cleanInputMap.get("username"));
                 usernameResultSet = usernameStatement.executeQuery();
-                usernameResultSet.next();
-                if(! usernameResultSet.first()){
-                    usernameMismatch = true;
+                
+                if(usernameResultSet.next()){
+                    if(! usernameResultSet.first()){
+                        usernameMismatch = true;
+                    }
                 }
+                
+                
+                usernameStatement.close();
+                usernameResultSet.close();
             }catch(SQLException e){
                 e.printStackTrace();
                 System.err.println("Unable to retrieve username!");
@@ -212,8 +216,13 @@ public class Login extends HttpServlet {
                     saltStatement = connection.prepareStatement(saltQuery);
                     saltStatement.setString(1, cleanInputMap.get("username"));
                     saltResultSet = saltStatement.executeQuery();
-                    saltResultSet.next();
-                    salt = saltResultSet.getString(1);
+                    
+                    if(saltResultSet.next()){
+                        salt = saltResultSet.getString(1);
+                    }
+                    
+                    saltStatement.close();
+                    saltResultSet.close();
                 }catch(SQLException e){
                     e.printStackTrace();
                     System.err.println("Unable to retrieve username!");
@@ -246,21 +255,17 @@ public class Login extends HttpServlet {
                     selectDetailsStatement = connection.prepareStatement(selectDetailsQuery);
                     selectDetailsStatement.setString(1, cleanInputMap.get("password"));
                     detailsResultSet = selectDetailsStatement.executeQuery();
-                    detailsResultSet.next();
-                    //if there are no elements in the ResultSet, Passwords mismatched
-                    if(! detailsResultSet.first()){
-                        passwordMismatch = true;
+                    
+                    if(detailsResultSet.next()){
+                        //if there are no elements in the ResultSet, Passwords mismatched
+                        if(! detailsResultSet.first()){
+                            passwordMismatch = true;
+                        }
                     }
+                    
                 }catch(SQLException e){
                     e.printStackTrace();
                     System.err.println("Problem when retrieving Charity info, Password doesn't match.");
-                }
-                
-                //Close the Database
-                try {
-                    connection.close();
-                }catch (SQLException exceptionObject) {
-                    System.out.println("Problem with closing up " + exceptionObject.getMessage()); 
                 }
                 
                 //If hashedd passwords didnt match, re-output login form
@@ -275,14 +280,22 @@ public class Login extends HttpServlet {
                         HttpSession session = request.getSession(true);
                         session.setAttribute("username", detailsResultSet.getString(1));
                         session.setAttribute("charity_id", detailsResultSet.getString(5));
+                        session.setAttribute("charityName", detailsResultSet.getString(6));
                         session.setAttribute("authorised", true);
+                        
+                        
+                        selectDetailsStatement.close();
+                        detailsResultSet.close();
+                        //Close the Database
+                        connection.close();
                     }catch(SQLException e){
                         e.printStackTrace();
                         System.out.println("Problem creating Session");
+                        
                     }
                     
                     //Redirect to Dashboard
-                    response.sendRedirect("/Dashboard");
+                    response.sendRedirect("Dashboard");
                 }
             }
         }

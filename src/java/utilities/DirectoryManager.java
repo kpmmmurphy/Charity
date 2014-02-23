@@ -5,8 +5,6 @@
 package utilities;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Handles creating of the file structure for the Charity, only works with Linux

@@ -291,7 +291,7 @@ public class Signup extends HttpServlet {
                         dirManager.createDirStructure(servletContext);
                         
                         //Create the JSON File for the Charity
-                        Charity charity = new Charity(cleanInputMap.get("charityName"),"","","","","","");
+                        Charity charity = new Charity(cleanInputMap.get("charityName"),"","","","","","", "");
                         charity.createCharityJSONFile(servletContext);
                         
                         //Redirect to basic registration of info page

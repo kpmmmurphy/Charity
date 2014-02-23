@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,21 +19,23 @@ import json.Charity;
 import org.json.simple.JSONObject;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
+import utilities.UploadPhoto;
 
 /**
  * Handles the entering of the Charity's address, telephone number, domain name,
- * and their  PayPal account email address.
+ * PayPal account email address, their social media page addresses and uploading 
+ * a Charity logo image.
  * 
  * @author  Kevin Murphy
- * @version 1.0
- * @date    12/2/14
+ * @version 1.1
+ * @date    22/2/14
  */
 @WebServlet(name = "Register", urlPatterns = {"/Register"})
+@MultipartConfig
 public class Register extends HttpServlet {
 
+    /* Debug Mechinism*/
     private final boolean DEBUG_ON = true;
-    
-    private boolean authorised = false;
     
     /* Attributes to be stored into DB */
     private String domain      = "";
@@ -47,7 +50,14 @@ public class Register extends HttpServlet {
     private String facebookUrl   = "";
     private String twitterUrl    = "";
     private String googleplusUrl = "";
+    private String logoImage     = "";
     
+    /* Charity Name to be gotten from Session */
+    private String charityName;
+    /* The trimmed and lower case charity name for upload directory*/
+    private String trimmedCharityName;
+    
+    /* Session */
     private HttpSession session;
     
     /**
@@ -63,13 +73,15 @@ public class Register extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         
-        session    = request.getSession(false);
-        //authorised = ((boolean)session.getAttribute("authorised"));
+        //Checks if there is a session
+        session = request.getSession(false);
         
+        //If the session is not null, process the request, else redirect to login
         if(session != null){
             String servletContext = request.getContextPath();
             String servletPath    = request.getServletPath();
             
+            //Initilise all fields with stored data
             initialiseDetails(request);
 
             try (PrintWriter out = response.getWriter()) {
@@ -80,14 +92,14 @@ public class Register extends HttpServlet {
                 out.println("<title>Edit Charity Info</title>");            
                 out.println("</head>");
                 out.println("<body>");
+                
                 out.println("<h1>Edit Details of your Charity</h1>");
-                out.println("<form method='POST' action='" + servletContext + servletPath +"'>");
+                
+                out.println("<form method='POST' action='" + servletContext + servletPath +"' >");
                 out.println("<fieldset>");
                 out.println("<legend>Edit Details</legend>");
-                //out.println("Description :  <input type='text' name='description' value='" + description + "'   placeholder='Description of your Charity' /> <br />");
-                //out.println("Address :      <input type='text' name='address'     value='" + address + "'       placeholder='Address' maxlength='255' size='50' /> <br />");
-                out.println("Description :  <textarea          name='description' value='" + description + "'   placeholder='Description of your Charity' ></textarea> <br />");
-                out.println("Address :      <textarea          name='address'     value='" + address + "'       placeholder='Address' maxlength='255' size='50' ></textarea> <br />");
+                out.println("Description :  <textarea          name='description' placeholder='Description of your Charity' >" + description + "</textarea> <br />");
+                out.println("Address :      <textarea          name='address'     placeholder='Address' maxlength='255' size='50' >" + address + "</textarea> <br />");
                 out.println("Telephone :    <input type='text' name='telephone'   value='" + telephone + "'     placeholder='Telephone' maxlength='12' /> <br />");
                 out.println("Domain name :  <input type='text' name='domain'      value='" + domain + "'        placeholder='Domain Name' /> <br />");
                 out.println("PayPal Email : <input type='text' name='paypalemail' value='" + payPalEmail + "'   placeholder='PayPal Email' /> <br />");
@@ -97,12 +109,23 @@ public class Register extends HttpServlet {
                 out.println("<input type=\"submit\" value=\"Submit\">");
                 out.println("</fieldset>");
                 out.println("</form>");
+                
+                out.println("<form method='POST' action='" + servletContext + servletPath +"' enctype='multipart/form-data'>");
+                out.println("<fieldset>");
+                out.println("<legend>Upload Logo Image</legend>");
+                out.println("Upload Logo Image : <input id='file' type='file' name='filename' size='50'/><br/>");
+                out.println("<img src='charities/" + trimmedCharityName  + "/uploads/" + logoImage + "' id='logoImg' /><br/>");
+                out.println("<input type=\"submit\" value=\"Submit\">");
+                out.println("</fieldset>");
+                out.println("</form>");
+                out.println("<a href='Dashboard'>Back to Dashboard</a>");
+                
                 out.println("</body>");
                 out.println("</html>");
             }
         }else{
-            //Redirect to basic registration of info page
-            response.sendRedirect("./Signup");
+            //Redirect to Signup page
+            response.sendRedirect("Signup");
         }
         
     }
@@ -133,110 +156,125 @@ public class Register extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        //Check if session attribute authorised is set, if so process request
         if(session.getAttribute("authorised") != null){
-            /* Read in all paramaters from request */
-            //For Database only
-            domain      = request.getParameter("domain");
-            payPalEmail = request.getParameter("paypalemail");
-
-            //For Databse and JSON
-            address     = request.getParameter("address");
-            telephone   = request.getParameter("telephone");
-
-            //For JSON only
-            description     = request.getParameter("description");
-            facebookUrl     = request.getParameter("facebook");
-            twitterUrl      = request.getParameter("twitter");
-            googleplusUrl   = request.getParameter("googleplus");
-
-            if(DEBUG_ON){
-                System.out.println("Address from request :"     + address);
-                System.out.println("Telephone from request :"   + telephone);
-                System.out.println("Domain from request :"      + domain);
-                System.out.println("payPalEmail from request :" + payPalEmail);
-
-                System.out.println("Description from request :  " + description);
-                System.out.println("Facebook Url from request : " + facebookUrl);
-                System.out.println("Twitter Url from request  : " + twitterUrl);
-                System.out.println("Google+ Url from request :  " + googleplusUrl);
-            }
-
-            //OWASP sanitizer to pretect against XSS attacks
-            HtmlPolicyBuilder htmlPolicyBuilder  = new HtmlPolicyBuilder();
-            PolicyFactory stripAllTagsPolicy     = htmlPolicyBuilder.toFactory();
-
-            String cleanAddress       = stripAllTagsPolicy.sanitize(address);
-            String cleanTelephone     = stripAllTagsPolicy.sanitize(telephone);
-            String cleanDomain        = stripAllTagsPolicy.sanitize(domain);
-            String cleanPayPalEmail   = stripAllTagsPolicy.sanitize(payPalEmail);
-            String cleanDescription   = stripAllTagsPolicy.sanitize(description);
-            String cleanFacebookUrl   = stripAllTagsPolicy.sanitize(facebookUrl);
-            String cleanTwitterUrl    = stripAllTagsPolicy.sanitize(twitterUrl);
-            String cleanGooglePlusUrl = stripAllTagsPolicy.sanitize(googleplusUrl);
-
-            HashMap<String, String> cleanInputMap = new HashMap<>();
-            cleanInputMap.put("address", cleanAddress);
-            cleanInputMap.put("telephone", cleanTelephone);
-            cleanInputMap.put("domain", cleanDomain);
-            cleanInputMap.put("payPalEmail", cleanPayPalEmail);
-            cleanInputMap.put("description", cleanDescription);
-            cleanInputMap.put("facebook", cleanFacebookUrl);
-            cleanInputMap.put("twitter", cleanTwitterUrl);
-            cleanInputMap.put("googleplus", cleanGooglePlusUrl);
-
-            //Connect to Database
-            DBConnect dbConnect   = new DBConnect();
-            Connection connection = dbConnect.getConnection();
-
             //Get the CharityName from the Session
-            String charityName = (String)session.getAttribute("charityName");
+            charityName = (String)session.getAttribute("charityName");
             if(DEBUG_ON){
                 System.out.println("Charity Name from Session: " + charityName);
             }
-
-            //PreparedStatement for inserting all nessesary fields
-            PreparedStatement insertStatement;
-
-            //Insert Query
-            String insertQuery = "UPDATE charities "
-                               + "SET address = ?, domain_url = ?, telephone = ?, paypal_email = ? "
-                               + "WHERE name = ? ";
-
-            try{
-                //Create the PreparedStatement and enter all input
-                insertStatement = connection.prepareStatement(insertQuery);
+            
+            //If a logo is being uploaded, checks if it's a multipart request
+            if (isMultipart(request)) {
+                //Upload logo image, returns the name of the uploaded file, today's date and time
+                String uploadName = UploadPhoto.uploadFile(request, charityName, true);
                 
-                insertStatement.setString(1, cleanInputMap.get("address"));
-                insertStatement.setString(2, cleanInputMap.get("domain"));
-                insertStatement.setString(3, cleanInputMap.get("telephone"));
-                insertStatement.setString(4, cleanInputMap.get("payPalEmail"));
-
-                insertStatement.setString(5, charityName);
-                System.out.println(insertStatement);
-                //Execute and close the connnection
-                insertStatement.executeUpdate();
-                connection.close();
-            }catch(SQLException e){
-                System.err.println("Problem entering input in Database");
-                e.printStackTrace();
+                //Redirect to Dashboard
+                response.sendRedirect("Register");
             }
+            
+            //Not a multipart request, just form fields from first form
+            if(! isMultipart(request)){
+                /* Read in all paramaters from request */
+                //For Database only
+                domain      = request.getParameter("domain");
+                payPalEmail = request.getParameter("paypalemail");
 
-            //Enter input into JSON file
-            Charity charity = new Charity(charityName, cleanInputMap.get("description"),
-                                          cleanInputMap.get("address"), cleanInputMap.get("telephone"),
-                                          cleanInputMap.get("facebook"),cleanInputMap.get("twitter"),
-                                          cleanInputMap.get("googleplus") );
+                //For Databse and JSON
+                address     = request.getParameter("address");
+                telephone   = request.getParameter("telephone");
 
-            //Get the Servlet Context for writing the json file
-            String servletContext = request.getServletContext().getRealPath("/");
+                //For JSON only
+                description     = request.getParameter("description");
+                facebookUrl     = request.getParameter("facebook");
+                twitterUrl      = request.getParameter("twitter");
+                googleplusUrl   = request.getParameter("googleplus");
 
-            //Writes the json file to the defined directory
-            charity.createCharityJSONFile(servletContext);
+                if(DEBUG_ON){
+                    System.out.println("Address from request :"     + address);
+                    System.out.println("Telephone from request :"   + telephone);
+                    System.out.println("Domain from request :"      + domain);
+                    System.out.println("payPalEmail from request :" + payPalEmail);
 
-            //Redirect to Dashboard
-            response.sendRedirect("/Dashboard");
+                    System.out.println("Description from request :  " + description);
+                    System.out.println("Facebook Url from request : " + facebookUrl);
+                    System.out.println("Twitter Url from request  : " + twitterUrl);
+                    System.out.println("Google+ Url from request :  " + googleplusUrl);
+                }
+
+                //OWASP sanitizer to pretect against XSS attacks
+                HtmlPolicyBuilder htmlPolicyBuilder  = new HtmlPolicyBuilder();
+                PolicyFactory stripAllTagsPolicy     = htmlPolicyBuilder.toFactory();
+
+                String cleanAddress       = stripAllTagsPolicy.sanitize(address);
+                String cleanTelephone     = stripAllTagsPolicy.sanitize(telephone);
+                String cleanDomain        = stripAllTagsPolicy.sanitize(domain);
+                //Not cleaning the PayPal email as it is escaping the "@"
+                //String cleanPayPalEmail   = stripAllTagsPolicy.sanitize(payPalEmail);
+                String cleanDescription   = stripAllTagsPolicy.sanitize(description);
+                String cleanFacebookUrl   = stripAllTagsPolicy.sanitize(facebookUrl);
+                String cleanTwitterUrl    = stripAllTagsPolicy.sanitize(twitterUrl);
+                String cleanGooglePlusUrl = stripAllTagsPolicy.sanitize(googleplusUrl);
+
+                //HashMap to track all clean data
+                HashMap<String, String> cleanInputMap = new HashMap<>();
+                cleanInputMap.put("address", cleanAddress);
+                cleanInputMap.put("telephone", cleanTelephone);
+                cleanInputMap.put("domain", cleanDomain);
+                cleanInputMap.put("payPalEmail", payPalEmail);
+                cleanInputMap.put("description", cleanDescription);
+                cleanInputMap.put("facebook", cleanFacebookUrl);
+                cleanInputMap.put("twitter", cleanTwitterUrl);
+                cleanInputMap.put("googleplus", cleanGooglePlusUrl);
+                
+                //Connect to Database
+                DBConnect dbConnect   = new DBConnect();
+                Connection connection = dbConnect.getConnection();
+
+                //PreparedStatement for inserting all nessesary fields
+                PreparedStatement insertStatement;
+
+                //Insert Query
+                String insertQuery = "UPDATE charities "
+                                   + "SET address = ?, domain_url = ?, telephone = ?, paypal_email = ? "
+                                   + "WHERE name = ? ";
+
+                try{
+                    //Create the PreparedStatement and enter all input
+                    insertStatement = connection.prepareStatement(insertQuery);
+
+                    insertStatement.setString(1, cleanInputMap.get("address"));
+                    insertStatement.setString(2, cleanInputMap.get("domain"));
+                    insertStatement.setString(3, cleanInputMap.get("telephone"));
+                    insertStatement.setString(4, cleanInputMap.get("payPalEmail"));
+
+                    insertStatement.setString(5, charityName);
+                    System.out.println(insertStatement);
+                    //Execute and close the connnection
+                    insertStatement.executeUpdate();
+                    connection.close();
+                }catch(SQLException e){
+                    System.err.println("Problem entering input in Database");
+                    e.printStackTrace();
+                }
+
+                //Enter input into JSON file
+                Charity charity = new Charity(charityName, cleanInputMap.get("description"),
+                                              cleanInputMap.get("address"), cleanInputMap.get("telephone"),
+                                              cleanInputMap.get("facebook"),cleanInputMap.get("twitter"),
+                                              cleanInputMap.get("googleplus"), logoImage );
+
+                //Get the Servlet Context for writing the json file
+                String servletContext = request.getServletContext().getRealPath("/");
+
+                //Writes the json file to the defined directory
+                charity.createCharityJSONFile(servletContext);
+
+                //Redirect to Dashboard
+                response.sendRedirect("Register");
+            }
         }else{
-            response.sendRedirect("/Login");
+            response.sendRedirect("Login");
         }
         
     }
@@ -259,12 +297,17 @@ public class Register extends HttpServlet {
      */
     private void initialiseDetails(HttpServletRequest request){
         
-        String charityName = (String)session.getAttribute("charityName");
+        //Get Charity Name from Session
+        charityName = (String)session.getAttribute("charityName");
+        //Trim, set to lower case and remove white spaces
+        trimmedCharityName = charityName.toLowerCase().trim().replaceAll("\\s+","");
+        //Get servlet Context
         String servletContext = request.getServletContext().getRealPath("/");
         if(DEBUG_ON){
-            System.out.println("Charity Name: " + charityName);
+            System.out.println("Charity Name: "     + charityName);
             System.out.println("Servlet Context : " + servletContext);
         }
+        //Parse the charity.json file, and get the charity JSONObject
         JSONObject charity = (JSONObject)Charity.parseJSON(charityName, servletContext).get("charity");
         
         //Connect to Database
@@ -293,10 +336,12 @@ public class Register extends HttpServlet {
             e.printStackTrace();
         }
         
+        //Initilise all attributes from the Charity JSONObject
         this.description    = charity.get("description").toString();
         this.facebookUrl    = charity.get("facebook").toString();
         this.twitterUrl     = charity.get("twitter").toString();
         this.googleplusUrl  = charity.get("googleplus").toString();
+        this.logoImage      = charity.get("logo").toString();
 
         if(DEBUG_ON){
             System.out.println("Address from DB: "     + address);
@@ -308,6 +353,24 @@ public class Register extends HttpServlet {
             System.out.println("Facebook Url from JSON: " + facebookUrl);
             System.out.println("Twitter Url from JSON: "    + twitterUrl);
             System.out.println("GooglePlus Url from JSON: " + googleplusUrl);
+            System.out.println("Logo Image from JSON: "     + logoImage);
         }
+    }
+    
+    /**
+     * Checks if the request is a Multipart request holding encoded file data,
+     * or is a regular plain-text form
+     * 
+     * @param request
+     * @return boolean isMultipart  
+     */
+    private boolean isMultipart(HttpServletRequest request ){
+        boolean isMultipart = false;
+        
+        if(request.getContentType() != null && request.getContentType().toLowerCase().indexOf("multipart/form-data") > -1){
+            isMultipart = true;
+        }
+        
+        return isMultipart;
     }
 }

@@ -1,0 +1,117 @@
+
+body
+{
+	background-color:#6C80A6;
+	background-image:url('../images/sos.png');
+	font-family: 'Muli', sans-serif;
+	font-size:0.6em;
+	margin:0px;
+}
+
+nav
+{
+	position:fixed;
+	float:left;
+	width:15%;
+	height:100%;
+	background-image:url('../images/tactile_noise.png');
+	margin:0px;
+	left:0px;
+	top:0px;
+	bottom:0px;
+	font-size:1.5em;
+	padding:0px;
+	color:white;
+	box-shadow: inset 5px 50px 70px #000000;
+}
+
+nav img
+{
+	width:110%;
+	box-shadow: 0 0 10px #000000;
+}
+
+#logo
+{
+	border-bottom-right-radius:2em;
+	border-right: solid 1px #888888;
+}
+
+nav li
+{
+	padding:0;
+	margin-left:5%;
+	margin-right:auto;
+}
+
+ul
+{
+	list-style-type: none;
+	margin:0;
+	padding:10px;
+}
+
+ul li
+{
+	padding: 5px;
+	margin:0px;
+}
+
+#main
+{
+    margin-left:20%;
+}
+
+article
+{
+	display: inline-block;
+	vertical-align: top;
+}
+
+article h2
+{
+    text-decoration: underline;
+}
+
+article.option
+{
+	background-color:white;
+	color: #3366FF;
+	font-size:1.5em;
+	text-align:center;
+	width:20%;
+	height:40%;
+	padding:10px;
+	margin-top: 15%;
+	margin-bottom: 15%;
+	margin:4%;
+	background-image:url('../images/use_your_illusion.png');
+	border:solid 1px white;
+	-webkit-box-shadow: 0 8px 6px -6px black;
+	   -moz-box-shadow: 0 8px 6px -6px black;
+	        box-shadow: 0 8px 6px -6px black;
+}
+
+article.option:hover
+{
+	opacity:0.9;
+}
+
+article.option h2,h3
+{
+	padding:10px;
+}
+
+footer
+{
+	clear:both;
+}
+
+a:link {color:#FFFFFF ;}     
+a:visited {color:#FFFFFF ;}  
+a:hover 
+{
+	color:#6699FF;
+}  
+a:active {color:#FFFFFF ;}
+

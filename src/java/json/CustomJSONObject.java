@@ -17,8 +17,11 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 /**
- *
- * @author Kevin Murphy
+ * Extended org.json.simple.JSONObject, with additional read and write functionality to file
+ * 
+ * @author  Kevin Murphy
+ * @version 1.0
+ * @date    12/2/14
  */
 public abstract class CustomJSONObject extends JSONObject{
     
