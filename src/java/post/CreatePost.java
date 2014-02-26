@@ -6,18 +6,19 @@
 
 package post;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Writer;
+import java.util.LinkedHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import json.Article;
+import utilities.Upload;
 
 /**
  *
@@ -28,7 +29,16 @@ import javax.servlet.http.HttpSession;
 @WebServlet(name = "CreatePost", urlPatterns = {"/CreatePost"})
 public class CreatePost extends HttpServlet {
 
+    private boolean DEBUG_ON = true;
+    
+    private String charityName;
+    private String trimmedCharityName;
+    private String servletContext;
+    private String articleImg;
+    
     private HttpSession session;
+    
+    private LinkedHashMap formFieldMap; 
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -44,6 +54,9 @@ public class CreatePost extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         
         session = request.getSession();
+        
+        initilizeDetials(request);
+        
         if(session.getAttribute("authorised") == null) {
             response.sendRedirect("Login");
         } else {
@@ -51,27 +64,35 @@ public class CreatePost extends HttpServlet {
             String servletPath = request.getServletPath();
             
             try (PrintWriter out = response.getWriter()) {
-                /* TODO output your page here. You may use following sample code. */
-                out.println("<!DOCTYPE html>");
-                out.println("<html>");
-                out.println("<head>");
-                out.println("<title>Create Post</title>");            
-                out.println("</head>");
-                out.println("<body>");
-                out.println("<h1>Create Post for " + session.getAttribute("name") + "</h1>");
-                out.println("<form method='POST' action='" + servletContext + servletPath +"'>");
+                /* Just the HTML for the form, gotten with an JQuery AJAX call*/
+               
+                //Article Form
+                out.println("<form method='POST' action='" + servletContext + servletPath +"' enctype='multipart/form-data' >");
                 out.println("<fieldset>");
                 out.println("<legend>New Post</legend>");
                 out.println("Title: <input type='text' name='title' placeholder='Post Title'> <br />");
-                out.println("Description: <textarea name=\"description\" rows=\"5\" cols=\"10\"></textarea><br />");
+                out.println("<hr />");
+                out.println("Type: <select name='type' placeholder='Type of Post'>"
+                        + "         <option value='general'>General</option>"
+                        + "         <option value='lost_and_found'>Lost and Found</option>"
+                        + "         <option value='sponsorship'>Sponsorship</option>"
+                        + "        </select><br />");
+                out.println("<hr />");
+                out.println("Brief Description: <textarea name=\"description\" rows=\"5\" cols=\"10\"></textarea><br />");
+                out.println("<hr />");
                 out.println("Content: <textarea name=\"content\" rows=\"15\" cols=\"30\"></textarea><br />");
+                out.println("<hr />");
+                out.println("Upload Logo Image : <input id='file' type='file' name='filename' size='50'/><br/>");
+                out.println("<img src='charities/" + trimmedCharityName  + "/uploads/" + articleImg + "' id='articleImg' /><br/>");
+                out.println("<hr />");
+                out.println("Tags : <input type='text' name='title' placeholder='Tags Seperated by a Space'> <br />");
+                out.println("<hr />");
                 out.println("<input type=\"submit\" value=\"Submit\">");
                 out.println("<input type=\"reset\" value=\"Clear\">");
                 out.println("</fieldset>");
                 out.println("</form>");
                 out.println("<p>Return to <a href=\"Dashboard\">Dashboard</a></p>");
-                out.println("</body>");
-                out.println("</html>");
+                
             }
         }
     }
@@ -102,37 +123,10 @@ public class CreatePost extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
-        
-        HttpSession session = request.getSession();
-        
-        if(session.getAttribute("authorised") == null) {
-            response.sendRedirect("Login");
-        } else {
-            String charity = (String)session.getAttribute("name");
-            String postTitle = request.getParameter("title");
-            String postDescription = request.getParameter("description");
-            String postContent = request.getParameter("content");
-            
-            Writer writer;
-            try{
-                writer = new BufferedWriter(
-                            new OutputStreamWriter(
-                                    new FileOutputStream("/home/kealan/College/CS3305/charities/" 
-                                            + charity + "/articles/" + postTitle + ".txt")));
-                
-                writer.write("Title: " + postTitle);
-                writer.append(System.getProperty("line.separator"));
-                writer.append("Description: " + postDescription);
-                writer.append(System.getProperty("line.separator"));
-                writer.append("Content: " + postContent);
-                writer.flush();
-                writer.close();
-            } catch(IOException exception) {
-                exception.printStackTrace();
-                System.err.println("Unable to write to file " + postTitle + ".txt");
-            }
-        }
+     
+            formFieldMap = Upload.processMultipartForm(request, charityName, false);
+            Article latestArticle = new Article(request, formFieldMap, servletContext); 
+       
     }
 
     /**
@@ -144,5 +138,27 @@ public class CreatePost extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+    
+    private boolean initilizeDetials(HttpServletRequest request){
+        boolean success = true;
+        session = request.getSession(false);
+        if(session.getAttribute("authorised") != null){
+            //Get Charity Name from Session
+            charityName = (String)session.getAttribute("charityName");
+            //Trim, set to lower case and remove white spaces
+            trimmedCharityName = charityName.toLowerCase().trim().replaceAll("\\s+","");
+            //Get servlet Context
+            servletContext = request.getServletContext().getRealPath("/");
+            if(DEBUG_ON){
+                System.out.println("Charity Name: "     + charityName);
+                System.out.println("Servlet Context : " + servletContext);
+            }
+        }else{
+            success = false;
+        }
+        return success;
+    }
+        
+   
 
 }

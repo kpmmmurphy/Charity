@@ -76,23 +76,34 @@ public class Signup extends HttpServlet {
         String servletPath = request.getServletPath();
         
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Signup</title>");            
+            out.println("<title>Signup</title>");
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/formStyles.css\"/>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Signup!</h1>");
+            out.println("<div id=\"wrapper\">");
             out.println("<form method='POST' action='" + servletContext + servletPath +"'>");
-            out.println("<fieldset>");
-            out.println("<legend>Signup</legend>");
-            out.println("Charity Name: <input type='text' name='charityName' placeholder='Charity Name'> <br />");
-            out.println("Username: <input type='text' name='username' placeholder='Username'> <br />");
-            out.println("Email   : <input type='email' name='email' placeholder='E-mail'> <br />");
-            out.println("Password: <input type='password' name='password' placeholder='Password'> <br />");
-            out.println("Retype Password: <input type='password' name='retyped_password' placeholder='Password'> <br />");
+            out.println("<h1>Signup!</h1>");
+            out.println("<p class=\"float\">");
+            out.println("<label for=\"charityName\">Charity Name:</label><input type='text' name='charityName' placeholder='Charity Name'> <br />");
+            out.println("</p>");
+            out.println("<p class=\"float\">");
+            out.println("<label for=\"username\">Username:</label><input type='text' name='username' placeholder='Username'> <br />");
+            out.println("</p>");
+            out.println("<p class=\"float\">");
+            out.println("<label for=\"email\">Email:</label><input type='text' name='email' placeholder='E-mail'> <br />");
+            out.println("</p>");
+            out.println("<p class=\"float\">");
+            out.println("<label for=\"password\">Password:</label><input type='password' name='password' placeholder='Password'> <br />");
+            out.println("</p>");
+            out.println("<p class=\"float\">");
+            out.println("<label for=\"retyped_password\">Retype Password:</label><input type='password' name='retyped_password' placeholder='Password'> <br />");
+            out.println("</p>");
+            out.println("<p class=\"claerfix\">");
             out.println("<input type=\"submit\" value=\"Submit\">");
+            out.println("<input type=\"reset\" value=\"Clear\">");
             if(unenteredInput){
                 out.println("<p>Please fill in all fields.</p>");
             }
@@ -105,8 +116,9 @@ public class Signup extends HttpServlet {
             if(charityNameDuplication){
                 out.println("<p>Charity name already registered, please choose another.</p>");
             }
-            out.println("</fieldset>");
+            out.println("</p>");
             out.println("</form>");
+            out.println("</div>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -238,6 +250,7 @@ public class Signup extends HttpServlet {
                         usernameDuplication = true;
                     }
                     
+                    
                     //PreparedStatement for username duplication checking
                     charityNameStatement = connection.prepareStatement(charityNameDuplicateQuery);
                     charityNameStatement.setString(1, cleanInputMap.get("charityName") );
@@ -247,6 +260,13 @@ public class Signup extends HttpServlet {
                     if(charityNameResultSet.first()){
                         charityNameDuplication = true;
                     }
+                    
+                    //Close statement and Result Set
+                    usernameStatement.close();
+                    usernameResultSet.close();
+                    charityNameStatement.close();
+                    charityNameResultSet.close();
+                    
                     
                     //if either have been duplicated, reoutputs the form
                     if(usernameDuplication || charityNameDuplication){
@@ -264,6 +284,7 @@ public class Signup extends HttpServlet {
                         cleanInputMap.put("salt", saltValue);
                         
                         //PrepareStatement to defend against SQL Injection attacks
+                        //Inserting all user inputted fields
                         PreparedStatement insertStatement;
                         String insertQuery = "INSERT INTO charities (name, username, email, password, salt,address)"
                                            + "VALUES (?,?,?,?,?,?)";
@@ -276,11 +297,39 @@ public class Signup extends HttpServlet {
                         insertStatement.setString(6, ""); //Address is Not Null, must have a value
                         insertStatement.executeUpdate();
                         
+                        //Close statement
+                        insertStatement.close();
+                        
+                        //Selecting the newly generated charity id from DB
+                        PreparedStatement selectCharityIDStatement;
+                        ResultSet charityIdResultSet;
+                        
+                        String selectQuery       = "SELECT id FROM charities WHERE name = ?";
+                        selectCharityIDStatement = connection.prepareStatement(selectQuery);
+                        selectCharityIDStatement.setString(1, cleanInputMap.get("charityName"));
+                        charityIdResultSet = selectCharityIDStatement.executeQuery();
+                        
+                        charityIdResultSet.next();
+                        cleanInputMap.put("charity_id", charityIdResultSet.getString(1) );
+                        
+                        //Close the statement and Result Set
+                        selectCharityIDStatement.close();
+                        charityIdResultSet.close();
+                        
+                        
                         //Store basic info in a Session Object
                         HttpSession session = request.getSession(true);
                         session.setAttribute("charityName", cleanInputMap.get("charityName"));
+                        session.setAttribute("charity_id", cleanInputMap.get("charity_id"));
                         session.setAttribute("username"   , cleanInputMap.get("username"));
                         session.setAttribute("authorised" , true);
+                        
+                        if(DEBUG_ON){
+                            System.out.println("SESSION - charityName: " + (String)session.getAttribute("charityName"));
+                            System.out.println("SESSION - charity_id: "  + (String)session.getAttribute("charity_id"));
+                            System.out.println("SESSION - charityName: " + (String)session.getAttribute("username"));
+                            System.out.println("SESSION - charityName: " + (Boolean)session.getAttribute("authorised"));
+                        }
                         
                         //Create new directory structure for this Charity
                         DirectoryManager dirManager = new DirectoryManager(cleanInputMap.get("charityName"));

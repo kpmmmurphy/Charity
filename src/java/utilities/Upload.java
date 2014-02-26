@@ -5,12 +5,17 @@
 package utilities;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -23,7 +28,6 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.json.simple.JSONObject;
 
 /**
  * Handles uploading pictures. Creates unique names for each image using the date and time, 
@@ -35,12 +39,24 @@ import org.json.simple.JSONObject;
  */
 @WebServlet(name = "uploadPhoto", urlPatterns = {"/uploadPhoto"})
 @MultipartConfig
-public class UploadPhoto extends HttpServlet {
+public class Upload extends HttpServlet {
     
     /* Debug mechinism */
     private static final boolean DEBUG_ON = true;
+    
     /* For session tracking */
-    HttpSession session;
+    private static HttpSession session;
+    
+    private static String servletContext;
+    private static String charityName;
+    private static String uploadPath;
+    
+    /* Uploading required objects*/
+    private static FileItemFactory factory;
+    private static ServletFileUpload upload;
+    
+    /* Form Field Elements HashMap*/
+    private static LinkedHashMap<String, String> fieldHashMap;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -54,11 +70,6 @@ public class UploadPhoto extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        
-        //Get the Session, or create one if does not exsists 
-        session = request.getSession(true);
-        //Get the charityName attribute
-        String charityName = (String)session.getAttribute("charityName");
         
         //If the name is not null or Empty String, outputs upload form, else redirects to login
         if(charityName != null && ! "".equals(charityName)){
@@ -122,14 +133,13 @@ public class UploadPhoto extends HttpServlet {
             throws ServletException, IOException {
         
         session = request.getSession(true);
-        String charityName = (String)session.getAttribute("charityName");
+        charityName = (String)session.getAttribute("charityName");
         
         if(charityName != null && ! "".equals(charityName)){
-            uploadFile(request, charityName, true);
+            processMultipartForm(request, charityName, false);
         }else{
             //Redirect to Login
             response.sendRedirect("Login");
-            
         }
     }
 
@@ -155,28 +165,18 @@ public class UploadPhoto extends HttpServlet {
      * @param charityName
      * @param isLogoImage
      * 
+     * @return HashMap
+     * 
      */
-    public static String uploadFile(HttpServletRequest request, String charityName, boolean isLogoImage){
+    public static LinkedHashMap processMultipartForm(HttpServletRequest request, String charityName, boolean isLogoImage){
         
-        /* Build the path for the uploaded file*/
-        //Get the Servlet Context for writing the json file
-        String servletContext = request.getServletContext().getRealPath("/");
-        String charitiesDir   = "charities/";
-        //Changes to lower case, trims and removes white spaces from name
-        String trimmedCharityName =  charityName.toLowerCase().trim().replaceAll("\\s+","");
-        //The final upload path
-        String uploadPath = servletContext + charitiesDir + trimmedCharityName + "/uploads/";
-        if(DEBUG_ON){
-            System.out.println("Upload Path: " + uploadPath );
-        }
-        
-        String dateToday = "";
+        initializeDetials(request);
         
         /* Code taken in-part from https://commons.apache.org/proper/commons-fileupload/using.html */
         boolean isMultipart = ServletFileUpload.isMultipartContent(request);
         if (isMultipart) {
-            FileItemFactory factory = new DiskFileItemFactory();
-            ServletFileUpload upload = new ServletFileUpload(factory);
+            factory = new DiskFileItemFactory();
+            upload = new ServletFileUpload(factory);
             
             try{
                 List<FileItem> items = upload.parseRequest(request);
@@ -184,26 +184,12 @@ public class UploadPhoto extends HttpServlet {
                 
                 while(iterator.hasNext()){
                     FileItem item = (FileItem) iterator.next();
-                    if (!item.isFormField()) {
-
-                        Date date = new Date();
-                        SimpleDateFormat dateFormat = 
-                        new SimpleDateFormat ("yyyy.MM.dd'-'hh:mm:ss");
-                        dateToday  = dateFormat.format(date);
-                        //Set file name as today's date and time
-                        File uploadedFile = new File(uploadPath + dateToday + ".png");
-                        item.write(uploadedFile);
-                        
-                        //If the uploaded image is to be made the logo for the Charity
-                        if(isLogoImage){
-                            /* Add image name to charity.json */
-                            //Get the Charity Object from the charity.json file
-                            Charity charity = Charity.parseJSONtoCharityObj(charityName, servletContext);
-                            //Put the image into the json object
-                            charity.setLogo(dateToday + ".png" );
-                            //Write out to file
-                            charity.createCharityJSONFile(servletContext);
-                        }
+                    if (item.isFormField()) {
+                        processFormField(item);
+                    }else{
+                        String uploadedImgName;
+                        uploadedImgName = processUpload(item, isLogoImage);
+                        fieldHashMap.put("img", uploadedImgName);
                     }
                 }
                
@@ -211,6 +197,87 @@ public class UploadPhoto extends HttpServlet {
                 e.printStackTrace();
             }
         }
+        return fieldHashMap;
+        
+    }
+    
+    
+    public static void processFormField(FileItem item){
+        
+        String name  = item.getFieldName();
+        String value = item.getString();
+        
+        if(DEBUG_ON){
+            System.out.println("Name: "  + name );
+            System.out.println("Value: " + value );
+        }
+        fieldHashMap.put(name, value);
+        
+    }
+    
+    private static String processUpload(FileItem item, boolean isLogoImage){
+        
+        String dateToday = "";
+        
+        Date date = new Date();
+        SimpleDateFormat dateFormat = 
+        new SimpleDateFormat ("yyyy.MM.dd'-'hh:mm:ss");
+        dateToday  = dateFormat.format(date);
+        //Set file name as today's date and time
+        File uploadedFile = new File(uploadPath + dateToday + ".png");
+        if(DEBUG_ON){
+            System.out.println("Uploaded File path: " + uploadedFile );
+        }
+        try {
+            item.write(uploadedFile);
+        } catch (Exception ex) {
+            Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        //If the uploaded image is to be made the logo for the Charity
+        if(isLogoImage){
+            /* Add image name to charity.json */
+            //Get the Charity Object from the charity.json file
+            Charity charity = Charity.parseJSONtoCharityObj(charityName, servletContext);
+            //Put the image into the json object
+            charity.setLogo(dateToday + ".png" );
+            try {
+                //Write out to file
+                charity.createCharityJSONFile(servletContext);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
         return dateToday + ".png";
+    }
+    
+    private static void initializeDetials(HttpServletRequest request){
+        
+        //Get the Session, or create one if does not exsists 
+        session = request.getSession(true);
+        //Get the charityName attribute
+        charityName = (String)session.getAttribute("charityName");
+        /* Build the path for the uploaded file*/
+        //Get the Servlet Context for writing the json file
+        servletContext = request.getServletContext().getRealPath("/");
+        String charitiesDir   = "charities/";
+        //Changes to lower case, trims and removes white spaces from name
+        String trimmedCharityName =  charityName.toLowerCase().trim().replaceAll("\\s+","");
+        //The final upload path
+        uploadPath = servletContext + charitiesDir + trimmedCharityName + "/uploads/";
+        if(DEBUG_ON){
+            System.out.println("Upload Path: " + uploadPath );
+        }
+        
+        fieldHashMap = new LinkedHashMap<>();
+    }
+    
+    /**
+     * 
+     * @return HashMap
+     */
+    public HashMap getFieldHashMap(){
+        return fieldHashMap;
     }
 }//End of uploadPhoto Class

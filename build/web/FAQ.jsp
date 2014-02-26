@@ -16,7 +16,7 @@
        <div id="main">
         <h1>FAQ</h1>
         
-        <fieldset>
+        <section>
           <Legend>For Posts:</Legend>
            <h2>How do I create a post?</h2>
              <p>1.Click the corresponding bottom on the dashboard; </p>
@@ -33,8 +33,8 @@
             <h2>How do I approve a post?</h2>
              <p>1.Check the list of post;</p>
              <p>2.Click the box to approve the post.</p>
-        </fieldset>
-        <fieldset>
+        </section>
+        <section>
             <Legend>Other functions</legend>
             <h2>How do I update my account details?</h2>
             <p>1.Click the corresponding link ('Edit the details') on the left of the dashboard;</p>
@@ -46,7 +46,7 @@
             <h2>How do I get to my charity site</h2>
             <p>Click the corresponding link ('My charity') on the left of the dashboard;</p>
             <hr/>
-        </fieldset>
+        </section>
        </div>
     </body>
 </html>

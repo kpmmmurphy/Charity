@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package utilities;
 
 import java.io.File;
@@ -27,7 +23,7 @@ public class DirectoryManager {
      */
     public DirectoryManager(String charityName){
         /* Converts to lower case, trims leading and following spaces, and removes whitespace characters */
-        this.charityName = charityName.toLowerCase().trim().replaceAll("\\s+","");
+        this.charityName = toLowerCaseAndTrim(charityName);
     }
     
     /**
@@ -68,4 +64,7 @@ public class DirectoryManager {
         
     }
     
+    public static String toLowerCaseAndTrim(String charityName){
+        return charityName.toLowerCase().trim().replaceAll("\\s+","");
+    }
 }

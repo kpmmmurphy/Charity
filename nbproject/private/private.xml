@@ -3,7 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/ui/Dashboard.java</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/post/EditPost.java</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/json/Charity.java</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/utilities/UploadPhoto.java</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/json/Article.java</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/auth/Register.java</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/javascript/createpost.js</file>
             <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/auth/Signup.java</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/post/CreatePost.java</file>
         </group>
     </open-files>
 </project-private>

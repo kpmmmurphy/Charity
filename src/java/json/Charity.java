@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.simple.*;
+import utilities.DirectoryManager;
 
 
 /**
@@ -121,7 +122,7 @@ public class Charity extends CustomJSONObject{
             String charityJSONString = JSONValue.toJSONString(charityObj);
             System.out.println(charityJSONString);
         }
-        super.writeJsonToFile(charityObj, jsonFilePath);
+        writeJsonToFile(charityObj, jsonFilePath);
     }
     
     
@@ -136,7 +137,7 @@ public class Charity extends CustomJSONObject{
     public static Charity parseJSONtoCharityObj(String nameOfCharity, String servletContext){
         
         //Converts name to lower case, trims and replaces whitespaces
-        String lowerCaseName = nameOfCharity.toLowerCase().trim().replaceAll("\\s+","");
+        String lowerCaseName = DirectoryManager.toLowerCaseAndTrim(nameOfCharity);
         
         //The path where the JSON file will be output to
         String jsonFilePath = servletContext + "/charities/" + lowerCaseName + "/json/charity.json";
@@ -158,7 +159,7 @@ public class Charity extends CustomJSONObject{
         String google = jsonCharity.get("googleplus").toString();
         String logo = jsonCharity.get("logo").toString();
         
-        return new Charity(charityName, desc, address, tele, face, twit, google, logo);
+        return new Charity(nameOfCharity, desc, address, tele, face, twit, google, logo);
     }
     
      public static JSONObject parseJSON(String nameOfCharity, String servletContext){

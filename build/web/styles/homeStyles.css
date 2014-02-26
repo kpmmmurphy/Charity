@@ -1,0 +1,116 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 26-Feb-2014, 11:30:27
+    Author     : kealan
+*/
+body
+{
+    background-image: url('../images/old_moon.png');
+}
+
+#wrapper
+{
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+    border: solid 1px #C0C0C0;
+    box-shadow: 5px 5px 5px #C8C8C8;
+    border-bottom-left-radius:2em;
+    background-color: white;
+}
+
+nav
+{
+    text-align: center;
+    padding: 1em 1em 1em 1em;
+    border: 1px solid black;
+    width: 60%;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+}
+
+#nav
+{
+   padding-left: 17em;
+   padding-top: 1em;
+}
+
+nav a
+{
+   padding: .5em; 
+}
+
+#logo
+{
+    float: left;
+    width: 40%;
+}
+
+#logo img
+{
+    width: 80%;
+    height: 80%;
+}
+
+#description
+{
+    padding-top: 20px;
+}
+
+#articles 
+{
+    width: 50%;
+    padding-left: 10em;
+}
+
+#articles article
+{
+    clear:both;
+    border: 1px solid black;
+    margin: 10px;
+}
+
+#news_img
+{
+   float: left;
+   width: 25%;
+   height: 20%;
+   padding-right: 5em;
+}
+
+#news_img img
+{
+    width: 100%;
+    height: 19%;
+}
+
+#faq
+{
+    float: left;
+    left:0;
+    position: fixed;
+    border: 1px solid grey;
+    padding: 1em 1em 1em 1em;
+    background-color: #ffff66;
+    box-shadow: 5px 5px 5px #C8C8C8;
+}
+
+#faq:hover
+{
+    padding:20px;
+    
+}
+
+footer
+{
+    padding-top: 5em;
+    padding-bottom: 2em;
+    clear: both;
+    text-align: center;
+}
+

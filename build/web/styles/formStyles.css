@@ -1,0 +1,149 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 22-Feb-2014, 13:40:56
+    Author     : kealan
+*/
+
+#wrapper
+{
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+
+body
+{
+    background-image: url(../images/sos.png);
+}
+
+form
+{
+    width: 340px;
+    margin: 60px auto 30px;
+    padding: 15px;
+    position: relative;
+    background: #fffafb;
+    border-radius: 4px;
+    color: #7e7975;
+    box-shadow:
+        0 2px 2px rgba(0,0,0,0.2),        
+        0 1px 5px rgba(0,0,0,0.2),        
+        0 0 0 12px rgba(255,255,255,0.4); 
+}
+
+form h1
+{
+    font-size: 30px;
+    text-align: center;
+    font-weight: bold;
+    color: #ffb347;
+    border-bottom: 1px solid #EBE6E2;
+    text-shadow: 0 2px 0 rgba(255,255,255,0.8);
+    text-transform: uppercase;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.8);
+}
+
+form .float
+{
+    width: 50%;
+    float: left;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,1);
+}
+
+form .float :first-of-type 
+{
+    padding-right: 5px;
+}
+
+form .float i
+{
+    padding-left: 1px;
+}
+
+form label
+{
+    display: block;
+    padding: 0 0 5px 2px;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: 400;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+    font-size: 12px;
+}
+
+form label i
+{
+    margin-right: 5px;
+    display: inline-block;
+    width: 10px;
+}
+
+form input[type = text],
+form input[type = password]
+{
+    font-family: 'Lato', Calibri, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    display: block;
+    width: 90%;
+    padding: 5px;
+    margin-bottom: 5px;
+    border: 3px solid #ebe6e2;
+    border-radius: 5px;
+    transition: all 0.3s ease-out;
+}
+
+form input[type = text]:hover,
+form input[type = password]:hover {
+    border-color: #ffb347;
+}
+
+form label:hover ~ input {
+    border-color: #ffb347;
+}
+ 
+form input[type=text]:focus,
+form input[type=password]:focus {
+    border-color: #ffb347;
+    outline: none;
+}
+
+form .clearfix:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+form input[type = submit],
+form input[type = reset]
+{
+    width: 49%;
+    height: 38px;
+    
+    box-shadow: inset 0 1px rgba(255,255,255,0.3);
+    border-radius: 3px;
+    cursor: pointer;
+
+    font-family: 'Lato', Calibri, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 38px;
+    text-align: center;
+    font-weight: bold;
+        
+    margin-left: 6em;
+    background: linear-gradient(#fbd568, #ffb347);
+    border: 1px solid #f4ab4c;
+    color: #996319;
+    text-shadow: 0 1px rgba(255,255,255,0.3);
+}
+
+#logoImg
+{
+    clear:both;
+
+}

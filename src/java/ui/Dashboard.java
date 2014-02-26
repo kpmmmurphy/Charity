@@ -48,16 +48,18 @@ public class Dashboard extends HttpServlet {
             /* TODO output your page here. You may use following sample code. */
             String servletContext = request.getContextPath();
             String servletPath = request.getServletPath();
-            String charityName = (String)session.getAttribute("name");
+            String charityName = (String)session.getAttribute("charityName");
             
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
             out.println("<title>" + charityName + " Dashboard</title>");
             out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/dashboardStyles.css\"/>");
-            out.println("<link href='http://fonts.googleapis.com/css?family=Muli' rel='stylesheet' type='text/css'>");
+            out.println("<link href='http://fonts.googleapis.com/css?family=Muli' rel='stylesheet' type='text/css' />");
+            out.println("<script src='//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js'></script>");
+            out.println("<script src='javascript/createpost.js'></script>");
             out.println("</head>");
-            out.println("<body>");
+            out.println("<body onload='init()'>");
             out.println("<div id=\"wrapper\">");
             out.println("<h1>" + charityName + "'s Dashboard</h1>");
             out.println("<nav>");
@@ -73,7 +75,7 @@ public class Dashboard extends HttpServlet {
             out.println("</ul>");
             out.println("</nav>");
             out.println("<section id=\"main\">");
-            out.println("<a href=\"CreatePost\">");
+            out.println("<a onclick='getCreatePost()'>");
             out.println("<article class=\"option\">");
             out.println("<h2>Create a Post</h2>");
             out.println("<h3>Create a new post and upload an image</h3>");

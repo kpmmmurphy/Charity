@@ -19,7 +19,7 @@ import json.Charity;
 import org.json.simple.JSONObject;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
-import utilities.UploadPhoto;
+import utilities.Upload;
 
 /**
  * Handles the entering of the Charity's address, telephone number, domain name,
@@ -89,34 +89,57 @@ public class Register extends HttpServlet {
                 out.println("<!DOCTYPE html>");
                 out.println("<html>");
                 out.println("<head>");
-                out.println("<title>Edit Charity Info</title>");            
+                out.println("<title>Edit Charity Info</title>"); 
+                out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/formStyles.css\"/>");
                 out.println("</head>");
                 out.println("<body>");
                 
+                out.println("<div id=\"wrapper\">");
+                out.println("<form method='POST' action='" + servletContext + servletPath +"'>");
                 out.println("<h1>Edit Details of your Charity</h1>");
-                
-                out.println("<form method='POST' action='" + servletContext + servletPath +"' >");
-                out.println("<fieldset>");
-                out.println("<legend>Edit Details</legend>");
-                out.println("Description :  <textarea          name='description' placeholder='Description of your Charity' >" + description + "</textarea> <br />");
-                out.println("Address :      <textarea          name='address'     placeholder='Address' maxlength='255' size='50' >" + address + "</textarea> <br />");
-                out.println("Telephone :    <input type='text' name='telephone'   value='" + telephone + "'     placeholder='Telephone' maxlength='12' /> <br />");
-                out.println("Domain name :  <input type='text' name='domain'      value='" + domain + "'        placeholder='Domain Name' /> <br />");
-                out.println("PayPal Email : <input type='text' name='paypalemail' value='" + payPalEmail + "'   placeholder='PayPal Email' /> <br />");
-                out.println("Facebook Url : <input type='text' name='facebook'    value='" + facebookUrl + "'   placeholder='Your Facebook page Url' /> <br />");
-                out.println("Twitter Url :  <input type='text' name='twitter'     value='" + twitterUrl + "'    placeholder='Your Twitter page'/> <br />");
-                out.println("Google+ Url :  <input type='text' name='googleplus'  value='" + googleplusUrl + "' placeholder='Your Google+ Url' /> <br />");
+		out.println("<p class=\"float\">");
+                out.println("<label for=\"description\">Description:</label><textarea name='description'  placeholder='Description of your Charity' >" + description + "</textarea> <br />");
+                out.println("</p>");
+                out.println("<p class=\"float\">");
+                out.println("<label for=\"address\">Address:</label><textarea name='address' placeholder='Address' maxlength='255' size='50' >" + address + "</textarea> <br />");
+                out.println("</p>");
+                out.println("<p class=\"float\">");
+                out.println("<label for=\"telephone\">Telephone:</label><input type='text' name='telephone'   value='" + telephone + "'     placeholder='Telephone' maxlength='12' /> <br />");
+                out.println("</p>");
+                out.println("<p class=\"float\">");
+                out.println("<label for=\"domain\">Domain Name:</label><input type='text' name='domain' value='" + domain + "'        placeholder='Domain Name' /> <br />");
+                out.println("</p>");
+                out.println("<p class=\"float\">");
+                out.println("<label for=\"payPalEmail\">PayPal Email:</label><input type='text' name='paypalemail' value='" + payPalEmail + "'   placeholder='PayPal Email' /> <br />");
+                out.println("</p>");
+                out.println("<p class=\"float\">");
+                out.println("<label for=\"facebook\">Facebook Url:</label><input type='text' name='facebook' value='" + facebookUrl + "'   placeholder='Your Facebook page Url' /> <br />");
+                out.println("</p>");
+                out.println("<p class=\"float\">");
+                out.println("<label for=\"twitter\">Twitter Url:</label><input type='text' name='twitter' value='" + twitterUrl + "'    placeholder='Your Twitter page'/> <br />");
+                out.println("</p>");
+                out.println("<p class=\"float\">");
+                out.println("<label for=\"googleplus\">Google+ Url:</label><input type='text' name='googleplus'  value='" + googleplusUrl + "' placeholder='Your Google+ Url' /> <br />");
+                out.println("</p>");
+                out.println("<p class=\"clearfix\">");
                 out.println("<input type=\"submit\" value=\"Submit\">");
-                out.println("</fieldset>");
+                out.println("</p>");
                 out.println("</form>");
+                out.println("</div>");
                 
                 out.println("<form method='POST' action='" + servletContext + servletPath +"' enctype='multipart/form-data'>");
-                out.println("<fieldset>");
-                out.println("<legend>Upload Logo Image</legend>");
-                out.println("Upload Logo Image : <input id='file' type='file' name='filename' size='50'/><br/>");
-                out.println("<img src='charities/" + trimmedCharityName  + "/uploads/" + logoImage + "' id='logoImg' /><br/>");
+                out.println("<p class=\"float\">");
+                out.println("<label for='filename'>Upload Logo Image : </label><input id='file' type='file' name='filename' size='50'/><br/>");
+                out.println("</p>");
+                if(logoImage == ""){
+                    out.println("<img src='charities/" + trimmedCharityName  + "/uploads/" + logoImage + "' id='logoImg' /><br/>");
+                }else{
+                    out.println("<p class=\"float\"> No Image uploaded yet!</p>");
+                }
+                
+                out.println("<p class=\"clearfix\">");
                 out.println("<input type=\"submit\" value=\"Submit\">");
-                out.println("</fieldset>");
+                out.println("</p>");
                 out.println("</form>");
                 out.println("<a href='Dashboard'>Back to Dashboard</a>");
                 
@@ -167,7 +190,7 @@ public class Register extends HttpServlet {
             //If a logo is being uploaded, checks if it's a multipart request
             if (isMultipart(request)) {
                 //Upload logo image, returns the name of the uploaded file, today's date and time
-                String uploadName = UploadPhoto.uploadFile(request, charityName, true);
+                Upload.processMultipartForm(request, charityName, true);
                 
                 //Redirect to Dashboard
                 response.sendRedirect("Register");
@@ -364,7 +387,7 @@ public class Register extends HttpServlet {
      * @param request
      * @return boolean isMultipart  
      */
-    private boolean isMultipart(HttpServletRequest request ){
+    public static boolean isMultipart(HttpServletRequest request ){
         boolean isMultipart = false;
         
         if(request.getContentType() != null && request.getContentType().toLowerCase().indexOf("multipart/form-data") > -1){

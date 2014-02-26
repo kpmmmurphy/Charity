@@ -16,7 +16,7 @@ body
 nav
 {
 	position:fixed;
-	background-image:url('sos.png');
+	background-image:url('../images/sos.png');
         background-repeat:no-repeat;
 	float:right;
 	margin-left:75%;
@@ -35,7 +35,7 @@ nav
 	margin-right:auto;
         margin-top:10%;
 	width:600px;
-        background-image:url('q.jpg');
+        background-image:url('../images/q.jpg');
         background-repeat:no-repeat;
         background-size:100% 100%;
 	padding:15px;
