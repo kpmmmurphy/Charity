@@ -8,7 +8,7 @@
 
 body
 {
-    background-image:url('../images/q.jpg');
+    background-image: url(../images/sos.png);
 
     font-family: 'Muli', sans-serif;
     font-size:0.6em;
@@ -47,6 +47,7 @@ nav
     border-top-left-radius:2em;
     border-top-right-radius:2em;
     color:white;
+    background: #fffafb;
 
 }
 

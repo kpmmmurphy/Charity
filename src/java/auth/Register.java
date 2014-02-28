@@ -131,10 +131,10 @@ public class Register extends HttpServlet {
                 out.println("<p class=\"float\">");
                 out.println("<label for='filename'>Upload Logo Image : </label><input id='file' type='file' name='filename' size='50'/><br/>");
                 out.println("</p>");
-                if(logoImage == ""){
-                    out.println("<img src='charities/" + trimmedCharityName  + "/uploads/" + logoImage + "' id='logoImg' /><br/>");
-                }else{
+                if("".equals(logoImage) ||logoImage == null){
                     out.println("<p class=\"float\"> No Image uploaded yet!</p>");
+                }else{
+                    out.println("<img src='charities/" + trimmedCharityName  + "/uploads/" + logoImage + "' id='logoImg' /><br/>");
                 }
                 
                 out.println("<p class=\"clearfix\">");

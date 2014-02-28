@@ -53,8 +53,9 @@ ul
 
 ul li
 {
-	padding: 5px;
+	padding: 10px;
 	margin:0px;
+        font-size: 1.5em;
 }
 
 #main
@@ -95,6 +96,7 @@ article.option
 article.option:hover
 {
 	opacity:0.9;
+        cursor: pointer; 
 }
 
 article.option h2,h3

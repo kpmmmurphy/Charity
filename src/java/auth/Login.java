@@ -39,11 +39,11 @@ public class Login extends HttpServlet {
     private String password;
     
     /* for indicateing if all input was entered */
-    private boolean unenteredInput;
+    private boolean unenteredInput = false;
     /* for indicateing if the user supplied username matches one in the DB*/
-    private boolean usernameMismatch;
+    private boolean usernameMatch = true;
     /* for indicateing if the user supplied password matches the one in the DB */
-    private boolean passwordMismatch;
+    private boolean passwordMismatch = false;
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -86,7 +86,7 @@ public class Login extends HttpServlet {
             if(unenteredInput){
                 out.println("<p>Please fill in all fields.</p>");
             }
-            if(usernameMismatch || passwordMismatch ){
+            if( ! usernameMatch || passwordMismatch ){
                 out.println("<p>Username or Password mismatch, please try again.</p>");
                 out.println("<p>Don't have an account? Sign up <a href=\"Signup\">HERE</a></p>");
             }
@@ -125,7 +125,7 @@ public class Login extends HttpServlet {
         
         //Initilize context sensitive help booleans
         unenteredInput   = false;
-        usernameMismatch = false;
+        usernameMatch    = false;
         passwordMismatch = false;
         
         //Get the user submitted parameter
@@ -199,21 +199,16 @@ public class Login extends HttpServlet {
                 usernameResultSet = usernameStatement.executeQuery();
                 
                 if(usernameResultSet.next()){
-                    if(! usernameResultSet.first()){
-                        usernameMismatch = true;
-                    }
+                    usernameMatch = true;
                 }
                 
-                
-                usernameStatement.close();
-                usernameResultSet.close();
             }catch(SQLException e){
                 e.printStackTrace();
                 System.err.println("Unable to retrieve username!");
             }
             
             //if usernames don't match re-output login form
-            if(usernameMismatch){
+            if(! usernameMatch){
                 processRequest(request, response);
             }else{
                 //Username matched, retrieve salt value

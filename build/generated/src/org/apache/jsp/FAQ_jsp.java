@@ -55,7 +55,7 @@ public final class FAQ_jsp extends org.apache.jasper.runtime.HttpJspBase
       out.write("       <div id=\"main\">\n");
       out.write("        <h1>FAQ</h1>\n");
       out.write("        \n");
-      out.write("        <fieldset>\n");
+      out.write("        <section>\n");
       out.write("          <Legend>For Posts:</Legend>\n");
       out.write("           <h2>How do I create a post?</h2>\n");
       out.write("             <p>1.Click the corresponding bottom on the dashboard; </p>\n");
@@ -72,8 +72,8 @@ public final class FAQ_jsp extends org.apache.jasper.runtime.HttpJspBase
       out.write("            <h2>How do I approve a post?</h2>\n");
       out.write("             <p>1.Check the list of post;</p>\n");
       out.write("             <p>2.Click the box to approve the post.</p>\n");
-      out.write("        </fieldset>\n");
-      out.write("        <fieldset>\n");
+      out.write("        </section>\n");
+      out.write("        <section>\n");
       out.write("            <Legend>Other functions</legend>\n");
       out.write("            <h2>How do I update my account details?</h2>\n");
       out.write("            <p>1.Click the corresponding link ('Edit the details') on the left of the dashboard;</p>\n");
@@ -85,7 +85,7 @@ public final class FAQ_jsp extends org.apache.jasper.runtime.HttpJspBase
       out.write("            <h2>How do I get to my charity site</h2>\n");
       out.write("            <p>Click the corresponding link ('My charity') on the left of the dashboard;</p>\n");
       out.write("            <hr/>\n");
-      out.write("        </fieldset>\n");
+      out.write("        </section>\n");
       out.write("       </div>\n");
       out.write("    </body>\n");
       out.write("</html>\n");

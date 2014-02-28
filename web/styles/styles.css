@@ -1,52 +1,75 @@
 body
 {
-	background-color:whitesmoke;
-	
+	background-image:url('../images/sos.png');	
 	font-family: 'Muli', sans-serif;
-	font-size:0.6em;
-       background-position: center;
-        background-repeat:no-repeat;
-        background-size:100% 100%;
+	font-size:1.6em;
  
       
 }
 
 
-
+/*
 nav
 {
 	position:fixed;
 	background-image:url('../images/sos.png');
         background-repeat:no-repeat;
 	float:right;
-	margin-left:75%;
-	right:0%;
-	top:0;
 	opacity:0.9;
 	border: solid 1px #C0C0C0;
 	box-shadow: 5px 5px 5px #C8C8C8;
 	border-bottom-left-radius:2em;
 }
-
+*/
 
 #main
 {
 	margin-left:auto;
 	margin-right:auto;
-        margin-top:10%;
-	width:600px;
-        background-image:url('../images/q.jpg');
-        background-repeat:no-repeat;
-        background-size:100% 100%;
+        margin-top:5%;
+	width: 340px;
+        color: #7e7975;
+        background: #fffafb;
 	padding:15px;
         border: solid 1px #C0C0C0;
-	box-shadow: 5px 5px 5px #C8C8C8;
-	border-bottom-left-radius:2em;
-        border-bottom-right-radius:2em;
-        border-top-left-radius:2em;
-        border-top-right-radius:2em;
-	color:whitesmoke;
+	box-shadow:
+        0 2px 2px rgba(0,0,0,0.2),        
+        0 1px 5px rgba(0,0,0,0.2),        
+        0 0 0 12px rgba(255,255,255,0.4);
+	border-radius: 4px;
 	
+}
+
+h1
+{
+    font-size: 30px;
+    text-align: center;
+    font-weight: bold;
+    color: #ffb347;
+    border-bottom: 1px solid #EBE6E2;
+    text-shadow: 0 2px 0 rgba(255,255,255,0.8);
+    text-transform: uppercase;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.8);
+}
+
+a{
+    text-decoration: none;      
+    
+}
+
+ul li
+{
+    text-align: center;
+    display:inline;
+    
+    
+}
+
+ul li a h3
+{
+    text-align: center;
+    color: grey;
+    
 }
 
 #main article
@@ -75,37 +98,16 @@ aside
 p
 {
 	padding: 5px;
-        color:white;
 }
 
-.social
-{
-	height: 30px;
-	width:30px;
-	padding: 5px;
-}
 
 a:link {color:#FFFFFF ;}     
 a:visited {color:#FFFFFF ;}  
-a:hover 
+ul li a h3:hover 
 {
-	color:#6699FF;
+    color: #ffb347;
 }  
 a:active {color:#000000 ;}  
 
-@media all and (min-width: 1001px) {
-  aside
-	{
-		position:fixed;
-		width:15%;
-		float:left;
-		top: 0%;
-		bottom:0%;
-		left:0;
-	}
-	main
-	{
-		width:900px;
-	}
-}
+
 

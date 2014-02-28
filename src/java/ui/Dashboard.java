@@ -53,13 +53,13 @@ public class Dashboard extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>" + charityName + " Dashboard</title>");
+            out.println("<title>" + charityName + "'s Dashboard</title>");
             out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/dashboardStyles.css\"/>");
             out.println("<link href='http://fonts.googleapis.com/css?family=Muli' rel='stylesheet' type='text/css' />");
             out.println("<script src='//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js'></script>");
             out.println("<script src='javascript/createpost.js'></script>");
             out.println("</head>");
-            out.println("<body onload='init()'>");
+            out.println("<body>");
             out.println("<div id=\"wrapper\">");
             out.println("<h1>" + charityName + "'s Dashboard</h1>");
             out.println("<nav>");

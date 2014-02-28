@@ -83,7 +83,12 @@ public class CreatePost extends HttpServlet {
                 out.println("Content: <textarea name=\"content\" rows=\"15\" cols=\"30\"></textarea><br />");
                 out.println("<hr />");
                 out.println("Upload Logo Image : <input id='file' type='file' name='filename' size='50'/><br/>");
-                out.println("<img src='charities/" + trimmedCharityName  + "/uploads/" + articleImg + "' id='articleImg' /><br/>");
+                
+                if(articleImg == null){
+                    out.println("<p class=\"float\"> No Image uploaded yet!</p>");
+                }else{
+                    out.println("<img src='charities/" + trimmedCharityName  + "/uploads/" + articleImg + "' id='articleImg' /><br/>");
+                }
                 out.println("<hr />");
                 out.println("Tags : <input type='text' name='title' placeholder='Tags Seperated by a Space'> <br />");
                 out.println("<hr />");

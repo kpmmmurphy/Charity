@@ -54,39 +54,39 @@ public class Homepage extends HttpServlet {
             /* TODO output your page here. You may use following sample code. */
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>charity_ui</title>"); 
+            out.println("<title>HomePage</title>"); 
             out.println("<link rel='stylesheet' type='text/css' href='styles/styles.css'>");
             out.println("</head>");
             out.println("<body>");
            
             out.println("<div id='main'>");
-            out.println("<h1 style='font-size:35px'>Gateway</h1>");
+            out.println("<h1>Home Page</h1>");
 
-            out.println("<hr/>");
-
-             out.println("<h2 style='font-size:20px;color:white'>Mission:</h2>");
-            out.println("<hr/>");
-            out.println("<p style='font-size:18px;color:white'>We work with the world's poorest people to transform their lives. Together with our amazing supporters,we are working for a world free from hunger and poverty. Now start your life helping others. Gods bless</p>");
-            out.println("<hr/>");
+            //out.println("<h2>Mission:</h2>");
+            //out.println("<p>We work with the world's poorest people to transform their lives. Together with our amazing supporters,we are working for a world free from hunger and poverty. Now start your life helping others. Gods bless</p>");
+            //out.println("<hr/>");
+            out.println("<ul>");
             out.println("<li>");
             out.println("<a href='Login'>");         
-            out.println("<h3 style='font-size:20px'>Login</h3>");
+            out.println("<h3>Login</h3>");
             out.println("</a>");
             out.println("</li>");
             out.println("<li>");
             out.println("<a href='Signup'>");
-            out.println("<h3 style='font-size:20px'>Signup</h3>");
+            out.println("<h3>Signup</h3>");
             out.println("</a>");
             out.println("</li>");
+            out.println("</ul>");
            
         
-    
+            /*
             out.println("<hr/>");
            
-            out.println("<p style='font-size:15px;color:#FFFFFF'>'O human child,to the water and wild,with a fairy,hand in hand,for the world's more full of trouble than you can understand'--W.B.Yeats</p>");
+            out.println("<p style='font-size:15px;color:#FFFFFF'>'O human child,to the water and wild,with a fairy,hand in hand,for the world's more full of weeping than you can understand'--W.B.Yeats</p>");
             out.println("<img src=\"images.jpg\" class=\"nav\">");
             out.println("</div>");
          
+            /*
             out.println("<nav>");
             out.println("<img src=\"1.jpg\" class=\"nav\">");
             out.println("<hr/>");
@@ -102,6 +102,9 @@ public class Homepage extends HttpServlet {
             //out.println("<p style='font-size:15px'>charities using our website:</p>"+results);
             
             out.println("</nav>");
+            */
+            
+            out.println("</div>");
             out.println("</body>");
             out.println("</html>");
         } finally {            
