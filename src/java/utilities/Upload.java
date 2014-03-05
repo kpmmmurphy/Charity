@@ -43,6 +43,7 @@ public class Upload extends HttpServlet {
     
     /* Debug mechinism */
     private static final boolean DEBUG_ON = true;
+    public static final String UPLOADS_DIR = "/uploads/";
     
     /* For session tracking */
     private static HttpSession session;
@@ -188,8 +189,10 @@ public class Upload extends HttpServlet {
                         processFormField(item);
                     }else{
                         String uploadedImgName;
-                        uploadedImgName = processUpload(item, isLogoImage);
+                        uploadedImgName = processUpload(request, item, isLogoImage);
                         fieldHashMap.put("img", uploadedImgName);
+                        
+                        
                     }
                 }
                
@@ -215,41 +218,44 @@ public class Upload extends HttpServlet {
         
     }
     
-    private static String processUpload(FileItem item, boolean isLogoImage){
+    private static String processUpload(HttpServletRequest request, FileItem item,  boolean isLogoImage){
         
         String dateToday = "";
-        
-        Date date = new Date();
-        SimpleDateFormat dateFormat = 
-        new SimpleDateFormat ("yyyy.MM.dd'-'hh:mm:ss");
-        dateToday  = dateFormat.format(date);
-        //Set file name as today's date and time
-        File uploadedFile = new File(uploadPath + dateToday + ".png");
-        if(DEBUG_ON){
-            System.out.println("Uploaded File path: " + uploadedFile );
-        }
-        try {
-            item.write(uploadedFile);
-        } catch (Exception ex) {
-            Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        //If the uploaded image is to be made the logo for the Charity
-        if(isLogoImage){
-            /* Add image name to charity.json */
-            //Get the Charity Object from the charity.json file
-            Charity charity = Charity.parseJSONtoCharityObj(charityName, servletContext);
-            //Put the image into the json object
-            charity.setLogo(dateToday + ".png" );
+        long sizeInBytes = item.getSize();
+        if(sizeInBytes > 0){
+            Date date = new Date();
+            SimpleDateFormat dateFormat = 
+            new SimpleDateFormat ("yyyy.MM.dd'-'hh:mm:ss");
+            dateToday  = dateFormat.format(date) + ".png";
+            //Set file name as today's date and time
+            File uploadedFile = new File(uploadPath + dateToday);
+            if(DEBUG_ON){
+                System.out.println("Uploaded File path: " + uploadedFile );
+            }
             try {
-                //Write out to file
-                charity.createCharityJSONFile(servletContext);
-            } catch (FileNotFoundException ex) {
+                item.write(uploadedFile);
+            } catch (Exception ex) {
                 Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
             }
+
+            //If the uploaded image is to be made the logo for the Charity
+            if(isLogoImage){
+                /* Add image name to charity.json */
+                //Get the Charity Object from the charity.json file
+                Charity charity = Charity.parseJSONtoCharityObj(request);
+                //Put the image into the json object
+                charity.setLogo(dateToday);
+                try {
+                    //Write out to file
+                    charity.createCharityJSONFile(servletContext);
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
+       
         
-        return dateToday + ".png";
+        return dateToday;
     }
     
     private static void initializeDetials(HttpServletRequest request){

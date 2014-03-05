@@ -65,8 +65,7 @@ public class CreatePost extends HttpServlet {
             
             try (PrintWriter out = response.getWriter()) {
                 /* Just the HTML for the form, gotten with an JQuery AJAX call*/
-               
-                //Article Form
+                
                 out.println("<form method='POST' action='" + servletContext + servletPath +"' enctype='multipart/form-data' >");
                 out.println("<fieldset>");
                 out.println("<legend>New Post</legend>");
@@ -90,7 +89,7 @@ public class CreatePost extends HttpServlet {
                     out.println("<img src='charities/" + trimmedCharityName  + "/uploads/" + articleImg + "' id='articleImg' /><br/>");
                 }
                 out.println("<hr />");
-                out.println("Tags : <input type='text' name='title' placeholder='Tags Seperated by a Space'> <br />");
+                out.println("Tags : <input type='text' name='tags' placeholder='Tags Seperated by a Space' /> <br />");
                 out.println("<hr />");
                 out.println("<input type=\"submit\" value=\"Submit\">");
                 out.println("<input type=\"reset\" value=\"Clear\">");
@@ -130,7 +129,8 @@ public class CreatePost extends HttpServlet {
             throws ServletException, IOException {
      
             formFieldMap = Upload.processMultipartForm(request, charityName, false);
-            Article latestArticle = new Article(request, formFieldMap, servletContext); 
+            Article article = new Article(request, formFieldMap); 
+            article.writeOutArticle(request);
        
     }
 

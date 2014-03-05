@@ -1,13 +1,14 @@
 package json;
 
-import database.DBConnect;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.json.simple.JSONArray;
@@ -22,13 +23,18 @@ import utilities.DirectoryManager;
 public class Article extends CustomJSONObject {
     
     /* Debug mechinism for testing */
-    private boolean DEBUG_ON = true;
+    private static final boolean DEBUG_ON = true;
+    private static final String CHARITY_NAME_FROM_SESSION = "charityName";
+    
+    public static final String ARTICLES_FILE_NAME = "articles.json";
+    public static final String CHARITIES_DIR = "charities/";
+    public static final String JSON_DIR = "/json/";
+    
     
     /* Charity name for creating the write path for the JSON file */
     private String charityName;
-    private String trimmedCharityName;
+    private static String trimmedCharityName;
     private boolean authorised;
-    private String servletContext;
     
     /* Session for tracking who's creating the Article */
     private HttpSession session;
@@ -51,13 +57,11 @@ public class Article extends CustomJSONObject {
     private JSONArray tags;
     /* Approved status, automatically approved if create by admin */
     private boolean   approved = false;
-    /* Linked map to house Article details for JSON conversion */
-    private LinkedHashMap articleHashMap;
     /* JSONArray for Articles Comments, initializes an empty array. Inputting of comments to be handled with javascript */
     private JSONArray     comments;
      
     /* The path of the JSON file  */
-    private String jsonPath;
+    private static String jsonPath;
     
     /*
      * Constructor
@@ -66,53 +70,25 @@ public class Article extends CustomJSONObject {
      * @param title   The title of the article
      * @param content The content of the Article
      */
-    public Article( HttpServletRequest request, LinkedHashMap articleHashMap, String servletContext ){
+    public Article( HttpServletRequest request, LinkedHashMap articleObj ){
         super();
-        initializeDetials(request, servletContext);
+        initializeDetials(request);
         
         this.id              = generateArticleId();
-        this.title           = articleHashMap.get("title").toString();
-        this.description     = articleHashMap.get("description").toString();
-        this.content         = articleHashMap.get("content").toString();
-        this.img             = articleHashMap.get("img").toString();
-        this.type            = articleHashMap.get("type").toString();
+        this.title           = (articleObj.get("title").toString()       != null) ? articleObj.get("title").toString()       : "" ;
+        this.description     = (articleObj.get("description").toString() != null) ? articleObj.get("description").toString() : "" ;
+        this.content         = (articleObj.get("content").toString()     != null) ? articleObj.get("content").toString()     : "" ;
+        this.img             = (articleObj.get("img").toString()         != null) ? articleObj.get("img").toString()         : "" ;
+        this.type            = (articleObj.get("type").toString()        != null) ? articleObj.get("type").toString()        : "general" ;
         SimpleDateFormat sdf = new SimpleDateFormat("dd/M/yyyy");
 	this.date            = sdf.format(new Date()); 
-        this.tags            = new JSONArray();
+        this.tags            = createJSONTagsArray(articleObj.get("tags").toString());
         this.comments        = new JSONArray();
        
         //Checks if the user is authorised from the Session, if so approves post 
         if(authorised){
             approved = true;
         }
-        createArticleJSONFile();
-    }
-    
-    public static void main(String[] args){
-        //testArticleClass();
-    }
-    
-    /*
-     * Method to test and display the basic functionality of the class
-     */
-    private static void testArticleClass(){
-        LinkedHashMap<String, String> testMap = new LinkedHashMap<>();
-        testMap.put("title", "First Article");
-        testMap.put("description", "Description here! ");
-        testMap.put("content", "Content here! ");
-        testMap.put("img", "Image name here! ");
-        testMap.put("type", "General! ");
-        
-        /* Gets the current path */
-        Path currentRelativePath = Paths.get("");
-        /* Gets the absolute current path and adds the JSON file name to it */
-        String jsonPath = currentRelativePath.toAbsolutePath().toString() + "/articles.json";
-        System.out.println("Write/Read Path: " + jsonPath);
-        
-        /* Creating an Article*/
-        Article article = new Article(null, testMap);
-        //Writes out the Article to file */
-        article.createArticleJSONFile();
     }
     
     /*
@@ -123,71 +99,54 @@ public class Article extends CustomJSONObject {
      * 
      * @param path  The path to be written out to 
      */
-    private void createArticleJSONFile(){
-        JSONObject articlesObj;
-        JSONArray  articlesArray;
-        JSONObject articleObj = createJSONArticleObj();
+    public void writeOutArticle(HttpServletRequest request){
         
+        JSONObject articlesObj   = new JSONObject();
+        JSONArray  articlesArray = new JSONArray();
         
+        JSONObject articleObj    = createArticleJSONObj();
+        String     jsonPath      = getArticlesJSONPath(request);
         
         /* Checks if JSON file exists, if not creates it */
         File jsonArticleFile = new File(jsonPath);
         if(!jsonArticleFile.exists() && !jsonArticleFile.isDirectory()) {
-            articlesObj = createNewJSONArticleFile();
-            articlesArray = new JSONArray();
+            articlesArray.add(articleObj);
         }else{
-            articlesObj   = readJsonFile(jsonPath);
-            articlesArray = (JSONArray)articlesObj.get("articles");
+            articlesArray = getArticlesArrayFromFile(request);
+            articlesArray.add(articleObj);
+            
         }
-        articlesArray.add(articleObj);
-        
         articlesObj.put("articles", articlesArray);
         
         writeJsonToFile(articlesObj, jsonPath);
     }
     
-    /*
-     * Creates a new JSON article file, containing a JSON array to 
-     * hold the individual articles
-     * 
-     * @return JSONObject 
-     */
-    private JSONObject createNewJSONArticleFile(){
-        JSONObject articlesObj = new JSONObject();
-        JSONArray  articlesArray    = new JSONArray();
-        
-        articlesObj.put("articles", articlesArray);
-        
-        return articlesObj;
-    }
     
-    /*
+    
+    /**
      * Formats the Article's JSON file
      * 
      * @return JSONObject containing comment attributes
      */
-    private JSONObject createJSONArticleObj(){
+    private JSONObject createArticleJSONObj(){
+        
         JSONObject articleObj = new JSONObject();
-        articleHashMap = new LinkedHashMap<>();
         
         /* Formatting of JSON Article Keys and Values*/
-        articleHashMap.put("id",          this.id);
-        articleHashMap.put("title",       this.title);
-        articleHashMap.put("type",       this.type);
-        articleHashMap.put("description", this.description);
-        articleHashMap.put("content",     this.content);
-        articleHashMap.put("date",        this.date);
-        articleHashMap.put("img",         this.img);
-        articleHashMap.put("tags",        this.tags);
-        articleHashMap.put("comments",    this.comments);
-        articleHashMap.put("approved",    this.approved);
-        
-        //Adds the article, indexed by it's id
-        articleObj.put(this.id, articleHashMap);
+        articleObj.put("id",          this.id);
+        articleObj.put("title",       this.title);
+        articleObj.put("type",       this.type);
+        articleObj.put("description", this.description);
+        articleObj.put("content",     this.content);
+        articleObj.put("date",        this.date);
+        articleObj.put("img",         this.img);
+        articleObj.put("tags",        this.tags);
+        articleObj.put("comments",    this.comments);
+        articleObj.put("approved",    this.approved);
         
         if(DEBUG_ON){
             String articleJSONString = JSONValue.toJSONString(articleObj);
-            System.out.println(articleJSONString);
+            System.out.println("Newest Article : " + articleObj);
         }
         
         return articleObj;
@@ -204,17 +163,17 @@ public class Article extends CustomJSONObject {
                 System.out.println("Articles array: " + articlesArrayObj);
                 System.out.println("Num Articles in array: " + articlesArray.size());
             }
-            //The size of the array plus one, to form the new id
-            id = articlesArray.size() + 1;
+            //The size of the array 
+            id = articlesArray.size();
         }
         
         
         return id;
     }
     
-    private void initializeDetials(HttpServletRequest request, String servletContext){
+    private void initializeDetials(HttpServletRequest request){
         //Get the Session 
-        session     = request.getSession(false);
+        session     = request.getSession(true);
         //Get the charity name, must initilize when user is viewing each charity 
         charityName = (String)session.getAttribute("charityName");
         //Only admins will be authorised, see Signup or Login session instantiation
@@ -222,10 +181,200 @@ public class Article extends CustomJSONObject {
         //The trimmed and lower case charity name, with spaces removed
         trimmedCharityName = DirectoryManager.toLowerCaseAndTrim(charityName);
         
-        /* Build the path for the uploaded file*/
-        //Get the Servlet Context for writing the json file
-        String charitiesDir   = "charities/";
-        jsonPath = servletContext + charitiesDir + trimmedCharityName + "/json/articles.json";
+        /* Gets the path of the articles.json file */
+        jsonPath = getArticlesJSONPath(request);
     }
     
+    private static JSONArray createJSONTagsArray(String submittedTags){
+        
+        JSONArray jsonTagsArray = new JSONArray();
+        if(submittedTags != null || !"".equals(submittedTags)){
+            String[] singularTags = submittedTags.split("\\s+");
+            for(int i = 0 ; i < singularTags.length ; i++){
+                jsonTagsArray.add(singularTags[i]);
+            }
+        }
+        return jsonTagsArray;
+    }
+    
+    public static String getTagsAsString(JSONObject article){
+        
+        Object obj  = JSONValue.parse(article.get("tags").toString());
+        JSONArray tagsArray = (JSONArray)obj;
+        
+        if(DEBUG_ON){
+            System.out.println("Tags:" + article.get("tags").toString());
+        }
+        
+        String tagsString = "";
+        for(int i = 0; i < tagsArray.size(); i++){
+            tagsString = tagsString.concat(" ").concat(tagsArray.get(i).toString());
+        }
+        return tagsString;
+        
+        
+    }
+    
+    public static JSONObject getArticleById(HttpServletRequest request,String id){
+        JSONArray  articlesArray = getArticlesArrayFromFile(request);
+        JSONObject article = new JSONObject();
+        JSONObject selectedArticle = new JSONObject();
+        for(int i = 0; i < articlesArray.size(); i++){
+          selectedArticle = (JSONObject)articlesArray.get(i);
+          if(id.equals(selectedArticle.get("id").toString())){
+              article = selectedArticle;
+          }
+        }
+        
+        return article;
+    }
+    
+    public static void updateArticleById(HttpServletRequest request, String id, LinkedHashMap fields){
+        
+        JSONArray  articlesArray = getArticlesArrayFromFile(request);
+        JSONArray  updatedArticlesArray = new JSONArray();
+        System.out.println(articlesArray);
+        JSONObject articles = new JSONObject();
+        JSONObject selectedArticle;
+        for(int i = 0; i < articlesArray.size(); i++){
+          selectedArticle = (JSONObject)articlesArray.get(i);
+          if(id.equals(selectedArticle.get("id").toString())){
+              //Get a set of all the entries Key - Value pairs contained in the LinkedHashMap 
+              Set<Entry<String, Object>> entrySet = fields.entrySet();
+              System.out.println("Entry Set: " + entrySet);
+              
+              for(Entry<String, Object> entry:entrySet){
+                  String key = entry.getKey();
+                  Object value = entry.getValue();
+                  
+                  if("tags".equals(key)){
+                      JSONArray tags = createJSONTagsArray(value.toString());
+                      selectedArticle.put(key, tags);
+                  }else{
+                      selectedArticle.put(key, value);
+                  }
+                  
+              }
+          }
+          updatedArticlesArray.add(selectedArticle);
+        }
+        
+        jsonPath = getArticlesJSONPath(request);
+        
+        articles.put("articles", updatedArticlesArray);
+        writeJsonToFile(articles, jsonPath);
+    }
+    
+    public static void deleteArticleById(HttpServletRequest request, String id){
+        JSONObject articles = new JSONObject();
+        JSONArray articlesArray = getArticlesArrayFromFile(request);
+        JSONArray updatedArticleArray = new JSONArray();
+        JSONObject selectedArticle = new JSONObject();
+        for(int i = 0; i < articlesArray.size(); i++){
+          selectedArticle = (JSONObject)articlesArray.get(i);
+          if(! id.equals(selectedArticle.get("id").toString())){
+              updatedArticleArray.add(selectedArticle);
+          }
+        }
+        articles.put("articles",updatedArticleArray );
+        String jsonPath = getArticlesJSONPath(request);
+        writeJsonToFile(articles, jsonPath);
+    }
+    
+    public static JSONArray getArticlesArrayFromFile(HttpServletRequest request){
+        JSONArray articles = new JSONArray();
+        HttpSession session = request.getSession(true);
+        String charityName = (String)session.getAttribute(CHARITY_NAME_FROM_SESSION);
+        if(charityName != null && !"".equals(charityName)){
+            String jsonPath = getArticlesJSONPath(request);
+            JSONObject articlesObj = readJsonFile(jsonPath);
+            
+            if(articlesObj == null){
+                articles = new JSONArray();
+            }else{
+                articles = (JSONArray)readJsonFile(jsonPath).get("articles");
+            }
+        }
+        return articles;
+    }
+    
+    public static String getArticlesJSONPath(HttpServletRequest request){
+        String jsonPath = "";
+        HttpSession session = request.getSession(true);
+        String charityName = (String)session.getAttribute(CHARITY_NAME_FROM_SESSION);
+        if(charityName != null && !"".equals(charityName)){
+            //Trim, set to lower case and remove white spaces
+            trimmedCharityName = DirectoryManager.toLowerCaseAndTrim(charityName);
+            /* Build the path for reading in the  file*/
+            String servletContext = request.getServletContext().getRealPath("/");
+            jsonPath = servletContext + CHARITIES_DIR + trimmedCharityName + JSON_DIR + ARTICLES_FILE_NAME ;
+        }
+        return jsonPath;
+    }
+    
+    public static void approvePost(HttpServletRequest request, String id){
+          JSONArray articlesArray = getArticlesArrayFromFile(request);
+          JSONObject articles = new JSONObject();
+          JSONArray  updatedArticles = new JSONArray();
+          JSONObject selectedArticle = new JSONObject();
+          String     articlesPath = getArticlesJSONPath(request);
+          
+          for(int i = 0; i < articlesArray.size(); i++){
+            selectedArticle = (JSONObject)articlesArray.get(i);
+            if(id.equals(selectedArticle.get("id").toString())){
+                
+                selectedArticle.put("approved", true);
+            }
+            updatedArticles.add(selectedArticle);
+          }
+          articles.put("articles", updatedArticles);
+          writeJsonToFile(articles, articlesPath);
+     }
+    
+    public static JSONArray getUnapprovedPosts(HttpServletRequest request){
+        JSONArray unapprovedPosts = new JSONArray();
+        JSONArray articlesArray = getArticlesArrayFromFile(request);
+
+        //Create a new array to house all unapproved posts
+        unapprovedPosts = new JSONArray();
+
+        //A temp JSONObject to house the current article being checked for it's approved status
+        JSONObject tmpArticle;
+
+        //Loops through all articles, checks each approved status, adding to the unapprovedPost JSONArray if not approved
+        for(int i = 0; i < articlesArray.size(); i++){
+            tmpArticle = (JSONObject)articlesArray.get(i);
+            System.out.println("tmpArticle: " + tmpArticle);
+            if(! (Boolean)tmpArticle.get("approved")){
+                unapprovedPosts.add(tmpArticle);
+            }
+        }
+        
+        return unapprovedPosts;
+     }
+    
+    public static LinkedHashMap<String, String> getDefaultValueMap(HttpServletRequest request){
+        /* Default values to be displayed when fields are not present */
+        String id          = "-1";
+        String title       = "No Title";
+        String description = "No Description";
+        String content     = "No Content";
+        String img         = Charity.parseJSONtoCharityObj(request).getLogo();
+        String type        = "general"; 
+        String date        = "No Date";
+        String tags        = "";
+        
+        LinkedHashMap<String, String> fieldsMap = new LinkedHashMap<>();
+        fieldsMap.put("id", id);
+        fieldsMap.put("title", title);
+        fieldsMap.put("description", description); 
+        fieldsMap.put("content", content); 
+        fieldsMap.put("img", img); 
+        fieldsMap.put("type", type); 
+        fieldsMap.put("date", date); 
+        fieldsMap.put("tags", tags); 
+        
+        return fieldsMap;
+         
+     }
 }

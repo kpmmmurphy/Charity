@@ -58,7 +58,7 @@ public class Login extends HttpServlet {
                     throws ServletException, IOException{
         response.setContentType("text/html;charset=UTF-8");
         
-        /* The root directory of the project - In this case "/Charity"  */
+        /* The root directory of the project - In this case "/cs3305"  */
         String servletContext = request.getContextPath();
         /* The servlet name - In this case "/Login" */
         String servletPath = request.getServletPath();

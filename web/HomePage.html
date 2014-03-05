@@ -10,6 +10,18 @@ and open the template in the editor.
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width">
         <link rel="stylesheet" type="text/css" href="styles/homeStyles.css" />
+        
+        
+        
+        
+        <script src='//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js'></script>
+        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+        
+        <script src="javascript/colorbox-master/jquery.colorbox-min.js"></script>
+        <link rel="stylesheet" href="javascript/colorbox-master/colorbox.css" />
+        
+        <script type="text/javascript" src="javascript/paypalfunctions.js"></script>
     </head>
     <body>
         <div id="wrapper">
@@ -26,6 +38,7 @@ and open the template in the editor.
              <img src="images/concern.png" />
           </div>
             <section id="description">
+                <img src="images/Pay-Pal-Donation.png" onclick="getPayPalDonationForm()"/>
                 <article>
                     <h2>About Us</h2>
                        <p>
@@ -47,13 +60,14 @@ and open the template in the editor.
                          </p>    
                 </article>
             </section>
+            <div id="faq">
+                <a href="">FAQ</a>
+            </div>
             <footer>
                 <small>Charity No. Chy 123</small><br />
                 <small>Registered Address: 456 Main Street</small>
             </footer>
         </div>
-        <div id="faq">
-            <a href="">FAQ</a>
-        </div>
+        
     </body>
 </html>

@@ -57,6 +57,7 @@ public class Dashboard extends HttpServlet {
             out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/dashboardStyles.css\"/>");
             out.println("<link href='http://fonts.googleapis.com/css?family=Muli' rel='stylesheet' type='text/css' />");
             out.println("<script src='//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js'></script>");
+            out.println("<script src='https://www.paypalobjects.com/js/external/paypal-button.min.js'></script>");
             out.println("<script src='javascript/createpost.js'></script>");
             out.println("</head>");
             out.println("<body>");
@@ -81,13 +82,13 @@ public class Dashboard extends HttpServlet {
             out.println("<h3>Create a new post and upload an image</h3>");
             out.println("</article>");
             out.println("</a>");
-            out.println("<a href=\"ApprovePost\">");
+            out.println("<a onclick='getApprovePost()'>");
             out.println("<article class=\"option\">");
             out.println("<h2>Approve a Post</h2>");
             out.println("<h3>Approve a user submitted post</h3>");
             out.println("</article>");
             out.println("</a>");
-            out.println("<a href=\"EditPost\">");
+            out.println("<a onclick='getListPosts()'>");
             out.println("<article class=\"option\">");
             out.println("<h2>Edit a Post</h2>");
             out.println("<h3>Edit one of your posts</h3>");

@@ -104,6 +104,12 @@ article.option h2,h3
 	padding:10px;
 }
 
+.unapprovedPost, article.post
+{
+    display:block;
+    clear:both;
+}
+
 footer
 {
 	clear:both;

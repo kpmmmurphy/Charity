@@ -8,22 +8,42 @@ package post;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.LinkedHashMap;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import json.Article;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import utilities.DirectoryManager;
+import utilities.Upload;
 
 /**
  *
- * @author kealan
+ * @author Kevin Murphy and Kealan Smyth
  */
 
 @WebServlet(name = "ApprovePost", urlPatterns = {"/ApprovePost"})
 public class ApprovePost extends HttpServlet {
+    
+    private boolean DEBUG_ON = true;
 
     private HttpSession session;
+    
+    private String charityName;
+    private String trimmedCharityName;
+    private String servletContext;
+    private String absoluteServletContext;
+    private String servletPath;
+    
+    private String articlesPath;
+    
+    private JSONObject articlesObj;
+    private JSONArray  articlesArray;
+    private JSONArray  unapprovedPosts;
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -38,25 +58,18 @@ public class ApprovePost extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         
-        String servletContext = request.getContextPath();
-        String servletPath = request.getServletPath();
-        session = request.getSession();
+        session = request.getSession(true);
+        
+        
         
         if(session.getAttribute("authorised") == null) {
             response.sendRedirect("Login");
         } else {
+            init(request);
+            unapprovedPosts = Article.getUnapprovedPosts(request);
             try (PrintWriter out = response.getWriter()) {
-                /* TODO output your page here. You may use following sample code. */
-                out.println("<!DOCTYPE html>");
-                out.println("<html>");
-                out.println("<head>");
-                out.println("<title>Servlet ApprovePost</title>");            
-                out.println("</head>");
-                out.println("<body>");
-                out.println("<h1>Approve a Post for " + session.getAttribute("name") + "</h1>");
+                renderUnapprovedPosts(request, out, unapprovedPosts);
                 out.println("<p>Return to <a href=\"Dashboard\">Dashboard</a></p>");
-                out.println("</body>");
-                out.println("</html>");
             }   
         }
     }
@@ -87,7 +100,11 @@ public class ApprovePost extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        init(request);
+        String idOfPostToApprove = request.getParameter("id");
+        System.out.println(idOfPostToApprove);
+        Article.approvePost(request, idOfPostToApprove);
+        
     }
 
     /**
@@ -99,5 +116,82 @@ public class ApprovePost extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+    
+    
+     private void init(HttpServletRequest request){
+         
+        session = request.getSession(true);
+        
+        //Get Charity Name from Session
+        charityName = (String)session.getAttribute("charityName");
+
+        //Trim, set to lower case and remove white spaces
+        trimmedCharityName = DirectoryManager.toLowerCaseAndTrim(charityName);
+
+        //Get the relative servlet context path - /cs3305/
+        servletContext = request.getContextPath();
+        
+        //Servlets relitive name
+        servletPath    = request.getServletPath();
+
+
+            
+       
+    }
+     
+     
+     
+     private void renderUnapprovedPosts(HttpServletRequest request, PrintWriter out,JSONArray unapprovedPosts){
+        
+        LinkedHashMap<String, String> fieldsMap;
+        
+        for(int i = 0; i < unapprovedPosts.size(); i++ ){
+            fieldsMap = Article.getDefaultValueMap(request);
+            JSONObject post =  (JSONObject)unapprovedPosts.get(i);
+            
+            for(String key : fieldsMap.keySet()){
+                String field = fieldsMap.get(key);
+                
+                if("tags".equals(key)){
+                    fieldsMap.put("tags", Article.getTagsAsString(post));
+                }else{
+                    field = ("".equals(post.get(key).toString()))?   fieldsMap.get(key) : post.get(key).toString();
+                    fieldsMap.put(key, field);
+                }
+                
+            }
+
+            out.println("<article class='unapprovedPost'>");
+            out.println("<hr/>");
+            if("".equals(fieldsMap.get("img"))){
+                out.println("<div class='postImg'><p>No Image Uploaded!</p></div>");
+            }else{
+                out.println("<div class='postImg'><img src='" + servletContext  + "/" +Article.CHARITIES_DIR + trimmedCharityName + Upload.UPLOADS_DIR + fieldsMap.get("img") + "'/></div>");
+            }
+            out.println("<div class='postDetials'>");
+            out.println("<p>Title: " + fieldsMap.get("title") + "</p>");
+            out.println("<p>Description : " + fieldsMap.get("description") + "</p>");
+            out.println("<p>Content : " + fieldsMap.get("content") + "</p>");
+            out.println("<p>date: " + fieldsMap.get("date") + "</p>");
+            out.println("<p>Type: " + fieldsMap.get("type") + "</p>");
+            out.println("<p>Tags: " + fieldsMap.get("tags") + "</p>");
+            out.println("<form method='POST' action='" + servletContext + servletPath + "'>");
+            out.println("<input type=\"hidden\" name='id' value='"+ fieldsMap.get("id") + "'>");
+            out.println("<input type=\"submit\" value=\"Approve Post!\">");
+            out.println("</form>");
+            out.println("<hr/>");
+            out.println("</div>");
+            out.println("</article>");
+
+
+        }
+           
+     }
+     
+     
+     
+     
+    
+    
 
 }

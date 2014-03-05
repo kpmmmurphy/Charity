@@ -5,6 +5,11 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import static json.Article.ARTICLES_FILE_NAME;
+import static json.Article.CHARITIES_DIR;
+import static json.Article.JSON_DIR;
 import org.json.simple.*;
 import utilities.DirectoryManager;
 
@@ -26,6 +31,12 @@ public class Charity extends CustomJSONObject{
     
     /* Debug mechinism for testing */
     private static boolean DEBUG_ON = true;
+    
+     private static final String CHARITY_NAME_FROM_SESSION = "charityName";
+    
+    public static final String CHARITY_FILE_NAME = "charity.json";
+    public static final String CHARITIES_DIR = "charities/";
+    public static final String JSON_DIR = "/json/";
     
     /* The path of the JSON file to be read from / write to */
     private static String jsonPath = ".";
@@ -60,36 +71,6 @@ public class Charity extends CustomJSONObject{
         this.twitter = twitter;
         this.googleplus = googleplus;
         this.logo = logo;
-    }
-    
-    public static void main(String[] args) throws FileNotFoundException{
-       testCharityClass();
-    }
-    
-    /*
-     * A method for testing the class's functionality
-     */
-    private static void testCharityClass() throws FileNotFoundException{
-        Path currentRelativePath = Paths.get("");
-        jsonPath = currentRelativePath.toAbsolutePath().toString() + "/charity.json";
-        System.out.println("Write/Read Path: " + jsonPath);
-        
-        //Creating a Charity Object
-        Charity charity = new Charity("Concern", "Concern worldwide","Co.Cork, Ireland", "001121","facebookurl","twitterurl","googleplusurl", "");
-        //Writes it to a file
-        charity.createCharityJSONFile(jsonPath);
-        
-        //Setting Charity Description 
-        charity.setDescription("This is the new desc.");
-        //Write to file
-        charity.createCharityJSONFile(jsonPath);
-        
-        //Reading JSON charity file from disk and Convert to Charity Obj
-        Charity newCharity = parseJSONtoCharityObj("Concern", jsonPath);
-        //Set Description
-        newCharity.setDescription("new Charity desc");
-        //Writes out to specified path
-        newCharity.createCharityJSONFile(jsonPath);
     }
     
     /*
@@ -134,18 +115,15 @@ public class Charity extends CustomJSONObject{
      * 
      * @return  Charity object
      */
-    public static Charity parseJSONtoCharityObj(String nameOfCharity, String servletContext){
-        
-        //Converts name to lower case, trims and replaces whitespaces
-        String lowerCaseName = DirectoryManager.toLowerCaseAndTrim(nameOfCharity);
+    public static Charity parseJSONtoCharityObj(HttpServletRequest request){
         
         //The path where the JSON file will be output to
-        String jsonFilePath = servletContext + "/charities/" + lowerCaseName + "/json/charity.json";
+        String jsonFilePath = getCharityJSONPath(request);
         
         JSONObject jsonCharity = readJsonFile(jsonFilePath);
         
         if(DEBUG_ON){
-            System.out.println( "Read in CharityObj \n" + jsonCharity);
+            System.out.println( "Read in CharityObj: " + jsonCharity);
         }
         
         jsonCharity = (JSONObject)jsonCharity.get("charity");
@@ -159,23 +137,28 @@ public class Charity extends CustomJSONObject{
         String google = jsonCharity.get("googleplus").toString();
         String logo = jsonCharity.get("logo").toString();
         
-        return new Charity(nameOfCharity, desc, address, tele, face, twit, google, logo);
+        return new Charity(charityName, desc, address, tele, face, twit, google, logo);
     }
     
-     public static JSONObject parseJSON(String nameOfCharity, String servletContext){
-        
-        //Converts name to lower case, trims and replaces whitespaces
-        String lowerCaseName = nameOfCharity.toLowerCase().trim().replaceAll("\\s+","");
-        
+     public static JSONObject parseJSON(HttpServletRequest request ){
+         
         //The path where the JSON file will be output to
-        String jsonFilePath = servletContext + "charities/" + lowerCaseName + "/json/charity.json";
-        if(DEBUG_ON){
-            System.out.println("JSON file Path: " + jsonFilePath);
-        }
+        String jsonFilePath = getCharityJSONPath(request);
         JSONObject jsonCharity = readJsonFile(jsonFilePath);
         
-        
         return jsonCharity;
+    }
+     
+     public static String getCharityJSONPath(HttpServletRequest request){
+        String jsonPath = "";
+        HttpSession session = request.getSession(true);
+        String charityName = (String)session.getAttribute(CHARITY_NAME_FROM_SESSION);
+        if(charityName != null && !"".equals(charityName)){
+            /* Build the path for reading in the  file*/
+            String servletContext = request.getServletContext().getRealPath("/");
+            jsonPath = servletContext + CHARITIES_DIR + DirectoryManager.toLowerCaseAndTrim(charityName) + JSON_DIR + CHARITY_FILE_NAME ;
+        }
+        return jsonPath;
     }
     
     /**
@@ -257,11 +240,19 @@ public class Charity extends CustomJSONObject{
     }
     
     /**
+     * @return the logo
+     */
+    public String getLogo() {
+        return logo;
+    }
+    
+    /**
      * @param filename filename of the logo
      */
     public void setLogo(String filename) {
         this.logo = filename;
     }
+    
 
     /**
      * @return the charityJSONObject

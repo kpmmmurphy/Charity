@@ -36,7 +36,7 @@ public abstract class CustomJSONObject extends JSONObject{
      * @exception UnsupportedEncodingException if a File's encoding is not supported.
      * @exception IOException if stream to a File cannot be written to or closed.
      */
-     protected static void writeJsonToFile(Map jsonMap, String path){
+     public static void writeJsonToFile(Map jsonMap, String path){
         try( Writer writer = new BufferedWriter( 
                              new OutputStreamWriter(
                              new FileOutputStream(path), "UTF-8"))){
@@ -59,7 +59,7 @@ public abstract class CustomJSONObject extends JSONObject{
      * 
      * @return JSONObject 
      */
-    protected static JSONObject readJsonFile(String jsonPath){
+    public static JSONObject readJsonFile(String jsonPath){
         BufferedReader reader;
         StringBuilder stringBuilder = new StringBuilder();
         String line;

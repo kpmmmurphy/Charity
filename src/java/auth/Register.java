@@ -330,8 +330,8 @@ public class Register extends HttpServlet {
             System.out.println("Charity Name: "     + charityName);
             System.out.println("Servlet Context : " + servletContext);
         }
-        //Parse the charity.json file, and get the charity JSONObject
-        JSONObject charity = (JSONObject)Charity.parseJSON(charityName, servletContext).get("charity");
+        //Parses the charity.json file, and get the Charity
+        Charity charity = Charity.parseJSONtoCharityObj(request);
         
         //Connect to Database
         DBConnect dbConnect   = new DBConnect();
@@ -360,11 +360,11 @@ public class Register extends HttpServlet {
         }
         
         //Initilise all attributes from the Charity JSONObject
-        this.description    = charity.get("description").toString();
-        this.facebookUrl    = charity.get("facebook").toString();
-        this.twitterUrl     = charity.get("twitter").toString();
-        this.googleplusUrl  = charity.get("googleplus").toString();
-        this.logoImage      = charity.get("logo").toString();
+        this.description    = charity.getDescription();
+        this.facebookUrl    = charity.getFacebook();
+        this.twitterUrl     = charity.getTwitter();
+        this.googleplusUrl  = charity.getGoogleplus();
+        this.logoImage      = charity.getLogo();
 
         if(DEBUG_ON){
             System.out.println("Address from DB: "     + address);
