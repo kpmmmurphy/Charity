@@ -39,7 +39,7 @@ public class Dashboard extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         
-        session = request.getSession();
+        session = request.getSession(true);
         
         if(session.getAttribute("authorised") == null) {
             response.sendRedirect("Login");
@@ -55,9 +55,9 @@ public class Dashboard extends HttpServlet {
             out.println("<head>");
             out.println("<title>" + charityName + "'s Dashboard</title>");
             out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/dashboardStyles.css\"/>");
-            out.println("<link href='http://fonts.googleapis.com/css?family=Muli' rel='stylesheet' type='text/css' />");
-            out.println("<script src='//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js'></script>");
-            out.println("<script src='https://www.paypalobjects.com/js/external/paypal-button.min.js'></script>");
+            //out.println("<link href='http://fonts.googleapis.com/css?family=Muli' rel='stylesheet' type='text/css' />");
+            out.println("<script src='javascript/jquery/jquery-1.11.0.js'></script>");
+            //out.println("<script src='https://www.paypalobjects.com/js/external/paypal-button.min.js'></script>");
             out.println("<script src='javascript/createpost.js'></script>");
             out.println("</head>");
             out.println("<body>");

@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import json.Article;
+import utilities.DirectoryManager;
 import utilities.Upload;
 
 /**
@@ -55,7 +56,7 @@ public class CreatePost extends HttpServlet {
         
         session = request.getSession();
         
-        initilizeDetials(request);
+        init(request);
         
         if(session.getAttribute("authorised") == null) {
             response.sendRedirect("Login");
@@ -91,7 +92,9 @@ public class CreatePost extends HttpServlet {
                 out.println("<hr />");
                 out.println("Tags : <input type='text' name='tags' placeholder='Tags Seperated by a Space' /> <br />");
                 out.println("<hr />");
-                out.println("<input type=\"submit\" value=\"Submit\">");
+                out.println("Post to Twitter Account : <input type='checkbox' name='twitter_oauth' id='twitter_oauth' value='post_to_twitter'/>");
+                out.println("<hr />");
+                out.println("<input type=\"submit\" value=\"Submit\" id='submitPost'>");
                 out.println("<input type=\"reset\" value=\"Clear\">");
                 out.println("</fieldset>");
                 out.println("</form>");
@@ -127,10 +130,54 @@ public class CreatePost extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+            init(request);
      
             formFieldMap = Upload.processMultipartForm(request, charityName, false);
+            String twitterOAuth = formFieldMap.get("twitter_oauth").toString();
+            System.out.println(twitterOAuth);
+            
             Article article = new Article(request, formFieldMap); 
             article.writeOutArticle(request);
+            
+            String articleTitle = article.getTitle();
+            int    articleID    = article.getId();
+            
+            try (PrintWriter out = response.getWriter()) {
+                
+                if(twitterOAuth != null && !"".equals(twitterOAuth)){
+                    
+                    String parameterString = "'" + articleTitle + "','" + charityName + "'," + articleID;
+                    out.println("<!DOCTYPE html>");
+                    out.println("<html>");
+                    out.println("<head>");
+                    out.println("<title>Servlet DonationManager</title>"); 
+                    out.println("<script src='javascript/createpost.js'></script>");
+                    out.println("<script src='javascript/jquery/jquery-1.11.0.js'></script>");
+                    out.println("<script src='javascript/jquery/jquery-ui-1.10.4/ui/jquery-ui.js'></script>");
+                    out.println(" <script src=\"javascript/colorbox-master/jquery.colorbox-min.js\"></script>");
+                    out.println("<link rel=\"stylesheet\" href=\"javascript/jquery/jquery-ui-1.10.4/themes/base/jquery-ui.css\" />");
+                    out.println("<link rel=\"stylesheet\" href=\"javascript/colorbox-master/colorbox.css\" />");
+                    out.println("</head>");
+                    out.println("<body>");
+                    out.println("<section>Posting to Social Media</section>");
+                    out.println("<p><a onclick=\"createTwitterOAuthWindow( " + parameterString + " )\">Post to Twitter</a></p>");
+                    out.println("<p><a onclick=\"createFacebookOAuthWindow( " + parameterString + " )\">Post to Facebook</a></p>");
+                    out.println("</body>");
+                    out.println("</html>");
+                    
+                   
+        
+        
+        
+       
+        
+        
+        
+                }
+                
+            }
+            
        
     }
 
@@ -144,20 +191,14 @@ public class CreatePost extends HttpServlet {
         return "Short description";
     }// </editor-fold>
     
-    private boolean initilizeDetials(HttpServletRequest request){
+    private boolean init(HttpServletRequest request){
         boolean success = true;
         session = request.getSession(false);
         if(session.getAttribute("authorised") != null){
             //Get Charity Name from Session
             charityName = (String)session.getAttribute("charityName");
             //Trim, set to lower case and remove white spaces
-            trimmedCharityName = charityName.toLowerCase().trim().replaceAll("\\s+","");
-            //Get servlet Context
-            servletContext = request.getServletContext().getRealPath("/");
-            if(DEBUG_ON){
-                System.out.println("Charity Name: "     + charityName);
-                System.out.println("Servlet Context : " + servletContext);
-            }
+            trimmedCharityName = DirectoryManager.toLowerCaseAndTrim(charityName);
         }else{
             success = false;
         }

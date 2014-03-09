@@ -124,6 +124,7 @@ public class Charity extends CustomJSONObject{
         
         if(DEBUG_ON){
             System.out.println( "Read in CharityObj: " + jsonCharity);
+            System.out.println( "Json file path : " + jsonFilePath);
         }
         
         jsonCharity = (JSONObject)jsonCharity.get("charity");

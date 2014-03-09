@@ -1,11 +1,13 @@
 package json;
 
+import database.DBConnect;
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -74,7 +76,7 @@ public class Article extends CustomJSONObject {
         super();
         initializeDetials(request);
         
-        this.id              = generateArticleId();
+        this.id              = generateArticleId(request);
         this.title           = (articleObj.get("title").toString()       != null) ? articleObj.get("title").toString()       : "" ;
         this.description     = (articleObj.get("description").toString() != null) ? articleObj.get("description").toString() : "" ;
         this.content         = (articleObj.get("content").toString()     != null) ? articleObj.get("content").toString()     : "" ;
@@ -133,16 +135,16 @@ public class Article extends CustomJSONObject {
         JSONObject articleObj = new JSONObject();
         
         /* Formatting of JSON Article Keys and Values*/
-        articleObj.put("id",          this.id);
-        articleObj.put("title",       this.title);
-        articleObj.put("type",       this.type);
-        articleObj.put("description", this.description);
-        articleObj.put("content",     this.content);
-        articleObj.put("date",        this.date);
-        articleObj.put("img",         this.img);
-        articleObj.put("tags",        this.tags);
-        articleObj.put("comments",    this.comments);
-        articleObj.put("approved",    this.approved);
+        articleObj.put("id", this.getId());
+        articleObj.put("title", this.getTitle());
+        articleObj.put("type", this.getType());
+        articleObj.put("description", this.getDescription());
+        articleObj.put("content", this.getContent());
+        articleObj.put("date", this.getDate());
+        articleObj.put("img", this.getImg());
+        articleObj.put("tags", this.getTags());
+        articleObj.put("comments", this.getComments());
+        articleObj.put("approved", this.isApproved());
         
         if(DEBUG_ON){
             String articleJSONString = JSONValue.toJSONString(articleObj);
@@ -152,7 +154,8 @@ public class Article extends CustomJSONObject {
         return articleObj;
     }
     
-    private int generateArticleId(){
+    private int generateArticleId(HttpServletRequest request){
+        /*
         int id = 0;
         System.out.println("Write/Read Path: " + jsonPath);
         
@@ -169,6 +172,53 @@ public class Article extends CustomJSONObject {
         
         
         return id;
+        */
+        
+        int generatedID = -1;
+        //Get the Session 
+        session     = request.getSession(true);
+        //Get the charity name, must initilize when user is viewing each charity 
+        int charityID = Integer.valueOf((String)session.getAttribute("charity_id"));
+        
+        if(charityID > 0){
+            //Connect to Database
+            DBConnect dbConnect   = new DBConnect();
+            Connection connection = dbConnect.getConnection();
+
+            String insertNewArticle = "INSERT INTO articles (charity_id)"
+                                    + "VALUES(?)";
+            try(PreparedStatement insertNewArticleStatement = connection.prepareStatement(insertNewArticle)) {
+                
+                insertNewArticleStatement.setInt(1, charityID);
+                insertNewArticleStatement.executeUpdate();
+            } catch (SQLException ex) {
+                System.err.println(this.getClass().getName() + ": Article ID cannot be generated, Charity ID from Session does not match one in DB ");
+            }
+            
+            String selectLatestArticleID = "SELECT id "
+                                         + "From articles "
+                                         + "WHERE charity_id = ? "
+                                         + "ORDER BY date_and_time DESC";
+           
+            try(PreparedStatement selectNewArticleIDStatement = connection.prepareStatement(selectLatestArticleID);){
+                selectNewArticleIDStatement.setInt(1, charityID);
+                ResultSet idResultSet = selectNewArticleIDStatement.executeQuery();
+                
+                if(idResultSet.next()){
+                    setId(idResultSet.getInt(1));
+                    
+                }
+                if(DEBUG_ON){
+                    System.out.println("Generated Article ID: " + getId());
+                }
+            } catch (SQLException ex) {
+                System.err.println(this.getClass().getName() + ": Article ID cannot be retrieved, Charity ID from Session does not match one in DB ");
+                ex.printStackTrace();
+            }
+        }
+        
+        return getId();
+        
     }
     
     private void initializeDetials(HttpServletRequest request){
@@ -177,7 +227,7 @@ public class Article extends CustomJSONObject {
         //Get the charity name, must initilize when user is viewing each charity 
         charityName = (String)session.getAttribute("charityName");
         //Only admins will be authorised, see Signup or Login session instantiation
-        authorised  = (Boolean)session.getAttribute("authorised");
+        setAuthorised((boolean) (Boolean)session.getAttribute("authorised"));
         //The trimmed and lower case charity name, with spaces removed
         trimmedCharityName = DirectoryManager.toLowerCaseAndTrim(charityName);
         
@@ -282,9 +332,9 @@ public class Article extends CustomJSONObject {
     }
     
     public static JSONArray getArticlesArrayFromFile(HttpServletRequest request){
-        JSONArray articles = new JSONArray();
+        JSONArray articles  = new JSONArray();
         HttpSession session = request.getSession(true);
-        String charityName = (String)session.getAttribute(CHARITY_NAME_FROM_SESSION);
+        String charityName  = (String)session.getAttribute(CHARITY_NAME_FROM_SESSION);
         if(charityName != null && !"".equals(charityName)){
             String jsonPath = getArticlesJSONPath(request);
             JSONObject articlesObj = readJsonFile(jsonPath);
@@ -377,4 +427,158 @@ public class Article extends CustomJSONObject {
         return fieldsMap;
          
      }
+
+    /**
+     * @return the authorised
+     */
+    public boolean isAuthorised() {
+        return authorised;
+    }
+
+    /**
+     * @param authorised the authorised to set
+     */
+    public void setAuthorised(boolean authorised) {
+        this.authorised = authorised;
+    }
+
+    /**
+     * @return the title
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * @param title the title to set
+     */
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     * @return the content
+     */
+    public String getContent() {
+        return content;
+    }
+
+    /**
+     * @param content the content to set
+     */
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    /**
+     * @return the date
+     */
+    public String getDate() {
+        return date;
+    }
+
+    /**
+     * @param date the date to set
+     */
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    /**
+     * @return the img
+     */
+    public String getImg() {
+        return img;
+    }
+
+    /**
+     * @param img the img to set
+     */
+    public void setImg(String img) {
+        this.img = img;
+    }
+
+    /**
+     * @return the type
+     */
+    public String getType() {
+        return type;
+    }
+
+    /**
+     * @param type the type to set
+     */
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    /**
+     * @return the tags
+     */
+    public JSONArray getTags() {
+        return tags;
+    }
+
+    /**
+     * @param tags the tags to set
+     */
+    public void setTags(JSONArray tags) {
+        this.tags = tags;
+    }
+
+    /**
+     * @return the approved
+     */
+    public boolean isApproved() {
+        return approved;
+    }
+
+    /**
+     * @param approved the approved to set
+     */
+    public void setApproved(boolean approved) {
+        this.approved = approved;
+    }
+
+    /**
+     * @return the comments
+     */
+    public JSONArray getComments() {
+        return comments;
+    }
+
+    /**
+     * @param comments the comments to set
+     */
+    public void setComments(JSONArray comments) {
+        this.comments = comments;
+    }
 }

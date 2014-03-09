@@ -6,6 +6,7 @@
 
 package utilities;
 
+import org.apache.commons.codec.binary.Base64;
 import database.DBConnect;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -63,7 +64,7 @@ public class PayPal extends HttpServlet {
                         + "         <option value='GBP'>GBP</option>"
                         + "         <option value='CNY'>Chinese Yuan</option>"
                         + "     </select><br />");
-             out.println("<input type=\"submit\" value=\"Submit\" id='donationSubmit' onmouseover='setUpAjaxSubmit()'>");
+             out.println("<input type=\"submit\" value=\"Submit\" id='donationSubmit' >");
              out.println("<input type=\"reset\" value=\"Clear\">");
              out.println("</fieldset>");
              
@@ -101,13 +102,7 @@ public class PayPal extends HttpServlet {
             throws ServletException, IOException {
          
         try (PrintWriter out = response.getWriter()) {
-            System.out.println("Posting");
-            out.println("<head>");
-            out.println("<script src='https://www.paypalobjects.com/js/external/paypal-button.min.js'></script>");
-            out.println("<script src='//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js'></script>");
-            out.println("<script src='javascript/createpost.js'></script>");
             buildPayPalForm(request, out);  
-            out.println("</body>");
         }
     }
 
@@ -124,17 +119,20 @@ public class PayPal extends HttpServlet {
     public static void buildPayPalForm(HttpServletRequest request, PrintWriter out ){
         
         String merchantIDorEmail = "";
-        String callbackUrl       = "http://localhost:8080/cs3305/Homepage";
-        String returnUrl         = "http://localhost:8080/cs3305/Homepage";
+        String returnUrl       = "http://localhost:8080/cs3305/DonationManager";
+        //String callbackUrl         = "http://localhost:8080/cs3305/HomePage.html";
+        String cancelReturnUrl         = "http://localhost:8080/cs3305/HomePage.html";
         String amount            = "10.00";
         String currency          = "EUR";
         
         HttpSession session = request.getSession(true);
         String charityName =  (String)session.getAttribute("charityName");
+        String charityID =  (String)session.getAttribute("charity_id");
         if(DEBUG_ON){
-                System.out.println("CharityName :" + charityName);
-            }
-        if(charityName != null && !"".equals(charityName)){
+                System.out.println("CharityID :" + charityID);
+        }
+        
+        if(charityID != null && Integer.valueOf(charityID) > 0){
             
             String stringInputAmount = request.getParameter("amount");
             if(DEBUG_ON){
@@ -143,10 +141,7 @@ public class PayPal extends HttpServlet {
             if(stringInputAmount != null && !"".equals(stringInputAmount)){
                 int intInputAmount = Integer.valueOf(stringInputAmount);
                 if(intInputAmount > 0){
-                    amount = Integer.toString(intInputAmount);
-                    if(DEBUG_ON){
-                        System.out.println("Submitted Amount :" + amount);
-                    }
+                    amount = String.valueOf(intInputAmount);
                 }
             }
             
@@ -163,7 +158,7 @@ public class PayPal extends HttpServlet {
                 }
                 
                 if(DEBUG_ON){
-                        System.out.println("Submitted Currency :" + currency);
+                    System.out.println("Submitted Currency :" + currency);
                 }
             }
             
@@ -173,10 +168,10 @@ public class PayPal extends HttpServlet {
             
             String selectPayPalEmail = "SELECT paypal_email "
                                      + "FROM   charities "
-                                     + "WHERE  name = ?";
+                                     + "WHERE  id = ?";
             try {
                 PreparedStatement payPalStatement = connection.prepareStatement(selectPayPalEmail);
-                payPalStatement.setInt(1, Integer.valueOf(charityName));
+                payPalStatement.setInt(1, Integer.valueOf(charityID));
                 ResultSet payPalResultSet = payPalStatement.executeQuery();
                 
                 if(payPalResultSet.next()){
@@ -190,9 +185,17 @@ public class PayPal extends HttpServlet {
                 Logger.getLogger(PayPal.class.getName()).log(Level.SEVERE, null, ex);
             }
             
+            byte[] encodedAmountinBytes = Base64.encodeBase64(amount.getBytes());
+            byte[] encodedCharityIDinBytes = Base64.encodeBase64(charityID.getBytes());
+            String encodedAmount = new String(encodedAmountinBytes);
+            String encodedCharityID = new String(encodedCharityIDinBytes);
+            
             
             if(merchantIDorEmail != null && !"".equals(merchantIDorEmail)){
                               
+                returnUrl = returnUrl.concat("?amount=" + encodedAmount).concat("&charity_id=" + encodedCharityID);
+                System.out.println(returnUrl);
+                
                 out.println("<article class='paypal_form'>");                
                 out.println("<p>Dontaion Amount : " + amount   + "</p>");
                 out.println("<p>Currency        : " + currency + "</p>");
@@ -203,10 +206,17 @@ public class PayPal extends HttpServlet {
                 out.println("data-currency='" + currency + "' ");
                 out.println("data-shipping='0' ");
                 out.println("data-tax='0' ");
-                out.println("data-callback='" + callbackUrl + "' ");
+                out.println("data-rm='2' ");
+                out.println("data-cancel_return='" + cancelReturnUrl + "' ");
+                //out.println("data-custom='amount=" + encodedAmount + "&charity_id='" + encodedCharityID + " ");
+                //out.println("data-callback='" + callbackUrl + "' ");
                 out.println("data-return='" + returnUrl + "' ");
                 out.println("data-env='sandbox'");
                 out.println("></script>");
+                out.println("</article>");
+            }else{
+                out.println("<article class='paypal_form'>");
+                out.println("<p>This Charity does not have a PayPal account Setup.</p>");
                 out.println("</article>");
             }
         }

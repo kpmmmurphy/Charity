@@ -58,7 +58,6 @@ public class ListPosts extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             init(request);
             renderPosts(request, out, articlesArray);
-            PayPal.buildPayPalForm(request, out);
         }
     }
 
