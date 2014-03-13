@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package post;
 
 import java.io.IOException;
@@ -31,16 +30,16 @@ import utilities.Upload;
 public class CreatePost extends HttpServlet {
 
     private boolean DEBUG_ON = true;
-    
+
     private String charityName;
     private String trimmedCharityName;
     private String servletContext;
     private String articleImg;
-    
+
     private HttpSession session;
-    
-    private LinkedHashMap formFieldMap; 
-    
+
+    private LinkedHashMap formFieldMap;
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -53,53 +52,57 @@ public class CreatePost extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        
+
         session = request.getSession();
-        
+
         init(request);
-        
-        if(session.getAttribute("authorised") == null) {
+
+        if (session.getAttribute("charityName") == null) {
             response.sendRedirect("Login");
         } else {
             String servletContext = request.getContextPath();
             String servletPath = request.getServletPath();
-            
+
             try (PrintWriter out = response.getWriter()) {
                 /* Just the HTML for the form, gotten with an JQuery AJAX call*/
-                
-                out.println("<form method='POST' action='" + servletContext + servletPath +"' enctype='multipart/form-data' >");
+
+                out.println("<form method='POST' action='" + servletContext + servletPath + "' enctype='multipart/form-data' >");
                 out.println("<fieldset>");
                 out.println("<legend>New Post</legend>");
-                out.println("Title: <input type='text' name='title' placeholder='Post Title'> <br />");
+                out.println("<label for='title'>Title:</label> <input type='text' name='title' placeholder='Post Title'> <br />");
                 out.println("<hr />");
-                out.println("Type: <select name='type' placeholder='Type of Post'>"
+                out.println("<label for='type'>Type:</label><select name='type' placeholder='Type of Post'>"
                         + "         <option value='general'>General</option>"
                         + "         <option value='lost_and_found'>Lost and Found</option>"
                         + "         <option value='sponsorship'>Sponsorship</option>"
                         + "        </select><br />");
                 out.println("<hr />");
-                out.println("Brief Description: <textarea name=\"description\" rows=\"5\" cols=\"10\"></textarea><br />");
+                out.println("<label for='description'>Brief Description:</label> <textarea name=\"description\" rows=\"5\" cols=\"10\"></textarea><br />");
                 out.println("<hr />");
-                out.println("Content: <textarea name=\"content\" rows=\"15\" cols=\"30\"></textarea><br />");
+                out.println("<label for='content'>Content:</label><textarea name=\"content\" rows=\"15\" cols=\"30\"></textarea><br />");
                 out.println("<hr />");
-                out.println("Upload Logo Image : <input id='file' type='file' name='filename' size='50'/><br/>");
-                
-                if(articleImg == null){
+                out.println("<label for='filename'>Upload Logo Image :</label> <input id='file' type='file' name='filename' size='50'/><br/>");
+
+                if (articleImg == null) {
                     out.println("<p class=\"float\"> No Image uploaded yet!</p>");
-                }else{
-                    out.println("<img src='charities/" + trimmedCharityName  + "/uploads/" + articleImg + "' id='articleImg' /><br/>");
+                } else {
+                    out.println("<img src='charities/" + trimmedCharityName + "/uploads/" + articleImg + "' id='articleImg' /><br/>");
                 }
                 out.println("<hr />");
-                out.println("Tags : <input type='text' name='tags' placeholder='Tags Seperated by a Space' /> <br />");
+                out.println("<label for='tags'>Tags :</label> <input type='text' name='tags' placeholder='Tags Seperated by a Space' /> <br />");
                 out.println("<hr />");
-                out.println("Post to Twitter Account : <input type='checkbox' name='twitter_oauth' id='twitter_oauth' value='post_to_twitter'/>");
-                out.println("<hr />");
+                if (session.getAttribute("authorised") != null) {
+                    out.println("<label for='post_to_social_media'>Post to Social Media Accounts :</label> <input type='checkbox' name='post_to_social_media' id='social_media' value='social_media'/>");
+                    out.println("<hr />");
+                }
                 out.println("<input type=\"submit\" value=\"Submit\" id='submitPost'>");
                 out.println("<input type=\"reset\" value=\"Clear\">");
                 out.println("</fieldset>");
                 out.println("</form>");
-                out.println("<p>Return to <a href=\"Dashboard\">Dashboard</a></p>");
                 
+                if(session.getAttribute("authorised") != null){
+                    out.println("<p>Return to <a href=\"Dashboard\">Dashboard</a></p>");
+                }
             }
         }
     }
@@ -130,55 +133,46 @@ public class CreatePost extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-            init(request);
-     
-            formFieldMap = Upload.processMultipartForm(request, charityName, false);
-            String twitterOAuth = formFieldMap.get("twitter_oauth").toString();
-            System.out.println(twitterOAuth);
-            
-            Article article = new Article(request, formFieldMap); 
-            article.writeOutArticle(request);
-            
-            String articleTitle = article.getTitle();
-            int    articleID    = article.getId();
-            
-            try (PrintWriter out = response.getWriter()) {
-                
-                if(twitterOAuth != null && !"".equals(twitterOAuth)){
-                    
-                    String parameterString = "'" + articleTitle + "','" + charityName + "'," + articleID;
-                    out.println("<!DOCTYPE html>");
-                    out.println("<html>");
-                    out.println("<head>");
-                    out.println("<title>Servlet DonationManager</title>"); 
-                    out.println("<script src='javascript/createpost.js'></script>");
-                    out.println("<script src='javascript/jquery/jquery-1.11.0.js'></script>");
-                    out.println("<script src='javascript/jquery/jquery-ui-1.10.4/ui/jquery-ui.js'></script>");
-                    out.println(" <script src=\"javascript/colorbox-master/jquery.colorbox-min.js\"></script>");
-                    out.println("<link rel=\"stylesheet\" href=\"javascript/jquery/jquery-ui-1.10.4/themes/base/jquery-ui.css\" />");
-                    out.println("<link rel=\"stylesheet\" href=\"javascript/colorbox-master/colorbox.css\" />");
-                    out.println("</head>");
-                    out.println("<body>");
-                    out.println("<section>Posting to Social Media</section>");
-                    out.println("<p><a onclick=\"createTwitterOAuthWindow( " + parameterString + " )\">Post to Twitter</a></p>");
-                    out.println("<p><a onclick=\"createFacebookOAuthWindow( " + parameterString + " )\">Post to Facebook</a></p>");
-                    out.println("</body>");
-                    out.println("</html>");
-                    
-                   
-        
-        
-        
-       
-        
-        
-        
-                }
-                
+
+        init(request);
+
+        formFieldMap = Upload.processMultipartForm(request, charityName, false);
+        Article article = new Article(request, formFieldMap);
+        article.writeOutArticle(request);
+
+        String articleTitle = article.getTitle();
+        int articleID = article.getId();
+
+        try (PrintWriter out = response.getWriter()) {
+
+            if (formFieldMap.containsKey("post_to_social_media")) {
+
+                String parameterString = "'" + articleTitle + "','" + charityName + "'," + articleID;
+                out.println("<!DOCTYPE html>");
+                out.println("<html>");
+                out.println("<head>");
+                out.println("<title>Servlet DonationManager</title>");
+                out.println("<script src='javascript/createpost.js'></script>");
+                out.println("<script src='javascript/jquery/jquery-1.11.0.js'></script>");
+                out.println("<script src='javascript/jquery/jquery-ui-1.10.4/ui/jquery-ui.js'></script>");
+                out.println(" <script src=\"javascript/colorbox-master/jquery.colorbox-min.js\"></script>");
+                out.println("<link rel=\"stylesheet\" href=\"javascript/jquery/jquery-ui-1.10.4/themes/base/jquery-ui.css\" />");
+                out.println("<link rel=\"stylesheet\" href=\"javascript/colorbox-master/colorbox.css\" />");
+                out.println("</head>");
+                out.println("<body>");
+                out.println("<section>");
+                out.println("<h1>Posting to Social Media</h1>");
+                out.println("<p><a onclick=\"createTwitterOAuthWindow( " + parameterString + " )\">Post to Twitter</a></p>");
+                out.println("<p><a onclick=\"createFacebookOAuthWindow( " + parameterString + " )\">Post to Facebook</a></p>");
+                out.println("<p>Return to <a href=\"Dashboard\">Dashboard</a></p>");
+                out.println("</section>");
+                out.println("</body>");
+                out.println("</html>");
+
             }
-            
-       
+
+        }
+
     }
 
     /**
@@ -190,21 +184,19 @@ public class CreatePost extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-    
-    private boolean init(HttpServletRequest request){
+
+    private boolean init(HttpServletRequest request) {
         boolean success = true;
         session = request.getSession(false);
-        if(session.getAttribute("authorised") != null){
+        if (session.getAttribute("authorised") != null) {
             //Get Charity Name from Session
-            charityName = (String)session.getAttribute("charityName");
+            charityName = (String) session.getAttribute("charityName");
             //Trim, set to lower case and remove white spaces
             trimmedCharityName = DirectoryManager.toLowerCaseAndTrim(charityName);
-        }else{
+        } else {
             success = false;
         }
         return success;
     }
-        
-   
 
 }

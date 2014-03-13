@@ -141,6 +141,37 @@ public class Charity extends CustomJSONObject{
         return new Charity(charityName, desc, address, tele, face, twit, google, logo);
     }
     
+    /*
+     * Overloaded - Reads in JSON file from disk and converts it to a Charity
+     * Object
+     * 
+     * @param path  The path of the JSON file to be parsed and converted
+     * 
+     * @return  Charity object
+     */
+    public static Charity parseJSONtoCharityObj(String jsonFilePath){
+        
+        JSONObject jsonCharity = readJsonFile(jsonFilePath);
+        
+        if(DEBUG_ON){
+            System.out.println( "Read in CharityObj: " + jsonCharity);
+            System.out.println( "Json file path : " + jsonFilePath);
+        }
+        
+        jsonCharity = (JSONObject)jsonCharity.get("charity");
+        
+        String charityName = jsonCharity.get("name").toString();
+        String desc = jsonCharity.get("description").toString();
+        String address = jsonCharity.get("address").toString();
+        String tele = jsonCharity.get("telephone").toString();
+        String face = jsonCharity.get("facebook").toString();
+        String twit = jsonCharity.get("twitter").toString();
+        String google = jsonCharity.get("googleplus").toString();
+        String logo = jsonCharity.get("logo").toString();
+        
+        return new Charity(charityName, desc, address, tele, face, twit, google, logo);
+    }
+    
      public static JSONObject parseJSON(HttpServletRequest request ){
          
         //The path where the JSON file will be output to

@@ -55,18 +55,15 @@ public class PayPal extends HttpServlet {
              
              out.println("<form method='POST' id='donationForm' '>");
              
-             out.println("<fieldset>");
-             out.println("<legend>Donate</legend>");
-             out.println("Amount: <input type='number' value='10' name='amount' min='5' max='10000'/><br/>");
-             out.println("Type: <select name='currency'>"
+             out.println("<h1>Donate</h1>");
+             out.println("<label for='amount'>Amount:</label><input type='number' value='10' name='amount' min='5' max='10000'/><br/>");
+             out.println("<label for='currency'>Type:</label> <select name='currency'>"
                         + "         <option value='EUR' selected>Euro</option>"
                         + "         <option value='USD'>US Dollar</option>"
                         + "         <option value='GBP'>GBP</option>"
                         + "         <option value='CNY'>Chinese Yuan</option>"
                         + "     </select><br />");
              out.println("<input type=\"submit\" value=\"Submit\" id='donationSubmit' >");
-             out.println("<input type=\"reset\" value=\"Clear\">");
-             out.println("</fieldset>");
              
              out.println("</form>");
             

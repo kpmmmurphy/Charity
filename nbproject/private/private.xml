@@ -3,11 +3,14 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/ui/CharityPage.java</file>
             <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/json/Charity.java</file>
             <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/javascript/paypalfunctions.js</file>
-            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/auth/Signup.java</file>
-            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/javascript/createpost.js</file>
-            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/OAuth/TwitterOAuth.java</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/styles/homeStyles.css</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/javascript/homepage.js</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/styles/donate.css</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/styles/post_styles.css</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/HomePage.html</file>
             <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/auth/Login.java</file>
             <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/utilities/PayPal.java</file>
         </group>

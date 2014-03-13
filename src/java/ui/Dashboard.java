@@ -59,6 +59,7 @@ public class Dashboard extends HttpServlet {
             out.println("<script src='javascript/jquery/jquery-1.11.0.js'></script>");
             //out.println("<script src='https://www.paypalobjects.com/js/external/paypal-button.min.js'></script>");
             out.println("<script src='javascript/createpost.js'></script>");
+            out.println("<script src='javascript/dashboard.js'></script>");
             out.println("</head>");
             out.println("<body>");
             out.println("<div id=\"wrapper\">");
@@ -68,9 +69,10 @@ public class Dashboard extends HttpServlet {
             out.println("<img src=\"images/concern.png\" id=\"logo\"/>");
             out.println("</div>");
             out.println("<ul>");
+            out.println("<li><a href=\"Dashboard\">Home</a></li>");
             out.println("<li><a href=\"EditStyles\">Edit Styles</a></li>");
             out.println("<li><a href=\"Register\">Edit Details</a></li>");
-            out.println("<li><a href=\"Analytics\">Analytics</a></li>");
+            out.println("<li><a onclick='getAnalytics()'>Analytics</a></li>");
             out.println("<li><a href=\"FAQ.jsp\">FAQ</a></li>");
             out.println("<li><a href=\"Signout\">Sign Out</a></li>");
             out.println("</ul>");

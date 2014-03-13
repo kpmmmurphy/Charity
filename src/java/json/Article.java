@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
@@ -80,7 +81,7 @@ public class Article extends CustomJSONObject {
         this.title           = (articleObj.get("title").toString()       != null) ? articleObj.get("title").toString()       : "" ;
         this.description     = (articleObj.get("description").toString() != null) ? articleObj.get("description").toString() : "" ;
         this.content         = (articleObj.get("content").toString()     != null) ? articleObj.get("content").toString()     : "" ;
-        this.img             = (articleObj.get("img").toString()         != null) ? articleObj.get("img").toString()         : "" ;
+        this.img             = (!"".equals(articleObj.get("img").toString()) )    ? articleObj.get("img").toString()         : Charity.parseJSONtoCharityObj(request).getLogo();
         this.type            = (articleObj.get("type").toString()        != null) ? articleObj.get("type").toString()        : "general" ;
         SimpleDateFormat sdf = new SimpleDateFormat("dd/M/yyyy");
 	this.date            = sdf.format(new Date()); 
@@ -155,30 +156,36 @@ public class Article extends CustomJSONObject {
     }
     
     private int generateArticleId(HttpServletRequest request){
-        /*
-        int id = 0;
-        System.out.println("Write/Read Path: " + jsonPath);
-        
-        JSONObject articlesArrayObj = (JSONObject)readJsonFile(jsonPath);
-        if(articlesArrayObj != null){
-            JSONArray  articlesArray     = (JSONArray)articlesArrayObj.get("articles");
-            if(DEBUG_ON){
-                System.out.println("Articles array: " + articlesArrayObj);
-                System.out.println("Num Articles in array: " + articlesArray.size());
-            }
-            //The size of the array 
-            id = articlesArray.size();
-        }
-        
-        
-        return id;
-        */
-        
         int generatedID = -1;
         //Get the Session 
         session     = request.getSession(true);
         //Get the charity name, must initilize when user is viewing each charity 
-        int charityID = Integer.valueOf((String)session.getAttribute("charity_id"));
+        int charityID = 0;
+        if(session.getAttribute("authorised") == null){
+            
+            String charityName = (String)session.getAttribute("charityName");
+            String selectCharityID = "SELECT id "
+                    + "FROM charities "
+                    + "WHERE name = ?";
+            
+            //Connect to Database
+            DBConnect dbConnect   = new DBConnect();
+            Connection connection = dbConnect.getConnection();
+            
+            try(PreparedStatement selectCharityIDStatement = connection.prepareStatement(selectCharityID)) {
+               
+                selectCharityIDStatement.setString(1, charityName);
+                ResultSet selectIDResultSet = selectCharityIDStatement.executeQuery();
+                if(selectIDResultSet.first()){
+                    charityID = selectIDResultSet.getInt(1);
+                }
+            } catch (SQLException ex) {
+                System.err.println(this.getClass().getName() + ": Article ID cannot be generated, Charity Name from Session does not match one in DB ");
+            }
+        
+        }else{
+           charityID = Integer.valueOf((String)session.getAttribute("charity_id"));
+        }
         
         if(charityID > 0){
             //Connect to Database
@@ -227,7 +234,9 @@ public class Article extends CustomJSONObject {
         //Get the charity name, must initilize when user is viewing each charity 
         charityName = (String)session.getAttribute("charityName");
         //Only admins will be authorised, see Signup or Login session instantiation
-        setAuthorised((boolean) (Boolean)session.getAttribute("authorised"));
+        if(session.getAttribute("authorised") != null){
+            setAuthorised(true);
+        }
         //The trimmed and lower case charity name, with spaces removed
         trimmedCharityName = DirectoryManager.toLowerCaseAndTrim(charityName);
         
@@ -269,6 +278,7 @@ public class Article extends CustomJSONObject {
         JSONArray  articlesArray = getArticlesArrayFromFile(request);
         JSONObject article = new JSONObject();
         JSONObject selectedArticle = new JSONObject();
+        
         for(int i = 0; i < articlesArray.size(); i++){
           selectedArticle = (JSONObject)articlesArray.get(i);
           if(id.equals(selectedArticle.get("id").toString())){
@@ -279,11 +289,10 @@ public class Article extends CustomJSONObject {
         return article;
     }
     
-    public static void updateArticleById(HttpServletRequest request, String id, LinkedHashMap fields){
+    public static void updateArticleById(HttpServletRequest request, String id, Map fields){
         
         JSONArray  articlesArray = getArticlesArrayFromFile(request);
         JSONArray  updatedArticlesArray = new JSONArray();
-        System.out.println(articlesArray);
         JSONObject articles = new JSONObject();
         JSONObject selectedArticle;
         for(int i = 0; i < articlesArray.size(); i++){
@@ -291,15 +300,22 @@ public class Article extends CustomJSONObject {
           if(id.equals(selectedArticle.get("id").toString())){
               //Get a set of all the entries Key - Value pairs contained in the LinkedHashMap 
               Set<Entry<String, Object>> entrySet = fields.entrySet();
-              System.out.println("Entry Set: " + entrySet);
               
               for(Entry<String, Object> entry:entrySet){
                   String key = entry.getKey();
                   Object value = entry.getValue();
                   
                   if("tags".equals(key)){
-                      JSONArray tags = createJSONTagsArray(value.toString());
-                      selectedArticle.put(key, tags);
+                      System.out.println(value.toString());
+                      JSONArray tags = (JSONArray)value;
+                      String tagsString = "";
+                      for(int j = 0; j < tags.size(); j++){
+                          System.out.println(tags.size());
+                          tagsString += " " + tags.get(j);
+                      }
+                      System.out.println(tagsString);
+                      JSONArray newTags = createJSONTagsArray(tagsString);
+                      selectedArticle.put(key, newTags);
                   }else{
                       selectedArticle.put(key, value);
                   }
@@ -394,7 +410,6 @@ public class Article extends CustomJSONObject {
         //Loops through all articles, checks each approved status, adding to the unapprovedPost JSONArray if not approved
         for(int i = 0; i < articlesArray.size(); i++){
             tmpArticle = (JSONObject)articlesArray.get(i);
-            System.out.println("tmpArticle: " + tmpArticle);
             if(! (Boolean)tmpArticle.get("approved")){
                 unapprovedPosts.add(tmpArticle);
             }
@@ -402,6 +417,34 @@ public class Article extends CustomJSONObject {
         
         return unapprovedPosts;
      }
+    
+    public static void inputComment(HttpServletRequest request){
+        String charityName    = (request.getParameter("charity_name")    == null) ? "" : request.getParameter("charity_name");
+        String postID         = (request.getParameter("post_id")         == null) ? "" : request.getParameter("post_id");
+        String commenterName  = (request.getParameter("commenter_name")  == null || "".equals(request.getParameter("commenter_name"))) ? "Anon" : request.getParameter("commenter_name");
+        String comment        = (request.getParameter("comment_textbox") == null || "".equals(request.getParameter("comment_textbox"))) ? "No Comment." : request.getParameter("comment_textbox");
+        
+        if(!"".equals(charityName) || !"".equals(postID) ){
+            
+            request.getSession(true).setAttribute("charityName", charityName);
+            JSONObject article = getArticleById(request, postID);
+            
+            System.out.println(article);
+            JSONObject latestComment = new JSONObject();
+            latestComment.put("name", commenterName);
+            latestComment.put("comment", comment);
+            
+            JSONArray commentsArray = (JSONArray)article.get("comments");
+            
+            System.out.println(commentsArray);
+            commentsArray.add(latestComment);
+            article.put("comments", commentsArray);
+            
+            updateArticleById(request, postID, article);
+        }
+        
+        
+    }
     
     public static LinkedHashMap<String, String> getDefaultValueMap(HttpServletRequest request){
         /* Default values to be displayed when fields are not present */
@@ -439,6 +482,7 @@ public class Article extends CustomJSONObject {
      * @param authorised the authorised to set
      */
     public void setAuthorised(boolean authorised) {
+        
         this.authorised = authorised;
     }
 
