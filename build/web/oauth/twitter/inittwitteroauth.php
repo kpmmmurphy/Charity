@@ -1,12 +1,6 @@
 <?php
 
 /*
- * 2014 CS3305 Team9
- * @author Kevin Murphy
- * @version 1.0
- * @date 8/3/14
- * 
- * 
  * Taken largly from https://github.com/abraham/twitteroauth
  * Using libraries OAuth.php anf twitteroauth.php by Abraham Williams - http://abrah.am - abraham@abrah.am
  *
@@ -36,8 +30,10 @@ $_SESSION['oauth_token'] = $token = $request_token['oauth_token'];
 $_SESSION['oauth_token_secret'] = $request_token['oauth_token_secret'];
 
 $_SESSION['article_title'] = $_GET['title'] . "       Click the Link below to Read More! ";
-$_SESSION['article_url'] = "http://127.0.0.1/cs3305/DisplayArticle?article_id=" . $_GET['article_id'] . "&charity_name=" . $_GET['charity_name'];
- 
+//$_SESSION['article_url'] = "http://127.0.0.1/cs3305/DisplayArticle?article_id=" . $_GET['article_id'] . "&charity_name=" . $_GET['charity_name'];
+$trimmedCharityName = strtolower(trim($_GET['charity_name']));
+$_SESSION['article_url'] = "       http://localhost:8080/cs3305/charities/" . $trimmedCharityName . "/index.html";
+
 /* If last connection failed don't display authorization link. */
 switch ($connection->http_code) {
   case 200:

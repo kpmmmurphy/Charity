@@ -1,6 +1,10 @@
 package utilities;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 
 /**
  * Handles creating of the file structure for the Charity, only works with Linux
@@ -57,6 +61,20 @@ public class DirectoryManager {
         //their uploads
         File uploadsDir = new File(charityUploadsDirPath);
         uploadsDir.mkdirs();
+        
+        //their index.html
+        try {
+            FileUtils.copyFileToDirectory(new File( path + "/index.html"),new File(charityDirPath) );
+        } catch (IOException ex) {
+            Logger.getLogger(DirectoryManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        //their indexStyles.css
+        try {
+            FileUtils.copyFileToDirectory(new File( path + "/styles/homeStyles.css"),new File(charityDirPath) );
+        } catch (IOException ex) {
+            Logger.getLogger(DirectoryManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
         if(DEBUG_ON){
             System.out.println("Create Path: " + charityDir);

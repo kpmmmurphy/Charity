@@ -8,13 +8,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import database.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import json.Charity;
+import utilities.DirectoryManager;
 /**
  *
  * @author kealan
@@ -40,6 +35,7 @@ public class Dashboard extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         
         session = request.getSession(true);
+        session.setAttribute("viewing_homepage", false);
         
         if(session.getAttribute("authorised") == null) {
             response.sendRedirect("Login");
@@ -50,57 +46,50 @@ public class Dashboard extends HttpServlet {
             String servletPath = request.getServletPath();
             String charityName = (String)session.getAttribute("charityName");
             
+            Charity charity = Charity.parseJSONtoCharityObj(request);
+            
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
             out.println("<title>" + charityName + "'s Dashboard</title>");
+            //out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/normalize.css\"/>");
             out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/dashboardStyles.css\"/>");
-            //out.println("<link href='http://fonts.googleapis.com/css?family=Muli' rel='stylesheet' type='text/css' />");
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/post_styles.css\"/>");
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/submit_post.css\"/>");
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/formStyles.css\"/>");
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/edit_styles.css\"/>");
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/ajax_msgs.css\"/>");
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/oauth.css\"/>");
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/faq.css\"/>");
             out.println("<script src='javascript/jquery/jquery-1.11.0.js'></script>");
-            //out.println("<script src='https://www.paypalobjects.com/js/external/paypal-button.min.js'></script>");
-            out.println("<script src='javascript/createpost.js'></script>");
+            out.println("<script src='javascript/postfunctions.js'></script>");
             out.println("<script src='javascript/dashboard.js'></script>");
             out.println("</head>");
-            out.println("<body>");
+            out.println("<body onload='initDashboard()'>");
             out.println("<div id=\"wrapper\">");
-            out.println("<h1>" + charityName + "'s Dashboard</h1>");
             out.println("<nav>");
             out.println("<div id=\"logodiv\">");
-            out.println("<img src=\"images/concern.png\" id=\"logo\"/>");
+            out.println("<img src=\"" + Charity.getCharityUploadsPath(request) + charity.getLogo() + "\" id=\"logo\"/>");
             out.println("</div>");
             out.println("<ul>");
-            out.println("<li><a href=\"Dashboard\">Home</a></li>");
-            out.println("<li><a href=\"EditStyles\">Edit Styles</a></li>");
-            out.println("<li><a href=\"Register\">Edit Details</a></li>");
+            out.println("<li><a href='charities/" + DirectoryManager.toLowerCaseAndTrim(charity.getName()) + "/index.html'>Your Page</a></li>");
+            out.println("<hr />");
+            out.println("<li><a onclick='initDashboard()'>Home</a></li>");
+            out.println("<li><a onclick='getEditStyles()'>Edit Styles</a></li>");
+            out.println("<li><a onclick='getEditDetails()'>Edit Details</a></li>");
             out.println("<li><a onclick='getAnalytics()'>Analytics</a></li>");
-            out.println("<li><a href=\"FAQ.jsp\">FAQ</a></li>");
+            out.println("<li><a onclick='getDashboardFaq()'>FAQ</a></li>");
             out.println("<li><a href=\"Signout\">Sign Out</a></li>");
+            
             out.println("</ul>");
-            out.println("</nav>");
-            out.println("<section id=\"main\">");
-            out.println("<a onclick='getCreatePost()'>");
-            out.println("<article class=\"option\">");
-            out.println("<h2>Create a Post</h2>");
-            out.println("<h3>Create a new post and upload an image</h3>");
-            out.println("</article>");
-            out.println("</a>");
-            out.println("<a onclick='getApprovePost()'>");
-            out.println("<article class=\"option\">");
-            out.println("<h2>Approve a Post</h2>");
-            out.println("<h3>Approve a user submitted post</h3>");
-            out.println("</article>");
-            out.println("</a>");
-            out.println("<a onclick='getListPosts()'>");
-            out.println("<article class=\"option\">");
-            out.println("<h2>Edit a Post</h2>");
-            out.println("<h3>Edit one of your posts</h3>");
-            out.println("</article>");
-            out.println("</a>");
-            out.println("</section>");
             out.println("<footer>");
             out.println("<small>CMS 2014 - Team 9</small>");
             out.println("</footer>");
+            out.println("</nav>");
+            
             out.println("</div>");
+            out.println("<section id=\"main\">");
+            out.println("</section>");
             out.println("</body>");
             out.println("</html>");
          }

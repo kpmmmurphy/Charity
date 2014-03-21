@@ -80,6 +80,10 @@ public class Signup extends HttpServlet {
             out.println("<html>");
             out.println("<head>");
             out.println("<title>Signup</title>");
+             out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/formStyles.css\"/>");
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/faq.css\"/>");
+            out.println("<script src='javascript/jquery/jquery-1.11.0.js'></script>");
+            out.println("<script src='javascript/general.js'></script>");
             out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/formStyles.css\"/>");
             out.println("</head>");
             out.println("<body>");
@@ -88,6 +92,9 @@ public class Signup extends HttpServlet {
             out.println("<h1>Signup!</h1>");
             out.println("<p class=\"float\">");
             out.println("<label for=\"charityName\">Charity Name:</label><input type='text' name='charityName' placeholder='Charity Name'> <br />");
+            out.println("</p>");
+            out.println("<p class=\"float\">");
+            out.println("<label for=\"charityNumber\">Charity Number:</label><input type='text' name='charityNumber' placeholder='Charity Number'> <br />");
             out.println("</p>");
             out.println("<p class=\"float\">");
             out.println("<label for=\"username\">Username:</label><input type='text' name='username' placeholder='Username'> <br />");
@@ -118,6 +125,14 @@ public class Signup extends HttpServlet {
             }
             out.println("</p>");
             out.println("</form>");
+            out.println("<footer>");
+            out.println("<small>&copy;CMS - Team9 - 2014</small>");
+            out.println("</footer>");
+            out.println("</div>");
+            out.println("<div id=\"faq\">");
+            out.println("<nav>");
+            out.println("<li><a href=\"gateway.html\">Home</a></li>");
+            out.println("<li><a onclick='getFAQ()'>FAQ</a></li>");
             out.println("</div>");
             out.println("</body>");
             out.println("</html>");
@@ -344,7 +359,7 @@ public class Signup extends HttpServlet {
                         charity.createCharityJSONFile(servletContext);
                         
                         //Redirect to basic registration of info page
-                        response.sendRedirect("./Register");
+                        response.sendRedirect("./Register?from_signup=true&with_header=true");
                     }
                     connection.close();
                 } catch (SQLException ex) {

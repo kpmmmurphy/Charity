@@ -1,0 +1,61 @@
+{
+    "faq": [
+        {
+            "type"    : "post",
+            "question": "How do I create a post?",
+            "answer"  : [
+                         "Click the corresponding bottom on the dashboard", 
+                         "Fill all the required fields in the post page (including the title/type/abstract/content/tags)",
+                         "Upload logo image for your post by choosing the corresponding file",
+                         "Click the 'Submit' button to submit your post (you can click the 'clear' button if you fill something wrong)",
+                         "Click Home to return to the dashboard."
+                         ]
+        }, 
+        {
+            "type"    : "post",
+            "question": "How do I delete/edit a post?",
+            "answer"  : [
+                         "Check the list of post you have created", 
+                         "Click the post for which you want to delete/edit",
+                         "Fill and submit the form just like what you did when you created it",
+                         "There are more details you can fill when you edit the post than when you created it (including the telephone/domain name/paypal email/facebook url/twitter url/google url/image)",
+                         "Click Home to return to the dashboard."
+                         ]
+        }, 
+        {
+            "type"    : "post",
+            "question": "How do I approve a post?",
+            "answer"  : [
+                         "Check the list of post and choose the one you want to approve. It will include all the details about this post", 
+                         "Click the corresponding button ('Approve Post!') to approve the post",
+                         "Click Home to return to the dashboard."
+                         ]
+        }, 
+        {
+            "type"    : "other",
+            "question": "How do I update my account details?",
+            "answer"  : [
+                         "Click the corresponding link ('Edit details/Edit Styles') on the left of the dashboard", 
+                         "Choose an option",
+                         "Edit the details",
+                         "Click the 'Submit' button to submit your update",
+                         "Click Home to return to the dashboard."
+                         ]
+        }, 
+        {
+            "type"    : "other",
+            "question": "Where can I find some statistics information about my charity?",
+            "answer"  : [
+                         "Click the corresponding link ('Analytics') on the left of the dashboard."
+                        ]
+        }, 
+        {
+            "type"    : "other",
+            "question": "How do I get to my charity site?",
+            "answer"  : [
+                         "Click the corresponding link ('My charity') on the left of the dashboard."
+                        ]
+        }
+        
+    ]
+}

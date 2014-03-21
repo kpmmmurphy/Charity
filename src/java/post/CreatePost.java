@@ -65,8 +65,8 @@ public class CreatePost extends HttpServlet {
 
             try (PrintWriter out = response.getWriter()) {
                 /* Just the HTML for the form, gotten with an JQuery AJAX call*/
-
-                out.println("<form method='POST' action='" + servletContext + servletPath + "' enctype='multipart/form-data' >");
+                
+                out.println("<form method='POST' id='create_post' enctype='multipart/form-data' >");
                 out.println("<fieldset>");
                 out.println("<legend>New Post</legend>");
                 out.println("<label for='title'>Title:</label> <input type='text' name='title' placeholder='Post Title'> <br />");
@@ -95,14 +95,14 @@ public class CreatePost extends HttpServlet {
                     out.println("<label for='post_to_social_media'>Post to Social Media Accounts :</label> <input type='checkbox' name='post_to_social_media' id='social_media' value='social_media'/>");
                     out.println("<hr />");
                 }
-                out.println("<input type=\"submit\" value=\"Submit\" id='submitPost'>");
-                out.println("<input type=\"reset\" value=\"Clear\">");
+                if((Boolean)session.getAttribute("viewing_homepage") == true){
+                     out.println("<input type=\"submit\" value=\"Submit\" id='submitPost' onclick='return ajaxPostSubmit(true)'>");
+                }else{
+                    out.println("<input type=\"submit\" value=\"Submit\" id='submitPost' onclick='return ajaxPostSubmit()'>");
+                }
                 out.println("</fieldset>");
                 out.println("</form>");
                 
-                if(session.getAttribute("authorised") != null){
-                    out.println("<p>Return to <a href=\"Dashboard\">Dashboard</a></p>");
-                }
             }
         }
     }
@@ -148,27 +148,21 @@ public class CreatePost extends HttpServlet {
             if (formFieldMap.containsKey("post_to_social_media")) {
 
                 String parameterString = "'" + articleTitle + "','" + charityName + "'," + articleID;
-                out.println("<!DOCTYPE html>");
-                out.println("<html>");
-                out.println("<head>");
-                out.println("<title>Servlet DonationManager</title>");
-                out.println("<script src='javascript/createpost.js'></script>");
-                out.println("<script src='javascript/jquery/jquery-1.11.0.js'></script>");
-                out.println("<script src='javascript/jquery/jquery-ui-1.10.4/ui/jquery-ui.js'></script>");
-                out.println(" <script src=\"javascript/colorbox-master/jquery.colorbox-min.js\"></script>");
-                out.println("<link rel=\"stylesheet\" href=\"javascript/jquery/jquery-ui-1.10.4/themes/base/jquery-ui.css\" />");
-                out.println("<link rel=\"stylesheet\" href=\"javascript/colorbox-master/colorbox.css\" />");
-                out.println("</head>");
-                out.println("<body>");
-                out.println("<section>");
+                
+                out.println("<section id='post_to_social_media'>");
                 out.println("<h1>Posting to Social Media</h1>");
-                out.println("<p><a onclick=\"createTwitterOAuthWindow( " + parameterString + " )\">Post to Twitter</a></p>");
-                out.println("<p><a onclick=\"createFacebookOAuthWindow( " + parameterString + " )\">Post to Facebook</a></p>");
-                out.println("<p>Return to <a href=\"Dashboard\">Dashboard</a></p>");
-                out.println("</section>");
-                out.println("</body>");
-                out.println("</html>");
+                
+                out.println("<div class='oauth_init' onclick=\"createTwitterOAuthWindow( " + parameterString + " )\">");
+                out.println("<img src='images/social/twitter.png'><p><a>Post to Twitter</a></p>");
+                out.println("</div>");
 
+                out.println("<div class='oauth_init' onclick=\"createFacebookOAuthWindow( " + parameterString + " )\">");
+                out.println("<img src='images/social/facebook.png' ><p><a>Post to Facebook</a></p>");
+                out.println("</div>");
+                
+                out.println("</section>");
+            }else{
+                out.println("0");
             }
 
         }

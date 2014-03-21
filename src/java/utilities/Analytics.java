@@ -32,10 +32,13 @@ public class Analytics extends HttpServlet {
     private HttpSession session;
     private int charity_id;
     private ResultSet donationsResultSet = null;
+    private ResultSet sponsorshipResultSet = null;
     private DBConnect dbConnect;
     private Connection connection;
     private PreparedStatement donationsStatement;
+    private PreparedStatement sponsorshipStatement;
     private String donationsQuery;
+    private String sponsorshipQuery;
     private String charityName;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -52,15 +55,20 @@ public class Analytics extends HttpServlet {
         
         session = request.getSession();
         
-        if(session.getAttribute("authorised") != null) {
+        if(session.getAttribute("authorised") == null) {
+            response.sendRedirect("Login");
+        }
+        
             charityName = (String)session.getAttribute("charityName");
             String id = (String)session.getAttribute("charity_id");
             charity_id = Integer.parseInt(id);
             dbConnect = new DBConnect();
             connection = dbConnect.getConnection();
             donationsStatement = null;
+            sponsorshipStatement = null;
             donationsQuery = "SELECT amount, date FROM donations WHERE charity_id = ?";
-        
+            sponsorshipQuery = "SELECT amount, article_id, date FROM sponsorships WHERE charity_id = ?";
+            
             try {
                 donationsStatement = connection.prepareStatement(donationsQuery);
                 donationsStatement.setInt(1, charity_id);
@@ -73,10 +81,21 @@ public class Analytics extends HttpServlet {
             }
             
             System.out.println("Donations Query Successful");
-        
+            
+            try {
+                sponsorshipStatement = connection.prepareStatement(sponsorshipQuery);
+                sponsorshipStatement.setInt(1, charity_id);
+                sponsorshipResultSet = sponsorshipStatement.executeQuery();
+            } catch(SQLException exception) {
+                exception.printStackTrace();
+                System.err.println("error retreiving sponsorships");
+            }
+            
             try (PrintWriter out = response.getWriter()) {
+               
                 out.println("<div id=\"donations_table\">");
                 out.println("<table align=\"center\">");
+                out.println("<caption>Donations</caption>");
                 out.println("<tr>");
                 out.println("<th>Date</th>");
                 out.println("<th>Amount</th>");
@@ -103,10 +122,42 @@ public class Analytics extends HttpServlet {
                 out.println("</tr>");
                 out.println("</table>");
                 out.println("</div>");
+                
+                out.println("<div id=\"sponsorshipTable\">");
+                out.println("<table align=\"center\">");
+                out.println("<caption>Sponsorship</caption>");
+                out.println("<tr>");
+                out.println("<th>Date</th>");
+                out.println("<th>Article</th>");
+                out.println("<th>Amount</th>");
+                out.println("</tr>");
+                
+                int totalSponsorships = 0;
+                try {
+                    while(sponsorshipResultSet.next()) {
+                        int amount = sponsorshipResultSet.getInt("amount");
+                        totalSponsorships += amount;
+                        Date date = sponsorshipResultSet.getDate("date");
+                        int articleID = sponsorshipResultSet.getInt("article_id");
+                        out.println("<tr>");
+                        out.println("<td>" + date + "</td>");
+                        out.println("<td>" + articleID + "</td>");
+                        out.println("<td>" + amount + "</td>");
+                        out.println("</tr>");
+                    }
+                } catch(SQLException exception) {
+                    exception.printStackTrace();
+                    System.err.println("error displaying results");
+                }
+                out.println("<tr>");
+                out.println("<th>Total</th><td colspan=\"2\">" + totalSponsorships + "</td>");
+                out.println("</tr>");
+                out.println("</table>");
+                out.println("</div>");
+                
+                out.println("</div>");
+                
             }
-        } else {
-            response.sendRedirect("Login");
-        }
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -147,5 +198,4 @@ public class Analytics extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
 }

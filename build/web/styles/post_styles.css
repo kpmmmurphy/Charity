@@ -3,11 +3,12 @@
     Author     : Kevin Murphy
 */
 
-.article
+#articles_container .article
 {
     
-    background-image:url('../images/triangular.png');
-    color:#FFFFFF;
+    
+    background-image: url(../images/furley_bg.png);
+    color:#000000;
     display: block;
     height:auto;
     min-height: 200px;
@@ -25,7 +26,7 @@
 
 
 
-.article_img
+#articles_container .article_img
 {
     display:inline;
     float:left;
@@ -38,7 +39,7 @@
 
 
 
-.article_details
+#articles_container .article_details
 {
     margin-left:30%;
     padding: 0 10px 0 10px;
@@ -54,14 +55,14 @@
 }
 
 
-.article_header
+#articles_container .article_header
 {
     clear:both;
     overflow: hidden;
     height:220px;
 }
 
-.donate
+#articles_container .donate
 {
     display: block;
     margin-left: auto;
@@ -73,7 +74,7 @@
     opacity:0.9;
 }
 
-.donate:hover
+#articles_container .donate:hover
 {
     opacity:1.0;
     
@@ -131,7 +132,7 @@
     padding: 5px;
 }
 
-h3
+#articles_container h3
 {
     padding:10px;
 }
@@ -159,15 +160,19 @@ h3
 
 .comment_name
 {
-    color:black;
-    background-color: white;
-    font-weight:bold;
+   background-image:url('../images/diagonales_decalees.png');
+   box-shadow:         inset 0 0 8px #000000;
+   font-weight:bold;
 }
 
 .comment_text
 {
     
-    background-image:url('../images/tactile_noise.png');
+    
+    color:black;
+    background-color: white;
+    
+    
 }
 
 
@@ -225,13 +230,14 @@ input:hover, *[id*='toggle_']:hover
 
 
 
-fieldset
+#articles_container fieldset
 {
     border:1px solid #C0C0C0;
-    background-image:url('../images/tactile_noise.png');
+    background-image:url('../images/diagonales_decalees.png');
+     box-shadow:         inset 0 0 8px #000000;
 }
 
-legend
+#articles_container legend
 {
     padding:10px;
     background-color: white;
@@ -241,44 +247,8 @@ legend
     
 }
 
-.ajax_loading, .ajax_success, .ajax_fail
-{
-    width:50%;
-    margin-left:auto;
-    margin-right:auto;
-    height:50px;
-    text-align: center;
-    font-weight:bold;
-}
 
-.ajax_loading p
-{
-    padding:0;
-    margin:0;
-}
-
-.ajax_success
-{
-    background-color:#6699FF;
-    border:1px solid black;
-    color:#FFFFFF;
-    border-radius: 1.5em;
-}
-
-.ajax_success p, .ajax_fail p 
-{
-    padding-top: 5px; 
-}
-
-.ajax_fail
-{
-    background-color:#cd0a0a;
-    border:1px solid black;
-    color:#FFFFFF;
-    border-radius: 1.5em;
-}
-
-.toggle_arrow
+#articles_container .toggle_arrow
 {
     width:15px;
     height:15px;
@@ -310,59 +280,15 @@ legend
 
 .tags span
 {
-    padding:10px;
+    padding:5px;
     margin:5px;
-    background-color: #555555;
+    background-color: #E8E8E8 ;
     border-radius: 1.1em;
+    display: inline-block;
 }
 
 
-p
+#article_container p
 {
     padding: 5px;
 }
-
-
-
-
-
-/*
-
-.post_img_div
-{
-    float:left;
-    width:25%;
-}
-
-.img img
-{
-    height:100%;
-    width:100%;
-}
-
-
-
-.post_details
-{
-    
-}
-
-.post_details,.comments_section
-{
-    padding:0 3px 0 5px;
-}
-
-
-
-.content_section div 
-{
-    padding:0 5px 0 5px;
-}
-
-.read_more:hover, .comments_section h3:hover
-{
-    color:#6699FF;
-    cursor: pointer;
-}
-
-*/

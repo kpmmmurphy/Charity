@@ -85,17 +85,29 @@ public class Register extends HttpServlet {
             initialiseDetails(request);
 
             try (PrintWriter out = response.getWriter()) {
-                /* TODO output your page here. You may use following sample code. */
-                out.println("<!DOCTYPE html>");
-                out.println("<html>");
-                out.println("<head>");
-                out.println("<title>Edit Charity Info</title>"); 
-                out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/formStyles.css\"/>");
-                out.println("</head>");
-                out.println("<body>");
+                
+                //If it's the Charity has just signed up, print entier page
+                if(request.getParameter("from_signup") != null && request.getParameter("with_header") != null){
+                    out.println("<!DOCTYPE html>");
+                    out.println("<html>");
+                    out.println("<head>");
+                    out.println("<title>Edit Charity Info</title>"); 
+                    
+                    //out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/normalize.css\"/>"); 
+                    out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/formStyles.css\"/>"); 
+                    out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/submit_post.css\"/>"); 
+                    out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/ajax_msgs.css\"/>"); 
+                    out.println("<script src='javascript/jquery/jquery-1.11.0.js'></script>");
+                    out.println("<script src='javascript/dashboard.js'></script>");
+                    out.println("</head>");
+                    out.println("<body>");
+                }
                 
                 out.println("<div id=\"wrapper\">");
-                out.println("<form method='POST' action='" + servletContext + servletPath +"'>");
+                out.println("<div id=\"registerDetails\">");
+                
+                //The General Charity Details From
+                out.println("<form method='POST' id='register_form'>");
                 out.println("<h1>Edit Details of your Charity</h1>");
 		out.println("<p class=\"float\">");
                 out.println("<label for=\"description\">Description:</label><textarea name='description'  placeholder='Description of your Charity' >" + description + "</textarea> <br />");
@@ -122,12 +134,19 @@ public class Register extends HttpServlet {
                 out.println("<label for=\"googleplus\">Google+ Url:</label><input type='text' name='googleplus'  value='" + googleplusUrl + "' placeholder='Your Google+ Url' /> <br />");
                 out.println("</p>");
                 out.println("<p class=\"clearfix\">");
-                out.println("<input type=\"submit\" value=\"Submit\">");
+                if(request.getParameter("from_signup") != null){
+                    out.println("<input type=\"submit\" value=\"Submit\" onclick='return ajaxRegisterSubmit(true)' >");
+                }else{
+                    out.println("<input type=\"submit\" value=\"Submit\" onclick='return ajaxRegisterSubmit()' >");
+                }
                 out.println("</p>");
                 out.println("</form>");
                 out.println("</div>");
                 
-                out.println("<form method='POST' action='" + servletContext + servletPath +"' enctype='multipart/form-data'>");
+                //The Multipart Upload form
+                out.println("<div id=\"registerImage\">");
+                out.println("<form method='POST' id='register_upload' enctype='multipart/form-data'>");
+                out.println("<h1>Upload your charities logo</h1>");
                 out.println("<p class=\"float\">");
                 out.println("<label for='filename'>Upload Logo Image : </label><input id='file' type='file' name='filename' size='50'/><br/>");
                 out.println("</p>");
@@ -136,15 +155,31 @@ public class Register extends HttpServlet {
                 }else{
                     out.println("<img src='charities/" + trimmedCharityName  + "/uploads/" + logoImage + "' id='logoImg' /><br/>");
                 }
-                
                 out.println("<p class=\"clearfix\">");
-                out.println("<input type=\"submit\" value=\"Submit\">");
+                if(request.getParameter("from_signup") != null){
+                    out.println("<input type=\"submit\" value=\"Submit\" onclick='return ajaxRegisterUpload(true)' >");
+                }else{
+                    out.println("<input type=\"submit\" value=\"Submit\" onclick='return ajaxRegisterUpload()' >");
+                }
                 out.println("</p>");
                 out.println("</form>");
-                out.println("<a href='Dashboard'>Back to Dashboard</a>");
+                out.println("</div>");
+                out.println("</div>");
                 
-                out.println("</body>");
-                out.println("</html>");
+                
+                if(request.getParameter("from_signup") != null){
+                    out.println("<div id=\"faq\">");
+                    out.println("<nav>");
+                    out.println("<ul>");
+                    out.println("<li><a href=\"Dashboard\">Dashboard</a></li>");
+                    out.println("<li><a href=\"EditDetails\">Edit Details</a></li>");
+                    out.println("</ul>");
+                    out.println("</div>");
+                    out.println("</nav>");
+                    out.println("</body>");
+                    out.println("</html>");
+                }
+                
             }
         }else{
             //Redirect to Signup page

@@ -1,0 +1,47 @@
+/* 
+    Created on : 17-Mar-2014, 18:42:24
+    Author     : Kevin Murphy
+*/
+
+.ajax_loading, .ajax_success, .ajax_fail
+{
+    width:50%;
+    margin:auto;
+    margin-top:3em;
+    margin-bottom:3em;
+    text-align: center;
+    font-weight:bold;
+}
+
+.ajax_loading p
+{
+    padding:0;
+    margin:auto;
+}
+
+.ajax_loading img
+{
+    border-radius: 1em;
+}
+.ajax_success
+{
+    background-color:#6699FF;
+    border:1px solid black;
+    color:#FFFFFF;
+    border-radius: 1.5em;
+}
+
+.ajax_success p, .ajax_fail p 
+{
+    padding-top: 5px; 
+}
+
+.ajax_fail
+{
+    background-color:#cd0a0a;
+    border:1px solid black;
+    color:#FFFFFF;
+    border-radius: 1.5em;
+}
+
+

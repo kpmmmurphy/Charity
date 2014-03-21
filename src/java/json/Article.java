@@ -24,48 +24,47 @@ import utilities.DirectoryManager;
  * @author Kevin Murphy
  */
 public class Article extends CustomJSONObject {
-    
+
     /* Debug mechinism for testing */
     private static final boolean DEBUG_ON = true;
     private static final String CHARITY_NAME_FROM_SESSION = "charityName";
-    
+
     public static final String ARTICLES_FILE_NAME = "articles.json";
     public static final String CHARITIES_DIR = "charities/";
     public static final String JSON_DIR = "/json/";
-    
-    
+
     /* Charity name for creating the write path for the JSON file */
     private String charityName;
     private static String trimmedCharityName;
     private boolean authorised;
-    
+
     /* Session for tracking who's creating the Article */
     private HttpSession session;
-    
+
     /* Article Title*/
-    private String    title;
+    private String title;
     /* ID of Article taken from the Database */
-    private int       id;
+    private int id;
     /* Short description of article */
-    private String    description;
+    private String description;
     /* Content of the Article */
-    private String    content;
+    private String content;
     /* Date the article was created. Auto Generated */
-    private String    date;
+    private String date;
     /* Image name associated with the article*/
-    private String    img;
+    private String img;
     /* Type of post - General, Lost and Found, Sponsor etc*/
-    private String    type;
+    private String type;
     /* JSONArray for Articles tags */
     private JSONArray tags;
     /* Approved status, automatically approved if create by admin */
-    private boolean   approved = false;
+    private boolean approved = false;
     /* JSONArray for Articles Comments, initializes an empty array. Inputting of comments to be handled with javascript */
-    private JSONArray     comments;
-     
+    private JSONArray comments;
+
     /* The path of the JSON file  */
     private static String jsonPath;
-    
+
     /*
      * Constructor
      * Initialises all attributes
@@ -73,27 +72,27 @@ public class Article extends CustomJSONObject {
      * @param title   The title of the article
      * @param content The content of the Article
      */
-    public Article( HttpServletRequest request, LinkedHashMap articleObj ){
+    public Article(HttpServletRequest request, LinkedHashMap articleMap) {
         super();
         initializeDetials(request);
-        
-        this.id              = generateArticleId(request);
-        this.title           = (articleObj.get("title").toString()       != null) ? articleObj.get("title").toString()       : "" ;
-        this.description     = (articleObj.get("description").toString() != null) ? articleObj.get("description").toString() : "" ;
-        this.content         = (articleObj.get("content").toString()     != null) ? articleObj.get("content").toString()     : "" ;
-        this.img             = (!"".equals(articleObj.get("img").toString()) )    ? articleObj.get("img").toString()         : Charity.parseJSONtoCharityObj(request).getLogo();
-        this.type            = (articleObj.get("type").toString()        != null) ? articleObj.get("type").toString()        : "general" ;
+
+        this.id          = generateArticleId(request);
+        this.title       = (articleMap.get("title").toString() != null)       ? articleMap.get("title").toString()       : "";
+        this.description = (articleMap.get("description").toString() != null) ? articleMap.get("description").toString() : "";
+        this.content     = (articleMap.get("content").toString() != null)     ? articleMap.get("content").toString()     : "";
+        this.img         = (!"".equals(articleMap.get("img").toString()))     ? articleMap.get("img").toString()         : Charity.parseJSONtoCharityObj(request).getLogo();
+        this.type        = (articleMap.get("type").toString() != null)        ? articleMap.get("type").toString()        : "general";
         SimpleDateFormat sdf = new SimpleDateFormat("dd/M/yyyy");
-	this.date            = sdf.format(new Date()); 
-        this.tags            = createJSONTagsArray(articleObj.get("tags").toString());
+        this.date            = sdf.format(new Date());
+        this.tags            = createJSONTagsArray(articleMap.get("tags").toString());
         this.comments        = new JSONArray();
-       
+
         //Checks if the user is authorised from the Session, if so approves post 
-        if(authorised){
+        if (authorised) {
             approved = true;
         }
     }
-    
+
     /*
      * Handels the writing-out to file of an Article. 
      * If no json file exists, it creates one. If one does, it
@@ -102,120 +101,118 @@ public class Article extends CustomJSONObject {
      * 
      * @param path  The path to be written out to 
      */
-    public void writeOutArticle(HttpServletRequest request){
-        
-        JSONObject articlesObj   = new JSONObject();
-        JSONArray  articlesArray = new JSONArray();
-        
-        JSONObject articleObj    = createArticleJSONObj();
-        String     jsonPath      = getArticlesJSONPath(request);
-        
+    public void writeOutArticle(HttpServletRequest request) {
+
+        JSONObject articlesObj = new JSONObject();
+        JSONArray articlesArray = new JSONArray();
+
+        JSONObject articleMap = createArticleJSONObj();
+        String jsonPath = getArticlesJSONPath(request);
+
         /* Checks if JSON file exists, if not creates it */
         File jsonArticleFile = new File(jsonPath);
-        if(!jsonArticleFile.exists() && !jsonArticleFile.isDirectory()) {
-            articlesArray.add(articleObj);
-        }else{
+        if (!jsonArticleFile.exists() && !jsonArticleFile.isDirectory()) {
+            articlesArray.add(articleMap);
+        } else {
             articlesArray = getArticlesArrayFromFile(request);
-            articlesArray.add(articleObj);
-            
+            articlesArray.add(articleMap);
+
         }
         articlesObj.put("articles", articlesArray);
-        
+
         writeJsonToFile(articlesObj, jsonPath);
     }
-    
-    
-    
+
     /**
      * Formats the Article's JSON file
-     * 
+     *
      * @return JSONObject containing comment attributes
      */
-    private JSONObject createArticleJSONObj(){
-        
-        JSONObject articleObj = new JSONObject();
-        
+    private JSONObject createArticleJSONObj() {
+
+        JSONObject articleMap = new JSONObject();
+
         /* Formatting of JSON Article Keys and Values*/
-        articleObj.put("id", this.getId());
-        articleObj.put("title", this.getTitle());
-        articleObj.put("type", this.getType());
-        articleObj.put("description", this.getDescription());
-        articleObj.put("content", this.getContent());
-        articleObj.put("date", this.getDate());
-        articleObj.put("img", this.getImg());
-        articleObj.put("tags", this.getTags());
-        articleObj.put("comments", this.getComments());
-        articleObj.put("approved", this.isApproved());
-        
-        if(DEBUG_ON){
-            String articleJSONString = JSONValue.toJSONString(articleObj);
-            System.out.println("Newest Article : " + articleObj);
+        articleMap.put("id", this.getId());
+        articleMap.put("title", this.getTitle());
+        articleMap.put("type", this.getType());
+        articleMap.put("description", this.getDescription());
+        articleMap.put("content", this.getContent());
+        articleMap.put("date", this.getDate());
+        articleMap.put("img", this.getImg());
+        articleMap.put("tags", this.getTags());
+        articleMap.put("comments", this.getComments());
+        articleMap.put("approved", this.isApproved());
+
+        if (DEBUG_ON) {
+            String articleJSONString = JSONValue.toJSONString(articleMap);
+            System.out.println("Newest Article : " + articleMap);
         }
-        
-        return articleObj;
+
+        return articleMap;
     }
-    
-    private int generateArticleId(HttpServletRequest request){
+
+    private int generateArticleId(HttpServletRequest request) {
         int generatedID = -1;
         //Get the Session 
-        session     = request.getSession(true);
+        session = request.getSession(true);
         //Get the charity name, must initilize when user is viewing each charity 
         int charityID = 0;
-        if(session.getAttribute("authorised") == null){
-            
-            String charityName = (String)session.getAttribute("charityName");
+        if (session.getAttribute("authorised") == null) {
+
+            String charityName = (String) session.getAttribute("charityName");
             String selectCharityID = "SELECT id "
                     + "FROM charities "
                     + "WHERE name = ?";
-            
+
             //Connect to Database
-            DBConnect dbConnect   = new DBConnect();
+            DBConnect dbConnect = new DBConnect();
             Connection connection = dbConnect.getConnection();
-            
-            try(PreparedStatement selectCharityIDStatement = connection.prepareStatement(selectCharityID)) {
-               
+
+            try (PreparedStatement selectCharityIDStatement = connection.prepareStatement(selectCharityID)) {
+
                 selectCharityIDStatement.setString(1, charityName);
                 ResultSet selectIDResultSet = selectCharityIDStatement.executeQuery();
-                if(selectIDResultSet.first()){
+                if (selectIDResultSet.first()) {
                     charityID = selectIDResultSet.getInt(1);
                 }
             } catch (SQLException ex) {
                 System.err.println(this.getClass().getName() + ": Article ID cannot be generated, Charity Name from Session does not match one in DB ");
             }
-        
-        }else{
-           charityID = Integer.valueOf((String)session.getAttribute("charity_id"));
+
+        } else {
+            charityID = Integer.valueOf((String) session.getAttribute("charity_id"));
         }
-        
-        if(charityID > 0){
+
+        if (charityID > 0) {
             //Connect to Database
-            DBConnect dbConnect   = new DBConnect();
+            DBConnect dbConnect = new DBConnect();
             Connection connection = dbConnect.getConnection();
 
             String insertNewArticle = "INSERT INTO articles (charity_id)"
-                                    + "VALUES(?)";
-            try(PreparedStatement insertNewArticleStatement = connection.prepareStatement(insertNewArticle)) {
-                
+                    + "VALUES(?)";
+            try (PreparedStatement insertNewArticleStatement = connection.prepareStatement(insertNewArticle)) {
+
                 insertNewArticleStatement.setInt(1, charityID);
                 insertNewArticleStatement.executeUpdate();
             } catch (SQLException ex) {
                 System.err.println(this.getClass().getName() + ": Article ID cannot be generated, Charity ID from Session does not match one in DB ");
             }
-            
+
             String selectLatestArticleID = "SELECT id "
-                                         + "From articles "
-                                         + "WHERE charity_id = ? "
-                                         + "ORDER BY date_and_time DESC";
-           
-            try(PreparedStatement selectNewArticleIDStatement = connection.prepareStatement(selectLatestArticleID);){
+                    + "From articles "
+                    + "WHERE charity_id = ? "
+                    + "ORDER BY date_and_time DESC";
+
+            try (PreparedStatement selectNewArticleIDStatement = connection.prepareStatement(selectLatestArticleID);) {
                 selectNewArticleIDStatement.setInt(1, charityID);
                 ResultSet idResultSet = selectNewArticleIDStatement.executeQuery();
-                
-                if(idResultSet.next()){
+
+                if (idResultSet.next()) {
                     setId(idResultSet.getInt(1));
-                    
+
                 }
-                if(DEBUG_ON){
+                if (DEBUG_ON) {
                     System.out.println("Generated Article ID: " + getId());
                 }
             } catch (SQLException ex) {
@@ -223,181 +220,186 @@ public class Article extends CustomJSONObject {
                 ex.printStackTrace();
             }
         }
-        
+
         return getId();
-        
+
     }
-    
-    private void initializeDetials(HttpServletRequest request){
+
+    private void initializeDetials(HttpServletRequest request) {
         //Get the Session 
-        session     = request.getSession(true);
+        session = request.getSession(true);
         //Get the charity name, must initilize when user is viewing each charity 
-        charityName = (String)session.getAttribute("charityName");
+        charityName = (String) session.getAttribute("charityName");
+        System.out.println(charityName);
         //Only admins will be authorised, see Signup or Login session instantiation
-        if(session.getAttribute("authorised") != null){
+        if (session.getAttribute("authorised") != null) {
             setAuthorised(true);
         }
         //The trimmed and lower case charity name, with spaces removed
         trimmedCharityName = DirectoryManager.toLowerCaseAndTrim(charityName);
-        
+
         /* Gets the path of the articles.json file */
         jsonPath = getArticlesJSONPath(request);
     }
-    
-    private static JSONArray createJSONTagsArray(String submittedTags){
-        
+
+    private static JSONArray createJSONTagsArray(String submittedTags) {
+
         JSONArray jsonTagsArray = new JSONArray();
-        if(submittedTags != null || !"".equals(submittedTags)){
+        if (submittedTags != null || !"".equals(submittedTags)) {
             String[] singularTags = submittedTags.split("\\s+");
-            for(int i = 0 ; i < singularTags.length ; i++){
+            for (int i = 0; i < singularTags.length; i++) {
                 jsonTagsArray.add(singularTags[i]);
             }
         }
         return jsonTagsArray;
     }
-    
-    public static String getTagsAsString(JSONObject article){
-        
-        Object obj  = JSONValue.parse(article.get("tags").toString());
-        JSONArray tagsArray = (JSONArray)obj;
-        
-        if(DEBUG_ON){
+
+    public static String getTagsAsString(JSONObject article) {
+
+        Object obj = JSONValue.parse(article.get("tags").toString());
+        JSONArray tagsArray = (JSONArray) obj;
+
+        if (DEBUG_ON) {
             System.out.println("Tags:" + article.get("tags").toString());
         }
-        
+
         String tagsString = "";
-        for(int i = 0; i < tagsArray.size(); i++){
+        for (int i = 0; i < tagsArray.size(); i++) {
             tagsString = tagsString.concat(" ").concat(tagsArray.get(i).toString());
         }
         return tagsString;
-        
-        
+
     }
-    
-    public static JSONObject getArticleById(HttpServletRequest request,String id){
-        JSONArray  articlesArray = getArticlesArrayFromFile(request);
+
+    public static JSONObject getArticleById(HttpServletRequest request, String id) {
+        JSONArray articlesArray = getArticlesArrayFromFile(request);
         JSONObject article = new JSONObject();
         JSONObject selectedArticle = new JSONObject();
-        
-        for(int i = 0; i < articlesArray.size(); i++){
-          selectedArticle = (JSONObject)articlesArray.get(i);
-          if(id.equals(selectedArticle.get("id").toString())){
-              article = selectedArticle;
-          }
+
+        for (int i = 0; i < articlesArray.size(); i++) {
+            selectedArticle = (JSONObject) articlesArray.get(i);
+            if (id.equals(selectedArticle.get("id").toString())) {
+                article = selectedArticle;
+            }
         }
-        
+
         return article;
     }
-    
-    public static void updateArticleById(HttpServletRequest request, String id, Map fields){
-        
-        JSONArray  articlesArray = getArticlesArrayFromFile(request);
-        JSONArray  updatedArticlesArray = new JSONArray();
+
+    public static void updateArticleById(HttpServletRequest request, String id, Map fields) {
+
+        JSONArray articlesArray = getArticlesArrayFromFile(request);
+        JSONArray updatedArticlesArray = new JSONArray();
         JSONObject articles = new JSONObject();
         JSONObject selectedArticle;
-        for(int i = 0; i < articlesArray.size(); i++){
-          selectedArticle = (JSONObject)articlesArray.get(i);
-          if(id.equals(selectedArticle.get("id").toString())){
-              //Get a set of all the entries Key - Value pairs contained in the LinkedHashMap 
-              Set<Entry<String, Object>> entrySet = fields.entrySet();
-              
-              for(Entry<String, Object> entry:entrySet){
-                  String key = entry.getKey();
-                  Object value = entry.getValue();
-                  
-                  if("tags".equals(key)){
-                      System.out.println(value.toString());
-                      JSONArray tags = (JSONArray)value;
-                      String tagsString = "";
-                      for(int j = 0; j < tags.size(); j++){
-                          System.out.println(tags.size());
-                          tagsString += " " + tags.get(j);
-                      }
-                      System.out.println(tagsString);
-                      JSONArray newTags = createJSONTagsArray(tagsString);
-                      selectedArticle.put(key, newTags);
-                  }else{
-                      selectedArticle.put(key, value);
-                  }
-                  
-              }
-          }
-          updatedArticlesArray.add(selectedArticle);
+        for (int i = 0; i < articlesArray.size(); i++) {
+            selectedArticle = (JSONObject) articlesArray.get(i);
+            if (id.equals(selectedArticle.get("id").toString())) {
+                //Get a set of all the entries Key - Value pairs contained in the LinkedHashMap 
+                Set<Entry<String, Object>> entrySet = fields.entrySet();
+
+                for (Entry<String, Object> entry : entrySet) {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+
+                    if ("tags".equals(key)) {
+                        JSONArray tags = new JSONArray();
+                        if (value instanceof String) {
+                            tags = createJSONTagsArray(value.toString());
+                        } else {
+                            tags = (JSONArray) value;
+                            String tagsString = "";
+                            for (int j = 0; j < tags.size(); j++) {
+                                System.out.println(tags.size());
+                                tagsString += " " + tags.get(j);
+                            }
+                            System.out.println(tagsString);
+                            tags = createJSONTagsArray(tagsString);
+                        }
+
+                        selectedArticle.put(key, tags);
+                    } else {
+                        selectedArticle.put(key, value);
+                    }
+
+                }
+            }
+            updatedArticlesArray.add(selectedArticle);
         }
-        
+
         jsonPath = getArticlesJSONPath(request);
-        
+
         articles.put("articles", updatedArticlesArray);
         writeJsonToFile(articles, jsonPath);
     }
-    
-    public static void deleteArticleById(HttpServletRequest request, String id){
+
+    public static void deleteArticleById(HttpServletRequest request, String id) {
         JSONObject articles = new JSONObject();
         JSONArray articlesArray = getArticlesArrayFromFile(request);
         JSONArray updatedArticleArray = new JSONArray();
         JSONObject selectedArticle = new JSONObject();
-        for(int i = 0; i < articlesArray.size(); i++){
-          selectedArticle = (JSONObject)articlesArray.get(i);
-          if(! id.equals(selectedArticle.get("id").toString())){
-              updatedArticleArray.add(selectedArticle);
-          }
+        for (int i = 0; i < articlesArray.size(); i++) {
+            selectedArticle = (JSONObject) articlesArray.get(i);
+            if (!id.equals(selectedArticle.get("id").toString())) {
+                updatedArticleArray.add(selectedArticle);
+            }
         }
-        articles.put("articles",updatedArticleArray );
+        articles.put("articles", updatedArticleArray);
         String jsonPath = getArticlesJSONPath(request);
         writeJsonToFile(articles, jsonPath);
     }
-    
-    public static JSONArray getArticlesArrayFromFile(HttpServletRequest request){
-        JSONArray articles  = new JSONArray();
+
+    public static JSONArray getArticlesArrayFromFile(HttpServletRequest request) {
+        JSONArray articles = new JSONArray();
         HttpSession session = request.getSession(true);
-        String charityName  = (String)session.getAttribute(CHARITY_NAME_FROM_SESSION);
-        if(charityName != null && !"".equals(charityName)){
+        String charityName = (String) session.getAttribute(CHARITY_NAME_FROM_SESSION);
+        if (charityName != null && !"".equals(charityName)) {
             String jsonPath = getArticlesJSONPath(request);
             JSONObject articlesObj = readJsonFile(jsonPath);
-            
-            if(articlesObj == null){
+
+            if (articlesObj == null) {
                 articles = new JSONArray();
-            }else{
-                articles = (JSONArray)readJsonFile(jsonPath).get("articles");
+            } else {
+                articles = (JSONArray) readJsonFile(jsonPath).get("articles");
             }
         }
         return articles;
     }
-    
-    public static String getArticlesJSONPath(HttpServletRequest request){
+
+    public static String getArticlesJSONPath(HttpServletRequest request) {
         String jsonPath = "";
         HttpSession session = request.getSession(true);
-        String charityName = (String)session.getAttribute(CHARITY_NAME_FROM_SESSION);
-        if(charityName != null && !"".equals(charityName)){
+        String charityName = (String) session.getAttribute(CHARITY_NAME_FROM_SESSION);
+        if (charityName != null && !"".equals(charityName)) {
             //Trim, set to lower case and remove white spaces
             trimmedCharityName = DirectoryManager.toLowerCaseAndTrim(charityName);
             /* Build the path for reading in the  file*/
             String servletContext = request.getServletContext().getRealPath("/");
-            jsonPath = servletContext + CHARITIES_DIR + trimmedCharityName + JSON_DIR + ARTICLES_FILE_NAME ;
+            jsonPath = servletContext + CHARITIES_DIR + trimmedCharityName + JSON_DIR + ARTICLES_FILE_NAME;
         }
         return jsonPath;
     }
-    
-    public static void approvePost(HttpServletRequest request, String id){
-          JSONArray articlesArray = getArticlesArrayFromFile(request);
-          JSONObject articles = new JSONObject();
-          JSONArray  updatedArticles = new JSONArray();
-          JSONObject selectedArticle = new JSONObject();
-          String     articlesPath = getArticlesJSONPath(request);
-          
-          for(int i = 0; i < articlesArray.size(); i++){
-            selectedArticle = (JSONObject)articlesArray.get(i);
-            if(id.equals(selectedArticle.get("id").toString())){
-                
+
+    public static void approvePost(HttpServletRequest request, String id) {
+        JSONArray articlesArray = getArticlesArrayFromFile(request);
+        JSONObject articles = new JSONObject();
+        JSONArray updatedArticles = new JSONArray();
+        JSONObject selectedArticle = new JSONObject();
+        String articlesPath = getArticlesJSONPath(request);
+
+        for (int i = 0; i < articlesArray.size(); i++) {
+            selectedArticle = (JSONObject) articlesArray.get(i);
+            if (id.equals(selectedArticle.get("id").toString())) {
+
                 selectedArticle.put("approved", true);
             }
             updatedArticles.add(selectedArticle);
-          }
-          articles.put("articles", updatedArticles);
-          writeJsonToFile(articles, articlesPath);
-     }
-    
-    public static JSONArray getUnapprovedPosts(HttpServletRequest request){
+        }
+        articles.put("articles", updatedArticles);
+        writeJsonToFile(articles, articlesPath);
+    }
+
+    public static JSONArray getUnapprovedPosts(HttpServletRequest request) {
         JSONArray unapprovedPosts = new JSONArray();
         JSONArray articlesArray = getArticlesArrayFromFile(request);
 
@@ -408,68 +410,67 @@ public class Article extends CustomJSONObject {
         JSONObject tmpArticle;
 
         //Loops through all articles, checks each approved status, adding to the unapprovedPost JSONArray if not approved
-        for(int i = 0; i < articlesArray.size(); i++){
-            tmpArticle = (JSONObject)articlesArray.get(i);
-            if(! (Boolean)tmpArticle.get("approved")){
+        for (int i = 0; i < articlesArray.size(); i++) {
+            tmpArticle = (JSONObject) articlesArray.get(i);
+            if (!(Boolean) tmpArticle.get("approved")) {
                 unapprovedPosts.add(tmpArticle);
             }
         }
-        
+
         return unapprovedPosts;
-     }
-    
-    public static void inputComment(HttpServletRequest request){
-        String charityName    = (request.getParameter("charity_name")    == null) ? "" : request.getParameter("charity_name");
-        String postID         = (request.getParameter("post_id")         == null) ? "" : request.getParameter("post_id");
-        String commenterName  = (request.getParameter("commenter_name")  == null || "".equals(request.getParameter("commenter_name"))) ? "Anon" : request.getParameter("commenter_name");
-        String comment        = (request.getParameter("comment_textbox") == null || "".equals(request.getParameter("comment_textbox"))) ? "No Comment." : request.getParameter("comment_textbox");
-        
-        if(!"".equals(charityName) || !"".equals(postID) ){
-            
+    }
+
+    public static void inputComment(HttpServletRequest request) {
+        String charityName = (request.getParameter("charity_name") == null) ? "" : request.getParameter("charity_name");
+        String postID = (request.getParameter("post_id") == null) ? "" : request.getParameter("post_id");
+        String commenterName = (request.getParameter("commenter_name") == null || "".equals(request.getParameter("commenter_name"))) ? "Anon" : request.getParameter("commenter_name");
+        String comment = (request.getParameter("comment_textbox") == null || "".equals(request.getParameter("comment_textbox"))) ? "No Comment." : request.getParameter("comment_textbox");
+
+        if (!"".equals(charityName) || !"".equals(postID)) {
+
             request.getSession(true).setAttribute("charityName", charityName);
             JSONObject article = getArticleById(request, postID);
-            
+
             System.out.println(article);
             JSONObject latestComment = new JSONObject();
             latestComment.put("name", commenterName);
             latestComment.put("comment", comment);
-            
-            JSONArray commentsArray = (JSONArray)article.get("comments");
-            
+
+            JSONArray commentsArray = (JSONArray) article.get("comments");
+
             System.out.println(commentsArray);
             commentsArray.add(latestComment);
             article.put("comments", commentsArray);
-            
+
             updateArticleById(request, postID, article);
         }
-        
-        
+
     }
-    
-    public static LinkedHashMap<String, String> getDefaultValueMap(HttpServletRequest request){
+
+    public static LinkedHashMap<String, String> getDefaultValueMap(HttpServletRequest request) {
         /* Default values to be displayed when fields are not present */
-        String id          = "-1";
-        String title       = "No Title";
+        String id = "-1";
+        String title = "No Title";
         String description = "No Description";
-        String content     = "No Content";
-        String img         = Charity.parseJSONtoCharityObj(request).getLogo();
-        String type        = "general"; 
-        String date        = "No Date";
-        String tags        = "";
-        
+        String content = "No Content";
+        String img = Charity.parseJSONtoCharityObj(request).getLogo();
+        String type = "general";
+        String date = "No Date";
+        String tags = "";
+
         LinkedHashMap<String, String> fieldsMap = new LinkedHashMap<>();
         fieldsMap.put("id", id);
         fieldsMap.put("title", title);
-        fieldsMap.put("description", description); 
-        fieldsMap.put("content", content); 
-        fieldsMap.put("img", img); 
-        fieldsMap.put("type", type); 
-        fieldsMap.put("date", date); 
-        fieldsMap.put("tags", tags); 
-        
+        fieldsMap.put("description", description);
+        fieldsMap.put("content", content);
+        fieldsMap.put("img", img);
+        fieldsMap.put("type", type);
+        fieldsMap.put("date", date);
+        fieldsMap.put("tags", tags);
+
         return fieldsMap;
-         
-     }
+
+    }
 
     /**
      * @return the authorised
@@ -482,7 +483,7 @@ public class Article extends CustomJSONObject {
      * @param authorised the authorised to set
      */
     public void setAuthorised(boolean authorised) {
-        
+
         this.authorised = authorised;
     }
 

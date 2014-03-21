@@ -3,16 +3,16 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/ui/CharityPage.java</file>
-            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/json/Charity.java</file>
-            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/javascript/paypalfunctions.js</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/post/ListPosts.java</file>
             <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/styles/homeStyles.css</file>
-            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/javascript/homepage.js</file>
-            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/styles/donate.css</file>
-            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/styles/post_styles.css</file>
-            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/HomePage.html</file>
-            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/auth/Login.java</file>
-            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/utilities/PayPal.java</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/utilities/DirectoryManager.java</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/auth/Register.java</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/javascript/dashboard.js</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/styles/dashboardStyles.css</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/index.html</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/web/javascript/postfunctions.js</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/post/ApprovePost.java</file>
+            <file>file:/home/kpmmmurphy/NetBeansProjects/cs3305/src/java/utilities/EditStyles.java</file>
         </group>
     </open-files>
 </project-private>

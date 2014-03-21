@@ -1,10 +1,5 @@
 <?php
-/*
- * 2014 CS3305 Team9
- * @author Kevin Murphy
- * @version 1.0
- * @date 8/3/14
- * 
+/**
  * Copyright 2014 CS3305 Team9
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -21,9 +16,9 @@
  */
 
 /**
- * Code and library "facebook.php" taken from the official Facebook PHP SDK git account https://github.com/facebook/facebook-ios-sdk
- * Modified to allow the updating of the charity's status with the title and link of their newest post.  The Facebook SDK is licenced under 
- * the Apache Licence.
+ *	Code and library "facebook.php" taken from the official Facebook PHP SDK git account https://github.com/facebook/facebook-ios-sdk
+ *	Modified to allow the updating of the charity's status with the title and link of their newest post.  The Facebook SDK is licenced under 
+ *	the Apache Licence.
  */
 
 require_once("facebook.php");
@@ -41,11 +36,14 @@ require_once("facebook.php");
   $user_id  = $facebook->getUser();
 
   $article_title = $_GET['title'];
-  $article_url   = "http://127.0.0.1/cs3305/DisplayArticle?article_id=" . $_GET['article_id'] . "&charity_name=" . $_GET['charity_name']; 
+  //$article_url   = "http://127.0.0.1/cs3305/DisplayArticle?article_id=" . $_GET['article_id'] . "&charity_name=" . $_GET['charity_name']; 
+  
+  $trimmedCharityName = strtolower(trim($_GET['charity_name']));
+  $article_url   = "http://localhost:8080/cs3305/charities/" . $trimmedCharityName . "/index.html"; 
 ?>
 
 <html>
-  <head></head>
+    <head><link rel="stylesheet" href="facebook_oauth.css"></head>
   <body>
 
   <?php
@@ -59,12 +57,13 @@ require_once("facebook.php");
                                       'link' => $article_url,
                                       'message' => $article_title
                                  ));
-        echo '<p>Sucessfully Posted your Latest Article!</p><br />';
+        echo '<p id="success"><img src="success.png"/>Sucessfully Posted your Latest Article!</p><br />';
         $facebook->destroySession();
 
         // Give the user a logout link 
-        echo '<br /><p><a href="' . $facebook->getLogoutUrl() . '">logout</a><p>';
-        echo '<p><a onclick="window.close()">Close Window</a></p>';
+        //echo '<br /><p><a href="' . $facebook->getLogoutUrl() . '">logout</a></p>';
+        echo '<a onclick="window.close()"><p><img src="close.png"/>Close Window</p></a>';
+		
       } catch(FacebookApiException $e) {
         // If the user is logged out, you can have a 
         // user ID even though the access token is invalid.
@@ -74,8 +73,8 @@ require_once("facebook.php");
         $login_url = $facebook->getLoginUrl( array(
                        'scope' => 'publish_stream'
                        )); 
-        echo 'Please <a href="' . $login_url . '">login..</a>';
-        echo '<p><a onclick="window.close()">Close Window</a></p>';
+        echo '<a href="' . $login_url . '"><p><img src="facebook.gif"/>Click Here to Login to Facebook..</p></a>';
+        echo "<a onclick='window.close()'><p class='close_window'><img src='close.png'/>Close Window</p></a>";
 
         if(debug_on){
         	echo $e->getType();
@@ -83,14 +82,13 @@ require_once("facebook.php");
         }
       }   
     } else {
-
       // No user, so print a link for the user to login
       // To post to a user's wall, we need publish_stream permission
       // We'll use the current URL as the redirect_uri, so we don't
       // need to specify it here.
       $login_url = $facebook->getLoginUrl( array( 'scope' => 'publish_stream' ) );
-      echo 'Please <a href="' . $login_url . '">login!</a>';
-      echo '<p><a onclick="window.close()">Close Window</a></p>';
+      echo '<a href="' . $login_url . '"><p><img src="facebook.gif"/>Click Here to Login to Facebook..</p></a>';
+      echo '<a onclick="window.close()"><p class="close_window"><img src="close.png"/>Close Window</p></a>';
 
     } 
 

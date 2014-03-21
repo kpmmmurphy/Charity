@@ -44,6 +44,9 @@ public class Login extends HttpServlet {
     private boolean usernameMatch = true;
     /* for indicateing if the user supplied password matches the one in the DB */
     private boolean passwordMismatch = false;
+    /* HttpSession object*/
+    private HttpSession session;
+    
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -62,6 +65,11 @@ public class Login extends HttpServlet {
         String servletContext = request.getContextPath();
         /* The servlet name - In this case "/Login" */
         String servletPath = request.getServletPath();
+        session = request.getSession();
+        
+        if(session.getAttribute("authorised") != null) {
+            response.sendRedirect("Dashboard");
+        }
         
         try(PrintWriter out = response.getWriter()) {
             out.println("<!DOCTYPE html>");
@@ -69,6 +77,9 @@ public class Login extends HttpServlet {
             out.println("<head>");
             out.println("<title>Login</title>");
             out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/formStyles.css\"/>");
+            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/faq.css\"/>");
+            out.println("<script src='javascript/jquery/jquery-1.11.0.js'></script>");
+            out.println("<script src='javascript/general.js'></script>");
             out.println("</head>");
             out.println("<body>");
             out.println("<div id=\"wrapper\">");
@@ -90,8 +101,18 @@ public class Login extends HttpServlet {
                 out.println("<p>Username or Password mismatch, please try again.</p>");
                 out.println("<p>Don't have an account? Sign up <a href=\"Signup\">HERE</a></p>");
             }
+            out.println("<p class='float'><a href=\"ForgotPassword\">Forgot your password?</a></p>");
             out.println("</form>");
+            out.println("<footer>");
+            out.println("<small>&copy;CMS - Team9 - 2014</small>");
+            out.println("</footer>");
             out.println("</div>");
+            out.println("<div id=\"faq\">");
+            out.println("<nav>");
+            out.println("<li><a href=\"gateway.html\">Home</a></li>");
+            out.println("<li><a onclick='getFAQ()'>FAQ</a></li>");
+            out.println("</div>");
+            out.println("</nav>");
             out.println("</body>");
             out.println("</html>");  
         }
@@ -258,11 +279,9 @@ public class Login extends HttpServlet {
                     selectDetailsStatement.setString(1, cleanInputMap.get("password"));
                     detailsResultSet = selectDetailsStatement.executeQuery();
                     
-                    if(detailsResultSet.next()){
-                        //if there are no elements in the ResultSet, Passwords mismatched
-                        if(! detailsResultSet.first()){
-                            passwordMismatch = true;
-                        }
+                    //if there are no elements in the ResultSet, Passwords mismatched
+                    if(! detailsResultSet.first()){
+                        passwordMismatch = true;
                     }
                     
                 }catch(SQLException e){
@@ -279,7 +298,7 @@ public class Login extends HttpServlet {
                     
                     try{
                         //Create a Session
-                        HttpSession session = request.getSession(true);
+                        session = request.getSession(true);
                         session.setAttribute("username", detailsResultSet.getString(1));
                         session.setAttribute("charity_id", detailsResultSet.getString(5));
                         session.setAttribute("charityName", detailsResultSet.getString(6));

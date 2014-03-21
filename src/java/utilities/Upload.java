@@ -189,10 +189,8 @@ public class Upload extends HttpServlet {
                         processFormField(item);
                     }else{
                         String uploadedImgName;
-                        uploadedImgName = processUpload(request, item, isLogoImage);
+                        uploadedImgName = processUpload(request, item, isLogoImage); 
                         fieldHashMap.put("img", uploadedImgName);
-                        
-                        
                     }
                 }
                
@@ -200,6 +198,7 @@ public class Upload extends HttpServlet {
                 e.printStackTrace();
             }
         }
+        
         return fieldHashMap;
         
     }
@@ -214,21 +213,26 @@ public class Upload extends HttpServlet {
             System.out.println("Name: "  + name );
             System.out.println("Value: " + value );
         }
-        fieldHashMap.put(name, value);
+        
+        //Update everything but the Img, which will be updated in the processMultipartForm method
+        if(!"img".equals(name)){
+            fieldHashMap.put(name, value);
+        }
+        
         
     }
     
     private static String processUpload(HttpServletRequest request, FileItem item,  boolean isLogoImage){
         
-        String dateToday = "";
+        String imgTimestamp = "";
         long sizeInBytes = item.getSize();
         if(sizeInBytes > 0){
             Date date = new Date();
             SimpleDateFormat dateFormat = 
             new SimpleDateFormat ("yyyy.MM.dd'-'hh:mm:ss");
-            dateToday  = dateFormat.format(date) + ".png";
+            imgTimestamp  = dateFormat.format(date) + ".png";
             //Set file name as today's date and time
-            File uploadedFile = new File(uploadPath + dateToday);
+            File uploadedFile = new File(uploadPath + imgTimestamp);
             if(DEBUG_ON){
                 System.out.println("Uploaded File path: " + uploadedFile );
             }
@@ -244,7 +248,7 @@ public class Upload extends HttpServlet {
                 //Get the Charity Object from the charity.json file
                 Charity charity = Charity.parseJSONtoCharityObj(request);
                 //Put the image into the json object
-                charity.setLogo(dateToday);
+                charity.setLogo(imgTimestamp);
                 try {
                     //Write out to file
                     charity.createCharityJSONFile(servletContext);
@@ -255,7 +259,7 @@ public class Upload extends HttpServlet {
         }
        
         
-        return dateToday;
+        return imgTimestamp;
     }
     
     private static void initializeDetials(HttpServletRequest request){

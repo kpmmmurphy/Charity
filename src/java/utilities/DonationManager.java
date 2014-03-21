@@ -11,7 +11,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -39,19 +42,6 @@ public class DonationManager extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet DonationManager</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet DonationManager at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -66,8 +56,8 @@ public class DonationManager extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
-        
+        //Redirect to Homepage
+        response.sendRedirect("Homepage");
    
     }
 
@@ -82,17 +72,23 @@ public class DonationManager extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //processRequest(request, response);
-        System.out.println("Posting: "    );
+        
         String encodedAmount    = request.getParameter("amount");
         String encodedCharityID = request.getParameter("charity_id");
+        String articleID   = ("undefined".equals(request.getParameter("article_id").toString())) ? "0" : request.getParameter("article_id");
         
         byte[] decodedAmountBytes    = Base64.decodeBase64(encodedAmount);
         byte[] decodedCharityIDBytes = Base64.decodeBase64(encodedCharityID);
         
         System.out.println(decodedAmountBytes.toString());
         
-        int amount    = Integer.valueOf(new String(decodedAmountBytes));
+        String amountString = new String(decodedAmountBytes);
+        int amount = 0;
+        if(amountString.contains(".")){
+            amount = (int)Math.round(Double.valueOf(amountString));
+        }else {
+            amount = Integer.valueOf(amountString);
+        }
         int charityID = Integer.valueOf(new String (decodedCharityIDBytes));
         
         if(DEBUG_ON){
@@ -116,8 +112,56 @@ public class DonationManager extends HttpServlet {
             e.printStackTrace();
         }
         
-        //Redirect to Dashboard
-        response.sendRedirect("HomePage.html");
+        String selectCharityName = "SELECT name "
+                + "FROM charities "
+                + "WHERE id = ?";
+        
+        String charityName = "";
+        try(PreparedStatement selectCharityNameStatement = connection.prepareStatement(selectCharityName)){
+            selectCharityNameStatement.setInt(1, charityID);
+            ResultSet charityNameResultSet = selectCharityNameStatement.executeQuery();
+            
+            if(charityNameResultSet.first()){
+                charityName = charityNameResultSet.getString(1);
+            }
+        }catch(SQLException ex){
+            System.err.println(this.getClass().getName() + " : Select Statement failed, no name matches charity_id");
+            ex.printStackTrace();
+        }
+        
+        //If it's a Sponsorship donation
+        if(!"0".equals(articleID)){
+            String insertSponsorship = "INSERT INTO sponsorships (charity_id, amount, article_id) "
+                    + "VALUES (?,?,?)";
+            
+            try(PreparedStatement insertSponsorshipStatement = connection.prepareStatement(insertSponsorship)){
+            insertSponsorshipStatement.setInt(1, charityID);
+            insertSponsorshipStatement.setInt(2, amount);
+            insertSponsorshipStatement.setInt(3, Integer.valueOf(articleID));
+            insertSponsorshipStatement.executeUpdate();
+
+            }catch(SQLException ex){
+                System.err.println(this.getClass().getName() + " : Insert Sponsorship Statement failed ");
+                ex.printStackTrace();
+            }
+            
+        }
+        
+        
+        //Close the Connection
+        try {
+            connection.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(DonationManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        if("".equals(charityName) ){
+            //Redirect to Homepage
+            response.sendRedirect("Homepage");
+        }else{
+            //Redirect to Charity's homepage with a Thank
+            response.sendRedirect( request.getContextPath() + "/charities/" + DirectoryManager.toLowerCaseAndTrim(charityName) + "/index.html");
+        }
         
         
         

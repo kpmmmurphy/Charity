@@ -1,0 +1,52 @@
+{
+    "faq": [
+        {
+            "type"    : "signup",
+            "question": "What should I do before using the system?",
+            "answer"  : [
+                         "You have to sign up at the first time when you use this system. You can login next time and all your information will be stored in your account. Don not worry about the security issue, the privacy protection have been done enough on technique level and we will not divulge any personal information through privacy policy."
+                         ]
+        }, 
+        {
+            "type"    : "signup",
+            "question": "How to sign up?",
+            "answer"  : [
+                         "The link is on the center of the homepage. Click it and you will enter the sign-up page.", 
+                         "You should fill your charity-name, user-name, email, and password.",
+                         "If you fill something worry, there is a clear-button under the form and you can clear all you have filled by clicking it.",
+                         "When you finish the form, click the submit-button under the form to submit it."
+                         ]
+        }, 
+        {
+            "type"    : "signup",
+            "question": "Can I change the charity-information after signed up?",
+            "answer"  : [
+                         "Yes, there is a edit-link waiting for you on the dashboard. For detail, see the FAQ for dashboard." 
+                         ]
+        }, 
+        {
+            "type"    : "login",
+            "question": "How to login?",
+            "answer"  : [
+                         "The link is on the center of the homepage. Click it and you will enter the login page.", 
+                         "Fill your user-name and corresponding password to login."
+                         ]
+        }, 
+        {
+            "type"    : "login",
+            "question": "What should I do if I forget my password?",
+            "answer"  : [
+                         "Don't worry about it and there will be a link on the login page to deal with it. Just click this link and a random new password will be send to you by email. Please use this password at this time and change it after you login",
+                         "Be careful about your email address. If you forget your password and email at the same time, there will be no way for you to login again."
+                        ]
+        }, 
+        {
+            "type"    : "login",
+            "question": "Can I login to different charities by the same username?",
+            "answer"  : [
+                         "No, we don't allow it for efficiency and security issue. If you yourself want to build different charities on this system, you have to use different usernames."
+                        ]
+        }
+        
+    ]
+}

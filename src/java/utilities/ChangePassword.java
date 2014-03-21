@@ -19,13 +19,14 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 
 /**
  *
  * @author kealan
- * @version 1.0
+ * @version 1.3
  * @date 06/03/14
  */
 @WebServlet(name ="ChangePassword", urlPatterns = {"/ChangePassword"})
@@ -47,6 +48,8 @@ public class ChangePassword extends HttpServlet {
     private boolean generatedPasswordMismatch;
     /* for indicateing if all input was entered */
     private boolean unenteredInput;
+    /* for identifying the user*/
+    private HttpSession session;
     /* Debug mechinism */
     private final boolean DEBUG_ON = true;
     /**
@@ -67,32 +70,52 @@ public class ChangePassword extends HttpServlet {
         /* The servlet name - In this case "/Login" */
         String servletPath = request.getServletPath();
         
+        session = request.getSession();
+        
+        boolean isForgottenPassword = (request.getParameter("forgotten_password") != null);
+        
         try (PrintWriter out = response.getWriter()) {
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Login</title>");
-            out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/formStyles.css\"/>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<div id=\"wrapper\">");
-            out.println("<form method='POST' action='" + servletContext + servletPath +"'>");
+            if(isForgottenPassword){
+                out.println("<!DOCTYPE html>");
+                out.println("<html>");
+                out.println("<head>");
+                out.println("<title>Login</title>");
+                out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/formStyles.css\"/>");
+                out.println("</head>");
+                out.println("<body>");
+                out.println("<div id=\"wrapper\">");
+            }
+            
+            out.println("<form method='POST' id='change_password_form'>");
             out.println("<h1>Change Password</h1>");
             out.println("</p>");
-            out.println("<p class=\"float\">");
-            out.println("<label for=\"username\">Username:</label><input type='text' name='username' placeholder='username'> <br />");
-            out.println("</p>");
-            out.println("<p class=\"float\">");
-            out.println("<label for=\"generatedPassword\">Generated Password:</label><input type='text' name='generatedPassword' placeholder='generatedPassword'> <br />");
-            out.println("</p>");
+            
+            if(session.getAttribute("authorised") == null) {
+                out.println("<p class=\"float\">");
+                out.println("<label for=\"username\">Username:</label><input type='text' name='username' placeholder='username'> <br />");
+                out.println("</p>");
+                out.println("<p class=\"float\">");
+                out.println("<label for=\"generatedPassword\">Generated Password:</label><input type='text' name='generatedPassword' placeholder='generatedPassword'> <br />");
+                out.println("</p>");
+            } else {
+                username = (String)session.getAttribute("username");
+                
+                out.println("<p class=\"float\">");
+                out.println("<label for=\"username\">Username:</label><input type='text' name='username' value=" + username + " readonly='true'> <br />");
+                out.println("</p>");
+                out.println("<p class=\"float\">");
+                out.println("<label for=\"generatedPassword\">Currnet Password:</label><input type='password' name='generatedPassword' placeholder='Currnet Password'> <br />");
+                out.println("</p>");
+            }
+            
             out.println("<p class=\"float\">");
             out.println("<label for=\"newPassword\"> New Password:</label><input type='password' name='newPassword' placeholder='newPassword'> <br />");
             out.println("</p>");
             out.println("<p class=\"float\">");
-            out.println("<label for=\"repeatPassword\">Repeat Password:</label><input type='password' name='repeatPassword' placeholder='repeatPassword'> <br />");
+            out.println("<label for=\"repeatPassword\">Retype Password:</label><input type='password' name='repeatPassword' placeholder='repeatPassword'> <br />");
             out.println("</p>");
             out.println("<p class=\"clearfix\">");
-            out.println("<input type=\"submit\" value=\"Submit\">");
+            out.println("<input type=\"submit\" value=\"Submit\" onclick='return ajaxChangePassword()'>");
             out.println("</p>");
             if(unenteredInput){
                 out.println("<p>Please fill in all fields.</p>");
@@ -105,8 +128,11 @@ public class ChangePassword extends HttpServlet {
             }
             out.println("</form>");
             out.println("</div>");
-            out.println("</body>");
-            out.println("</html>");
+            
+            if(isForgottenPassword){ 
+                out.println("</body>");
+                out.println("</html>");
+            }
         }
     }
 
@@ -137,7 +163,7 @@ public class ChangePassword extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        //Initialize contect sensitive help booleans
+        //Initialize content sensitive help booleans
         usernameMismatch = false;
         unenteredInput = false;
         passwordMismatch = false;
@@ -169,6 +195,10 @@ public class ChangePassword extends HttpServlet {
                 System.out.println("DEBUG: All input entered");
             }
             
+            //Connect to Database
+            DBConnect dbConnect   = new DBConnect();
+            Connection connection = dbConnect.getConnection();
+            
             //Check if the new password equals the repeat passowrd
             if(! newPassword.equals(repeatPassword)) {
                 passwordMismatch = true;
@@ -194,14 +224,53 @@ public class ChangePassword extends HttpServlet {
             
             //Stores all sanitized input in HashMap
             HashMap<String, String> cleanInputMap = new HashMap<String, String>();
+            cleanInputMap.put("cleanUsername", cleanUsername);
             cleanInputMap.put("newPassword", cleanNewPassword);
             cleanInputMap.put("repeatPassword", cleanRepeatPassword);
-            cleanInputMap.put("cleanGeneratedPassword", cleanGeneratedPassword);
-            cleanInputMap.put("cleanUsername", cleanUsername);
             
-            //Connect to Database
-            DBConnect dbConnect   = new DBConnect();
-            Connection connection = dbConnect.getConnection();
+            if(session.getAttribute("authorised") != null) {
+                //PreparedStatement to retrieve salt value belonging to the supplied username
+                PreparedStatement saltStatement = null;
+                
+                //Result set for saltStatement
+                ResultSet saltResultSet;
+                
+                /* Query for selecting salt value */
+                String saltQuery = "SELECT salt "
+                                 + "FROM   charities "
+                                 + "WHERE  username = ?";
+                
+                String salt = "";
+                
+                try{
+                    saltStatement = connection.prepareStatement(saltQuery);
+                    saltStatement.setString(1, cleanInputMap.get("cleanUsername"));
+                    saltResultSet = saltStatement.executeQuery();
+                    
+                    if(saltResultSet.next()){
+                        salt = saltResultSet.getString(1);
+                    }
+                    
+                    saltStatement.close();
+                    saltResultSet.close();
+                } catch(SQLException exception) {
+                    exception.printStackTrace();
+                    System.err.println("Error retreiving salt!");
+                }
+                
+                if(DEBUG_ON) {
+                    System.err.println("Salt value from DB: " + salt);
+                }
+                
+                //Creates a new Password object using the user supplied password and salt value gotten from the DB
+                Password passwordToBeHashed = new Password(cleanGeneratedPassword, salt);
+                //Gets the hashed value of the password and salt
+                String   hashedPassword     = passwordToBeHashed.getHashedPassword();
+                cleanInputMap.put("cleanGeneratedPassword", hashedPassword);
+                
+            } else {
+                cleanInputMap.put("cleanGeneratedPassword", cleanGeneratedPassword);
+            }
             
             //PreparedStatement to retrieve the generated password belonging to the supplied username
             PreparedStatement generatedPasswordStatement = null;

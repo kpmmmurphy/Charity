@@ -135,7 +135,8 @@ public class ListPosts extends HttpServlet {
         String tags;
         
         LinkedHashMap<String, String> fieldsMap;
-        for(int i = 0; i < articles.size(); i++ ){
+        if(articles.size() > 0){
+            for(int i = 0; i < articles.size(); i++ ){
             fieldsMap = Article.getDefaultValueMap(request);
             JSONObject article =  (JSONObject)articles.get(i);
             String field;
@@ -153,23 +154,26 @@ public class ListPosts extends HttpServlet {
             if("".equals(fieldsMap.get("img"))){
                 out.println("<div class='postImg'><p>No Image Uploaded!</p></div>");
             }else{
-                out.println("<div class='postImg'><img src='" + servletContext  +"/" +Article.CHARITIES_DIR + DirectoryManager.toLowerCaseAndTrim(charityName) + Upload.UPLOADS_DIR + fieldsMap.get("img") + "'/></div>");
+                out.println("<div class='postImg'><img id='postImage' src='" + servletContext  +"/" +Article.CHARITIES_DIR + DirectoryManager.toLowerCaseAndTrim(charityName) + Upload.UPLOADS_DIR + fieldsMap.get("img") + "'/></div>");
             }
             out.println("<div class='articleDetials'>");
-            out.println("<p>Title: " + fieldsMap.get("title") + "</p>");
-            out.println("<p>Description : " + fieldsMap.get("description") + "</p>");
-            out.println("<p>Content : " + fieldsMap.get("content") + "</p>");
-            out.println("<p>date: " + fieldsMap.get("date") + "</p>");
-            out.println("<p>Type: " + fieldsMap.get("type") + "</p>");
-            out.println("<p>Tags: " + fieldsMap.get("tags") + "</p>");
+            out.println("<p><h4>Title: " + fieldsMap.get("title") + "</h4></p>");
+            out.println("<p><h4>Description : " + fieldsMap.get("description") + "</h4></p>");
+            //out.println("<p>Content : " + fieldsMap.get("content") + "</p>");
+            out.println("<p><h4>Date: " + fieldsMap.get("date") + "</h4></p>");
+            out.println("<p><h4>Type: " + fieldsMap.get("type") + "</h4></p>");
+            out.println("<p><h4>Tags: " + fieldsMap.get("tags") + "</h4></p>");
             out.println("<p><a onclick='getEditPost(" + fieldsMap.get("id") + ")'>Edit</a></p>");
             out.println("<p><a onclick='getDeletePost(" + fieldsMap.get("id") + ")'>Delete</a></p>");
-            out.println("<hr/>");
             out.println("</div>");
             out.println("</article>");
-
-
+            }
+        }else{
+            out.println("<div id='no_posts'>");
+            out.println("<p>There are no Posts for you to edit right now, try creating one!</p>");
+            out.println("</div>");
         }
+        
            
      }
 

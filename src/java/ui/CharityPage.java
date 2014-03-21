@@ -30,6 +30,9 @@ import utilities.DirectoryManager;
  */
 @WebServlet(name = "CharityPage", urlPatterns = {"/CharityPage"})
 public class CharityPage extends HttpServlet {
+    
+    private final boolean DEBUG_ON = true;
+    HttpSession session;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -52,9 +55,6 @@ public class CharityPage extends HttpServlet {
         while ( i.hasNext() ){
             String key = (String) i.next();
             String value = ((String[]) params.get( key ))[ 0 ];
-            System.out.println(key);
-            System.out.println(value);
-            System.out.println(1);
         }
         
         //System.out.println(charityName);
@@ -65,26 +65,7 @@ public class CharityPage extends HttpServlet {
         
         //Charity charity = Charity.parseJSONtoCharityObj(jsonPath);
         //System.out.println(charity.getName());
-        
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet CharityPage</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            
-            
-            
-            //printNav(out);
-            
-            
-            
-            
-            out.println("</body>");
-            out.println("</html>");
-        }
+       
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -115,7 +96,7 @@ public class CharityPage extends HttpServlet {
             throws ServletException, IOException {
         //processRequest(request, response);
         
-        HttpSession session = request.getSession(true);
+        session = request.getSession(true);
         String charityName = request.getParameter("charity_name");
         
         Object charityJson;
@@ -131,8 +112,10 @@ public class CharityPage extends HttpServlet {
             charityJson        = JSONValue.parse(key);
             charityJSONObj = (JSONObject)charityJson;
             
-            System.out.println("Key: " + key);
-            System.out.println("Value: " + value);
+            if(DEBUG_ON){
+                System.out.println("Key: " + key);
+                System.out.println("Value: " + value);
+            }
         }
         
         
@@ -142,12 +125,10 @@ public class CharityPage extends HttpServlet {
         Charity charity = Charity.parseJSONtoCharityObj(jsonPath);
         
         session.setAttribute("charityName", charity.getName());
+        session.setAttribute("viewing_homepage", true);
         
          try (PrintWriter out = response.getWriter()) {
-            
-            printNav(charity.getName(), out);
-            
-            
+            printNav(charity, out);
         }
         
     }
@@ -162,10 +143,15 @@ public class CharityPage extends HttpServlet {
         return "Short description";
     }// </editor-fold>
     
-    private void printNav(String charityName, PrintWriter out ){
+    private void printNav(Charity charity, PrintWriter out ){
         
-        //charityName = "'" + charityName + "'";
+        String charityName = charity.getName();
+        String charityLogo = charity.getLogo();
         
+        out.println("<div id='nav'>");
+        out.println("<img src=./uploads/" + charityLogo +" />");
+        
+        out.println("<p>" + charity.getDescription() + "</p>");
         out.println("<nav>");
         out.println("<ul>");
         out.println("<li><a onclick=\"getCharityDetails('" + charityName + "')\">Home</a></li>");
@@ -176,7 +162,14 @@ public class CharityPage extends HttpServlet {
         out.println("<li><a onclick=\"getDonate()\">Donate</a></li>");
         out.println("<li><a onclick=\"getFAQ()\">FAQ</a></li>");
         out.println("</ul>");
-        out.println("</nav>");  
+        out.println("</nav>"); 
+        
+        if((Boolean)session.getAttribute("authorised")){
+            out.println("<div id=\"faq\">");
+            out.println("<p><a href=\"../../Dashboard\">Dashboard</a></p>");
+            out.println("</div>");
+        }
+        out.println("</div>");  
     }
 
 }

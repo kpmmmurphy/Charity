@@ -36,13 +36,11 @@ import utilities.GoogleMail;
 public class ForgotPassword extends HttpServlet {
 
     /* Debug mechinism */
-    private final boolean DEBUG_ON = true;
-    
+    private final boolean DEBUG_ON = true;    
     /* user supplied username */
     private String username;
     /* user supplied email */
-    private String email;
-    
+    private String email;    
     /* for indicateing if all input was entered */
     private boolean unenteredInput;
     /* for indicateing if the user supplied username matches one in the DB*/
@@ -96,6 +94,14 @@ public class ForgotPassword extends HttpServlet {
                 out.println("<p>Username or Email mismatch, please try again.</p>");
             }
             out.println("</form>");
+            out.println("<footer>");
+            out.println("<small>&copy;CMS - Team9 - 2014</small>");
+            out.println("</footer>");
+            out.println("</div>");
+            out.println("<div id=\"faq\">");
+            out.println("<nav>");
+            out.println("<li><a href=\"gateway.html\">Home</a></li>");
+            out.println("<li><a href=\"\">FAQ</a></li>");
             out.println("</div>");
             out.println("</body>");
             out.println("</html>");
@@ -208,66 +214,63 @@ public class ForgotPassword extends HttpServlet {
                usernameResultSet = usernameStatement.executeQuery();
                
                if(! usernameResultSet.next()) {
-                    usernameMismatch = true;
+                   usernameMismatch = true;
+                   processRequest(request, response);
                }
                
+               username = usernameResultSet.getString("username");
                usernameStatement.close();
             } catch(SQLException exception) {
                 exception.printStackTrace();
                 System.err.println("Unable to retrieve username!");
             }
             
-            if(usernameMismatch){
+            try {
+                emailStatement = connection.prepareStatement(emailQuery);
+                emailStatement.setString(1, cleanInputMap.get("username"));
+                emailResultSet = emailStatement.executeQuery();
+
+                if(! emailResultSet.next()) {
+                    emailMismatch = true;
+                    processRequest(request, response);
+                }
+
+                email = emailResultSet.getString("email");
+
+                emailStatement.close();
+            } catch(SQLException exception) {
+                exception.printStackTrace();
+                System.err.println("Unable to retreive email!");
+            }
+
+            /* Determine if user submitted data equals values in the DB*/
+            if(! username.equals(cleanInputMap.get("username"))
+                    ||  ! email.equals(cleanInputMap.get("email"))) {
+
+                usernameMismatch = true;
+                emailMismatch = true;
+
                 processRequest(request, response);
             } else {
+                //generate temporary random password 
+                String generatedPassword = UUID.randomUUID().toString();
+
                 try {
-                    emailStatement = connection.prepareStatement(emailQuery);
-                    emailStatement.setString(1, cleanInputMap.get("username"));
-                    emailResultSet = emailStatement.executeQuery();
-                    
-                    if(! emailResultSet.next()) {
-                        emailMismatch = true;
-                    }
-                
-                    emailStatement.close();
+                    //update DB with temporary password
+                    updatePasswordStatement = connection.prepareStatement(updatePasswordQuery);
+                    updatePasswordStatement.setString(1, generatedPassword);
+                    updatePasswordStatement.setString(2, cleanInputMap.get("username"));
+                    System.out.println(updatePasswordStatement);
+                    updatePasswordStatement.executeUpdate();
+
                 } catch(SQLException exception) {
                     exception.printStackTrace();
-                    System.err.println("Unable to retreive email!");
+                    System.err.println("Unable to update password");
                 }
-                
-                try {
-                    /* Determine if user submitted data equals values in the DB*/
-                    if(! usernameResultSet.getString("username").equals(cleanInputMap.get("username"))
-                            ||  ! emailResultSet.getString("email").equals(cleanInputMap.get("email"))) {
-                        
-                        usernameMismatch = true;
-                        emailMismatch = true;
-                        
-                        processRequest(request, response);
-                    } else {
-                        //generate temporary random password 
-                        String generatedPassword = UUID.randomUUID().toString();
-                        
-                        try {
-                            //update DB with temporary password
-                            updatePasswordStatement = connection.prepareStatement(updatePasswordQuery);
-                            updatePasswordStatement.setString(1, generatedPassword);
-                            updatePasswordStatement.setString(2, cleanInputMap.get("username"));
-                            System.out.println(updatePasswordStatement);
-                            updatePasswordStatement.executeUpdate();
-                            
-                        } catch(SQLException exception) {
-                            exception.printStackTrace();
-                            System.err.println("Unable to update password");
-                        }
-                        
-                        GoogleMail mail = new GoogleMail("kealantest@gmail.com", "thirdyearteam_9", email);
-                        mail.send("", "Generated Password", "Your generated password is " + generatedPassword);
-                        response.sendRedirect("ChangePassword");;
-                    }
-                } catch (SQLException ex) {
-                    Logger.getLogger(ForgotPassword.class.getName()).log(Level.SEVERE, null, ex);
-                }
+
+                GoogleMail mail = new GoogleMail("kealantest@gmail.com", "thirdyearteam_9", email);
+                mail.send("", "Generated Password", "Your generated password is " + generatedPassword);
+                response.sendRedirect("ChangePassword?forgotten_password=true");
             }
         }
     }

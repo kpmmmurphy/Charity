@@ -1,0 +1,66 @@
+/* 
+    Created on : 17-Mar-2014, 17:24:35
+    Author     : Kevin Murphy
+*/
+
+#post_to_social_media
+{
+    margin-left: auto;
+    margin-right: auto;
+    width: 60%;
+    text-align: center;
+    font-size: 1.6em;
+    display: inline;
+}
+
+#post_to_social_media h1
+{
+    padding:1.6em;
+    font-size: 2em;
+    color:#7e7975;
+}
+
+#post_to_social_media p
+{
+    padding: 1.6em;
+    margin: 1.6em;
+}
+
+#post_to_social_media a
+{
+    background: linear-gradient(#fbd568, #ffb347);
+    border: 1px solid #f4ab4c;
+    color: #996319;
+    text-shadow: 0 1px rgba(255,255,255,0.3);
+    padding:1.6em;
+    cursor: pointer;
+}
+
+#post_to_social_media a:hover
+{
+    border: 1px solid #FFFFFF;
+}
+
+.oauth_init
+{
+    margin: 1.5em;
+    margin-left: 10em;
+    padding: 15px;
+    position: relative;
+    background: #fffafb;
+    color: #7e7975;
+    box-shadow:
+        0 2px 2px rgba(0,0,0,0.2),        
+        0 1px 5px rgba(0,0,0,0.2),        
+        0 0 0 12px rgba(255,255,255,0.4); 
+    font-family: none;
+    float:left;
+}
+
+.oauth_init:hover
+{
+    cursor: pointer;
+    border: 1px solid #ffb347;
+}
+
+

@@ -69,14 +69,12 @@ function createCommentingForm(charityName, id) {
 }
 
 function ajaxSubmit(form, submit, section, id) {
+    $.ajaxSetup({ cache: false });
     $(submit).click(function() {
-
-
         event.preventDefault();
 
         var commenter_name = $(".commenter_name", form).val();
         var comment = $(".comment_textbox", form).val();
-        console.debug(comment);
         if (commenter_name === null || commenter_name === "") {
             alert("Please enter a Name! ");
             return 0;
@@ -137,6 +135,8 @@ function processComments(charityName, comments, id) {
             createComment(comments[k].name, comments[k].comment, div, section);
 
         }
+    }else{
+        $(section).append(div);
     }
 
     var commentingForm = createCommentingForm(charityName, id);
@@ -242,15 +242,18 @@ function processTags(tags) {
 
 
 function getArticles(charityName, display_type) {
-
+    $.ajaxSetup({ cache: false });
     var jsonPath = "../../charities/" + charityName + "/json/articles.json";
-    var articleFields,
+    var articlesContainer, articleFields,
             articleClassFields = {"0": "img", "1": "title", "2": "date", "3": "description", "4": "content", "5": "type", "6": "id", "7": "approved", "8": "comments", "9": "tags"},
     articles, article, htmlArticle, htmlParagraph, title, description, content, type, date, img, tags, id, approved, comments, currentArticleField, contentSection;
 
-    $("#main").html(" ");
+    $("#main").html("<p id='no_posts'>No Posts? <a href='#' onclick='getSubmitForm(true)'>Click here to create one!</a></p>");
     $.getJSON(jsonPath, function(data) {
         articles = data.articles;
+        articlesContainer = document.createElement("section");
+        articlesContainer.id = "articles_container";
+        
         for (var i = 0; i < articles.length; i++) {
             article = articles[i];
             title = article.title;
@@ -264,7 +267,7 @@ function getArticles(charityName, display_type) {
             approved = article.approved;
             comments = article.comments;
             articleFields = {"0": img, "1": title, "2": date, "3": description, "4": content, "5": type, "6": id, "7": approved, "8": comments, "9": tags};
-            console.debug(type);
+            
             if (display_type === type || display_type === null) {
                 if (approved) {
                     htmlArticle = document.createElement("article");
@@ -320,7 +323,7 @@ function getArticles(charityName, display_type) {
 
                             if (currentArticleField === "sponsorship") {
 
-                                $(articleBody).append("<img src='../../images/Pay-Pal-Donation.png' class='donate' onclick='getPayPalDonationForm()'/>");
+                                $(articleBody).append("<img src='../../images/Pay-Pal-Donation.png' class='donate' onclick=\"getPayPalDonationForm( '" + id + "')\"/>");
                             }
 
                         } else if (currentArticleClassField === "content") {
@@ -335,7 +338,7 @@ function getArticles(charityName, display_type) {
                         $(htmlArticle).append(articleHeader);
                         $(htmlArticle).append(articleBody);
                     }
-                    $("#main").prepend(htmlArticle);
+                    $(articlesContainer).prepend(htmlArticle);
                 }
             }
 
@@ -343,12 +346,94 @@ function getArticles(charityName, display_type) {
 
 
         }
-
+        $("#main").prepend(articlesContainer).hide().fadeIn(1000);
     });
 }
 
 function getCharityDetails(){
-    //Get Charity's Address, Desc etc....
+    $.ajaxSetup({ cache: false });
+    var description, address, telephone, facebook, twitter, googleplus;
+    $.getJSON("./json/charity.json", function(data) {
+        
+        var charityDetails = document.createElement("article");
+        charityDetails.id = "charity_details";
+        
+        charity_name        = data.charity.name;
+        description = data.charity.description;
+        address     = data.charity.address;
+        telephone   = data.charity.telephone;
+        facebook    = data.charity.facebook;
+        twitter     = data.charity.twitter;
+        googleplus  = data.charity.googleplus;
+        logo        = data.charity.logo;
+        
+        var logoImg = document.createElement("img");
+        logoImg.src = "./uploads/" + logo;
+        
+        var nameH2 = document.createElement("h2"); 
+        nameH2.id = "charity_name";
+        $(nameH2).html(charity_name);
+        
+
+        
+
+        var descArticle = document.createElement("article"); 
+        descArticle.id = "description";
+        var descP = document.createElement("p");
+        $(descP).html(description);
+        $(descArticle).html(descP);
+        
+        var addressArticle = document.createElement("article"); 
+        addressArticle.id = "address";
+        var addressP = document.createElement("p");
+        $(addressP).html(address);
+        $(addressArticle).html(addressP);
+        
+        var telephoneArticle = document.createElement("article"); 
+        telephoneArticle.id = "telephone";
+        var teleP = document.createElement("p");
+        $(teleP).html(telephone);
+        $(telephoneArticle).html(teleP);
+        
+        //Social Media Icons gotten from - 
+        //http://dribbble.com/shots/1233464-24-Free-Flat-Social-Icons
+        var socialArticle = document.createElement("article"); 
+        socialArticle.id  = "social";
+        
+        var facebookImg   = document.createElement("img");
+        var facebookAnchor  = document.createElement("a");
+        facebookImg.src = "../../images/social/facebook.png";
+        facebookAnchor.setAttribute("href", facebook);
+        $(facebookAnchor).html(facebookImg);
+        
+        var twitterImg  = document.createElement("img");
+        var twitterAnchor  = document.createElement("a");
+        twitterImg.src = "../../images/social/twitter.png";
+        twitterAnchor.setAttribute("href", twitter);
+        $(twitterAnchor).html(twitterImg);
+        
+        var googleplusImg = document.createElement("img");
+        var googleplusAnchor  = document.createElement("a");
+        googleplusImg.src = "../../images/social/googleplus.png";
+        googleplusAnchor.setAttribute("href", googleplus );
+        $(googleplusAnchor).html(googleplusImg);
+        
+        $(socialArticle).append(facebookAnchor);
+        $(socialArticle).append(twitterAnchor);
+        $(socialArticle).append(googleplusAnchor);
+        
+        
+        $("#main").html(" ");
+        $(charityDetails).append(logoImg);
+        $(charityDetails).append(nameH2);
+        $(charityDetails).append(descArticle);
+        $(charityDetails).append(addressArticle);
+        $(charityDetails).append(telephoneArticle);
+        $(charityDetails).append(socialArticle);
+        $("#main").append(charityDetails).hide().fadeIn(2000);
+        
+        
+    });
 }
 
 function getDonate() {
@@ -373,13 +458,12 @@ function getDonate() {
     $(article).append(p2);
     $(article).append(img);
 
-
-
     $("#main").hide().html(article).fadeIn(1000);
 
 }
 
 function init() {
+    $.ajaxSetup({ cache: false });
     var charity_name;
     $.getJSON("./json/charity.json", function(data) {
         charity_name = data.charity.name;
@@ -388,6 +472,7 @@ function init() {
             mainSection.id = "main";
             $("#wrapper").append(data);
             $("#wrapper").append(mainSection);
+            getCharityDetails();
         });
     });
 
@@ -396,10 +481,84 @@ function init() {
 }
 
 function getSubmitForm() {
-    var from;
     $.get("../../CreatePost", function(data) {
-        $("#main").html(" ");
-        $("#main").html(data).hide().fadeIn(1000);
+        
+        var submitArticle = document.createElement("article");
+        submitArticle.id = "submit_container";
+        
+        $(submitArticle).html(data);
+        $("#main").html(submitArticle).hide().fadeIn(1500);
     });
 
 }
+
+function getFAQ(){
+    var article = document.createElement("article");
+    article.className = "faq";
+    
+    
+    var newsSection    = document.createElement("section");
+    newsSection.id = "news_section";
+    
+    var lostAndFoundSection    = document.createElement("section");
+    lostAndFoundSection.id = "lost_and_found_section";
+    
+    var sponsorshipSection   = document.createElement("section");
+    sponsorshipSection.id = "sponsorship_section";
+    
+    
+    
+    var type, question, answers;
+    $.getJSON('./../../charity_faq.json', function(data){
+        var faq = data.faq;
+        var bulletList  = document.createElement("ul");
+        for(var i = 0; i < faq.length; i++){
+            
+            type     = faq[i].type;
+            
+            var questionLi = document.createElement("li");
+            var questionH2 = document.createElement("h2");
+            $(questionH2).html(faq[i].question);
+            $(questionLi).html(questionH2);
+            
+            var answersLi = document.createElement("li");
+            answers   = faq[i].answer;
+            var answerList = document.createElement("ol");
+            
+            for(var j = 0; j < answers.length ; j++ ){
+                var answerLi = document.createElement("li");
+                $(answerList).append($(answerLi).html(answers[j]))
+            }
+            
+            if(type === "news"){
+                $(questionLi).append(answerList);
+                $(newsSection).append(questionLi);
+                $(bulletList).append(newsSection);
+            }else if(type === "lost_and_found"){
+                $(questionLi).append(answerList);
+                $(lostAndFoundSection).append(questionLi);
+                $(bulletList).append(lostAndFoundSection);
+            }else if(type === "sponsorship") {
+                $(questionLi).append(answerList);
+                $(sponsorshipSection).append(questionLi);
+                $(bulletList).append(sponsorshipSection);
+            }
+            
+        }
+        
+        $(newsSection).prepend("<h1>For News</h1>");
+        $(lostAndFoundSection).prepend("<h1>For Lost and Found</h1>");
+        $(sponsorshipSection).prepend("<h1>For Sponsorship</h1>");
+        
+        
+        $("#main").html(" ");
+        $(article).append(bulletList);
+        $("#main").html(article).fadeIn(3000);
+        
+    });
+}
+
+/*
+
+
+*/

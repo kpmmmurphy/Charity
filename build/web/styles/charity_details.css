@@ -1,0 +1,26 @@
+/* 
+    Created on : 17-Mar-2014, 15:33:16
+    Author     : Kevin Murphy
+*/
+
+#charity_details
+{
+    padding:1em;
+    text-align: center;
+}
+
+#charity_details h2
+{
+    padding:0.5em;
+    font-size: 1.6em;
+}
+
+#social
+{
+    padding:1em;
+}
+
+#social img
+{
+    padding:0.5em;
+}

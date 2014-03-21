@@ -50,6 +50,7 @@ public class PayPal extends HttpServlet {
         /* The servlet name - In this case "/Login" */
         String servletPath = request.getServletPath();
         
+        String article_id = (request.getParameter("article_id") == null) ? "0" : request.getParameter("article_id");
         try (PrintWriter out = response.getWriter()) {
             
              
@@ -57,6 +58,9 @@ public class PayPal extends HttpServlet {
              
              out.println("<h1>Donate</h1>");
              out.println("<label for='amount'>Amount:</label><input type='number' value='10' name='amount' min='5' max='10000'/><br/>");
+             if(!"0".equals(article_id)){
+                 out.println("<input type='hidden' value='" + article_id +"' name='article_id' />");
+             }
              out.println("<label for='currency'>Type:</label> <select name='currency'>"
                         + "         <option value='EUR' selected>Euro</option>"
                         + "         <option value='USD'>US Dollar</option>"
@@ -123,13 +127,33 @@ public class PayPal extends HttpServlet {
         String currency          = "EUR";
         
         HttpSession session = request.getSession(true);
-        String charityName =  (String)session.getAttribute("charityName");
-        String charityID =  (String)session.getAttribute("charity_id");
+        String charityName  =  (String)session.getAttribute("charityName");
+        String article_id   = (request.getParameter("article_id") == null) ? "0" : request.getParameter("article_id");
+        int charityID = 0;
+        
+        //Connect to Database
+        DBConnect dbConnect   = new DBConnect();
+        Connection connection = dbConnect.getConnection();
+
+        String selectCharityID = "SELECT   id "
+                                 + "FROM   charities "
+                                 + "WHERE  name = ?";
+
+        try(PreparedStatement selectIDStatement = connection.prepareStatement(selectCharityID)){
+            selectIDStatement.setString(1, charityName);
+            ResultSet charityIDResultSet = selectIDStatement.executeQuery();
+            
+            if(charityIDResultSet.first()){
+                charityID = charityIDResultSet.getInt(1);
+            }
+        }catch(SQLException ex){
+            
+        }
         if(DEBUG_ON){
                 System.out.println("CharityID :" + charityID);
         }
         
-        if(charityID != null && Integer.valueOf(charityID) > 0){
+        if(charityID > 0){
             
             String stringInputAmount = request.getParameter("amount");
             if(DEBUG_ON){
@@ -158,11 +182,6 @@ public class PayPal extends HttpServlet {
                     System.out.println("Submitted Currency :" + currency);
                 }
             }
-            
-            //Connect to Database
-            DBConnect dbConnect   = new DBConnect();
-            Connection connection = dbConnect.getConnection();
-            
             String selectPayPalEmail = "SELECT paypal_email "
                                      + "FROM   charities "
                                      + "WHERE  id = ?";
@@ -183,7 +202,7 @@ public class PayPal extends HttpServlet {
             }
             
             byte[] encodedAmountinBytes = Base64.encodeBase64(amount.getBytes());
-            byte[] encodedCharityIDinBytes = Base64.encodeBase64(charityID.getBytes());
+            byte[] encodedCharityIDinBytes = Base64.encodeBase64(new Integer(charityID).toString().getBytes());
             String encodedAmount = new String(encodedAmountinBytes);
             String encodedCharityID = new String(encodedCharityIDinBytes);
             
@@ -191,9 +210,13 @@ public class PayPal extends HttpServlet {
             if(merchantIDorEmail != null && !"".equals(merchantIDorEmail)){
                               
                 returnUrl = returnUrl.concat("?amount=" + encodedAmount).concat("&charity_id=" + encodedCharityID);
+                if(!"0".equals(article_id)){
+                    returnUrl = returnUrl.concat("&article_id=" + article_id);
+                }
                 System.out.println(returnUrl);
                 
                 out.println("<article class='paypal_form'>");                
+                out.println("<h1>Review Donation</h1>");                
                 out.println("<p>Dontaion Amount : " + amount   + "</p>");
                 out.println("<p>Currency        : " + currency + "</p>");
                 out.println("<script src='https://www.paypalobjects.com/js/external/paypal-button.min.js?merchant=" + merchantIDorEmail + "' ");
@@ -216,6 +239,10 @@ public class PayPal extends HttpServlet {
                 out.println("<p>This Charity does not have a PayPal account Setup.</p>");
                 out.println("</article>");
             }
+        }else{
+            out.println("<article class='paypal_form'>");
+            out.println("<p>A problem has occured, please refresh the page and try again.</p>");
+            out.println("</article>");
         }
     }
 

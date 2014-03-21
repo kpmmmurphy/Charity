@@ -12,6 +12,7 @@ import static json.Article.CHARITIES_DIR;
 import static json.Article.JSON_DIR;
 import org.json.simple.*;
 import utilities.DirectoryManager;
+import utilities.Upload;
 
 
 /**
@@ -189,6 +190,18 @@ public class Charity extends CustomJSONObject{
             /* Build the path for reading in the  file*/
             String servletContext = request.getServletContext().getRealPath("/");
             jsonPath = servletContext + CHARITIES_DIR + DirectoryManager.toLowerCaseAndTrim(charityName) + JSON_DIR + CHARITY_FILE_NAME ;
+        }
+        return jsonPath;
+    }
+     
+     public static String getCharityUploadsPath(HttpServletRequest request){
+        String jsonPath = "";
+        HttpSession session = request.getSession(true);
+        String charityName = (String)session.getAttribute(CHARITY_NAME_FROM_SESSION);
+        if(charityName != null && !"".equals(charityName)){
+            /* Build the path for reading in the  file*/
+            String servletContext = request.getServletContext().getRealPath("/");
+            jsonPath =  CHARITIES_DIR + DirectoryManager.toLowerCaseAndTrim(charityName) + Upload.UPLOADS_DIR;
         }
         return jsonPath;
     }

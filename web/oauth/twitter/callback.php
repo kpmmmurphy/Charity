@@ -1,16 +1,5 @@
 <?php
-/*
- * 2014 CS3305 Team9
- * @author Kevin Murphy
- * @version 1.0
- * @date 8/3/14
- * 
- * Taken largly from https://github.com/abraham/twitteroauth
- * Using libraries OAuth.php anf twitteroauth.php by Abraham Williams - http://abrah.am - abraham@abrah.am
- * 
- * 
- * Modified to allow the updating of the charity's status with the title and link of their newest post. 
- * 
+/**
  * @file
  * Take the user when they return from Twitter. Get access tokens.
  * Verify credentials and redirect to based on response from Twitter.
@@ -44,15 +33,21 @@ $article_url    = $_SESSION['article_url'];
 unset($_SESSION['oauth_token']);
 unset($_SESSION['oauth_token_secret']);
 
+?>
 
+<html>
+    <head><link rel="stylesheet" href="twitter_oauth.css"></head>
+  <body>
+  
+<?php
 /* If HTTP response is 200 continue otherwise send to connect page to retry */
 if (200 == $connection->http_code) {
   /* The user has been verified and the access tokens can be saved for future use */
   $_SESSION['status'] = 'verified';
   $newStatus = $article_title . $article_url;
   $status = $connection->post('statuses/update', array('status' => $newStatus));
-  echo '<p>Sucessfully Posted your Latest Article!</p><br />';
-  echo '<p><a onclick="window.close()">Close Window</a></p>';
+  echo '<p id="success"><img src="success.png"/>Sucessfully Posted your Latest Article!</p><br />';
+  echo '<a onclick="window.close()"><p class="close_window"><img src="close.png"/>Close Window</p></a>';
   die();
 } else {
   echo "Unable to Connect Error: " . $connection->http_code;

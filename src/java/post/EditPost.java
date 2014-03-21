@@ -8,7 +8,7 @@ package post;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -16,9 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import json.Article;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import utilities.DirectoryManager;
 import utilities.Upload;
 
@@ -97,8 +95,9 @@ public class EditPost extends HttpServlet {
             throws ServletException, IOException {
         
         
-        LinkedHashMap formFieldMap = Upload.processMultipartForm(request, charityName, false);
+        HashMap formFieldMap = Upload.processMultipartForm(request, charityName, false);
         String idOfPostToUpdate = formFieldMap.get("id").toString();
+        System.out.println("IMg from map in Editpost " + formFieldMap.get("img").toString());
         Article.updateArticleById(request, idOfPostToUpdate,formFieldMap );
     }
 
@@ -151,7 +150,8 @@ public class EditPost extends HttpServlet {
         
         /* Just the HTML for the form, gotten with an JQuery AJAX call*/
                 
-        out.println("<form method='POST' action='" + servletContext + servletPath +"' enctype='multipart/form-data' >");
+        out.println("<div id='submit_container'>");
+        out.println("<form method='POST' id='edit_post' enctype='multipart/form-data' >");
         out.println("<fieldset>");
         out.println("<legend>Edit Post</legend>");
         out.println("Title: <input type='text' name='title' value='" + title + "' placeholder='Post Title'/> <br />");
@@ -177,13 +177,13 @@ public class EditPost extends HttpServlet {
         out.println("<hr />");
         out.println("Tags : <input type='text' name='tags'  value='" + tags + "'placeholder='Tags Seperated by a Space' /> <br />");
         out.println("<input type=\"hidden\" name='id' value='" + id + "'/>");
-        out.println("<input type=\"hidden\" name='originalImg' value='" + img + "'/>");
+        out.println("<input type=\"hidden\" name='img' value='" + img + "'/>");
         out.println("<hr />");
-        out.println("<input type=\"submit\" value=\"Submit\"/>");
-        out.println("<input type=\"reset\" value=\"Clear\"/>");
+        out.println("<input type=\"submit\" value=\"Submit\" onclick='return ajaxSubmitEditedPost()' />");
         out.println("</fieldset>");
         out.println("</form>");
-        out.println("<p>Return to <a href=\"Dashboard\">Dashboard</a></p>");
+        out.println("</div>");
+        
 
 
         

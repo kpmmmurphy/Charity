@@ -29,7 +29,7 @@ import utilities.Upload;
 @WebServlet(name = "ApprovePost", urlPatterns = {"/ApprovePost"})
 public class ApprovePost extends HttpServlet {
     
-    private boolean DEBUG_ON = true;
+    private final boolean DEBUG_ON = true;
 
     private HttpSession session;
     
@@ -60,8 +60,6 @@ public class ApprovePost extends HttpServlet {
         
         session = request.getSession(true);
         
-        
-        
         if(session.getAttribute("authorised") == null) {
             response.sendRedirect("Login");
         } else {
@@ -69,7 +67,6 @@ public class ApprovePost extends HttpServlet {
             unapprovedPosts = Article.getUnapprovedPosts(request);
             try (PrintWriter out = response.getWriter()) {
                 renderUnapprovedPosts(request, out, unapprovedPosts);
-                out.println("<p>Return to <a href=\"Dashboard\">Dashboard</a></p>");
             }   
         }
     }
@@ -101,9 +98,12 @@ public class ApprovePost extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         init(request);
-        String idOfPostToApprove = request.getParameter("id");
+        String idOfPostToApprove = (request.getParameter("id") == null) ? "" :request.getParameter("id") ;
         System.out.println(idOfPostToApprove);
-        Article.approvePost(request, idOfPostToApprove);
+        if(!"".equals(idOfPostToApprove)){
+            Article.approvePost(request, idOfPostToApprove);
+        }
+        
         
     }
 
@@ -144,47 +144,51 @@ public class ApprovePost extends HttpServlet {
      private void renderUnapprovedPosts(HttpServletRequest request, PrintWriter out,JSONArray unapprovedPosts){
         
         LinkedHashMap<String, String> fieldsMap;
-        
-        for(int i = 0; i < unapprovedPosts.size(); i++ ){
-            fieldsMap = Article.getDefaultValueMap(request);
-            JSONObject post =  (JSONObject)unapprovedPosts.get(i);
-            
-            for(String key : fieldsMap.keySet()){
-                String field = fieldsMap.get(key);
-                
-                if("tags".equals(key)){
-                    fieldsMap.put("tags", Article.getTagsAsString(post));
-                }else{
-                    field = ("".equals(post.get(key).toString()))?   fieldsMap.get(key) : post.get(key).toString();
-                    fieldsMap.put(key, field);
+        System.out.println(unapprovedPosts.size());
+        if(unapprovedPosts.size() != 0 ){
+            for(int i = 0; i < unapprovedPosts.size(); i++ ){
+                fieldsMap = Article.getDefaultValueMap(request);
+                JSONObject post =  (JSONObject)unapprovedPosts.get(i);
+
+                for(String key : fieldsMap.keySet()){
+                    String field = fieldsMap.get(key);
+
+                    if("tags".equals(key)){
+                        fieldsMap.put("tags", Article.getTagsAsString(post));
+                    }else{
+                        field = ("".equals(post.get(key).toString()))?   fieldsMap.get(key) : post.get(key).toString();
+                        fieldsMap.put(key, field);
+                    }
+
                 }
                 
+                out.println("<article class='unapprovedPost'>");
+                out.println("<hr/>");
+                
+                if("".equals(fieldsMap.get("img"))){
+                    out.println("<div class='postImg'><p>No Image Uploaded!</p></div>");
+                }else{
+                    out.println("<div class='postImg'><img src='" + servletContext  + "/" +Article.CHARITIES_DIR + trimmedCharityName + Upload.UPLOADS_DIR + fieldsMap.get("img") + "'/></div>");
+                }
+                
+                out.println("<div class='postDetials'>");
+                out.println("<p>Title: " + fieldsMap.get("title") + "</p>");
+                out.println("<p>Description : " + fieldsMap.get("description") + "</p>");
+                out.println("<p>Content : " + fieldsMap.get("content") + "</p>");
+                out.println("<p>date: " + fieldsMap.get("date") + "</p>");
+                out.println("<p>Type: " + fieldsMap.get("type") + "</p>");
+                out.println("<p>Tags: " + fieldsMap.get("tags") + "</p>");
+                out.println("<p class='approve_post_button' ><a onclick='return ajaxApprovePost(" + fieldsMap.get("id") + ")'>Approve Post</a></p>");
+                out.println("<hr/>");
+                out.println("</div>");
+                out.println("</article>");
             }
-
-            out.println("<article class='unapprovedPost'>");
-            out.println("<hr/>");
-            if("".equals(fieldsMap.get("img"))){
-                out.println("<div class='postImg'><p>No Image Uploaded!</p></div>");
-            }else{
-                out.println("<div class='postImg'><img src='" + servletContext  + "/" +Article.CHARITIES_DIR + trimmedCharityName + Upload.UPLOADS_DIR + fieldsMap.get("img") + "'/></div>");
-            }
-            out.println("<div class='postDetials'>");
-            out.println("<p>Title: " + fieldsMap.get("title") + "</p>");
-            out.println("<p>Description : " + fieldsMap.get("description") + "</p>");
-            out.println("<p>Content : " + fieldsMap.get("content") + "</p>");
-            out.println("<p>date: " + fieldsMap.get("date") + "</p>");
-            out.println("<p>Type: " + fieldsMap.get("type") + "</p>");
-            out.println("<p>Tags: " + fieldsMap.get("tags") + "</p>");
-            out.println("<form method='POST' action='" + servletContext + servletPath + "'>");
-            out.println("<input type=\"hidden\" name='id' value='"+ fieldsMap.get("id") + "'>");
-            out.println("<input type=\"submit\" value=\"Approve Post!\">");
-            out.println("</form>");
-            out.println("<hr/>");
+        }else{
+            out.println("<div id='no_posts'>");
+            out.println("<p>There are no Posts for you to approve right now!</p>");
             out.println("</div>");
-            out.println("</article>");
-
-
         }
+        
            
      }
      

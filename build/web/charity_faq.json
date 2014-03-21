@@ -1,0 +1,58 @@
+{
+    "faq": [
+        {
+            "type"    : "news",
+            "question": "Where can I find the news?",
+            "answer"  : [
+                         "Some Top news will just display on the center of the home site; (the news is displayed on chronological order by default)",
+                         ".If you don't find the news you want, then click the correspond link on the top of the home site."
+                         ]
+        }, 
+        {
+            "type"    : "news",
+            "question": "Can I search for some news?",
+            "answer"  : [
+                         "Yes, Of course. After you clicked the 'news' link, there will be a pull-down menu for search waiting for you.", 
+                         "ou can search based on the date/relational people/key words."
+                         ]
+        }, 
+        {
+            "type"    : "news",
+            "question": "How do I post news?",
+            "answer"  : [
+                         "Use the 'user submit'link on the top-right of the home site",
+                         "Then click the correspond link for post news."
+                         ]
+        }, 
+        {
+            "type"    : "lost_and_found",
+            "question": "Where can I find the information about Lost & Found?",
+            "answer"  : [
+                         "Click the correspond link on the top of the home site"
+                         ]
+        }, 
+        {
+            "type"    : "lost_and_found",
+            "question": "How do I post a message about Lost & Found?",
+            "answer"  : [
+                         "Follow the answer for post news."
+                         ]
+        }, 
+        {
+            "type"    : "sponsorship",
+            "question": "Where can I find the information about Sponsorship?",
+            "answer"  : [
+                         "Click the correspond link on the top of the home site;",
+                         "Be careful about your email address. If you forget your password and email at the same time, there will be no way for you to login again."
+                        ]
+        }, 
+        {
+            "type"    : "sponsorship",
+            "question": "How do I post a message about Sponsorship?How do I post a message about Sponsorship?",
+            "answer"  : [
+                         "Follow the answer for post news."
+                        ]
+        }
+        
+    ]
+}
