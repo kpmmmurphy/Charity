@@ -85,9 +85,11 @@ public class Register extends HttpServlet {
             initialiseDetails(request);
 
             try (PrintWriter out = response.getWriter()) {
-                
+                boolean from_signup = false;
+                from_signup = Boolean.valueOf(request.getParameter("from_signup")).booleanValue();
+                boolean with_header = Boolean.valueOf(request.getParameter("with_header")).booleanValue();
                 //If it's the Charity has just signed up, print entier page
-                if(request.getParameter("from_signup") != null && request.getParameter("with_header") != null){
+                if( from_signup ){
                     out.println("<!DOCTYPE html>");
                     out.println("<html>");
                     out.println("<head>");
@@ -134,7 +136,7 @@ public class Register extends HttpServlet {
                 out.println("<label for=\"googleplus\">Google+ Url:</label><input type='text' name='googleplus'  value='" + googleplusUrl + "' placeholder='Your Google+ Url' /> <br />");
                 out.println("</p>");
                 out.println("<p class=\"clearfix\">");
-                if(request.getParameter("from_signup") != null){
+                if(from_signup){
                     out.println("<input type=\"submit\" value=\"Submit\" onclick='return ajaxRegisterSubmit(true)' >");
                 }else{
                     out.println("<input type=\"submit\" value=\"Submit\" onclick='return ajaxRegisterSubmit()' >");
@@ -156,7 +158,7 @@ public class Register extends HttpServlet {
                     out.println("<img src='charities/" + trimmedCharityName  + "/uploads/" + logoImage + "' id='logoImg' /><br/>");
                 }
                 out.println("<p class=\"clearfix\">");
-                if(request.getParameter("from_signup") != null){
+                if(from_signup){
                     out.println("<input type=\"submit\" value=\"Submit\" onclick='return ajaxRegisterUpload(true)' >");
                 }else{
                     out.println("<input type=\"submit\" value=\"Submit\" onclick='return ajaxRegisterUpload()' >");
@@ -167,12 +169,11 @@ public class Register extends HttpServlet {
                 out.println("</div>");
                 
                 
-                if(request.getParameter("from_signup") != null){
+                if(from_signup){
                     out.println("<div id=\"faq\">");
                     out.println("<nav>");
                     out.println("<ul>");
                     out.println("<li><a href=\"Dashboard\">Dashboard</a></li>");
-                    out.println("<li><a href=\"EditDetails\">Edit Details</a></li>");
                     out.println("</ul>");
                     out.println("</div>");
                     out.println("</nav>");

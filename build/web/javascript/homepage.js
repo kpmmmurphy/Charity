@@ -243,7 +243,7 @@ function processTags(tags) {
 
 function getArticles(charityName, display_type) {
     $.ajaxSetup({ cache: false });
-    var jsonPath = "../../charities/" + charityName + "/json/articles.json";
+    var jsonPath = "../../charities/" + charityName.replace(" ", "").trim().toLowerCase() + "/json/articles.json";
     var articlesContainer, articleFields,
             articleClassFields = {"0": "img", "1": "title", "2": "date", "3": "description", "4": "content", "5": "type", "6": "id", "7": "approved", "8": "comments", "9": "tags"},
     articles, article, htmlArticle, htmlParagraph, title, description, content, type, date, img, tags, id, approved, comments, currentArticleField, contentSection;

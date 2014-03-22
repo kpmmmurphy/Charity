@@ -33,17 +33,11 @@ function getRegister(dynamicElement, from_signup, with_header){
     $.ajaxSetup({ cache: false });
     var url = "Register";
     
-    if(from_signup){
-        url.concat("?from_signup=true");
-        if(with_header){
-            url.concat("&with_header=true");
-        }
-    }
     
     console.debug(url);
-    $.get(url,function(data) {
+    $.get(url,{from_signup:from_signup, with_header:with_header}, function(data) {
         $(dynamicElement).html(" ");
-        $(dynamicElement).html(data).hide().fadeIn(1000);
+        $(dynamicElement).html(data).fadeIn(1000);
     });
 }
 
@@ -68,9 +62,16 @@ function ajaxRegisterSubmit(from_signup) {
         $.post("Register", $(this).serialize(),function(data){
             $(dynamicElement).html("<section class='ajax_success'><p>Successfully Registered your Details!</p></section>").fadeIn(1000).fadeOut(2000);
             
-            setTimeout(function() {
-                getRegister("#main", true, true);
-            }, 2000);
+            if(from_signup){
+                setTimeout(function() {
+                    getRegister(dynamicElement, true, true);
+                }, 2000);
+            }else{
+                setTimeout(function() {
+                    getRegister(dynamicElement, false, false);
+                }, 2000);
+            }
+            
         });
     });
 }

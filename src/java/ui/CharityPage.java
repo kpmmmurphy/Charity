@@ -148,6 +148,8 @@ public class CharityPage extends HttpServlet {
         String charityName = charity.getName();
         String charityLogo = charity.getLogo();
         
+        charityName = DirectoryManager.toLowerCaseAndTrim(charityName);
+        
         out.println("<div id='nav'>");
         out.println("<img src=./uploads/" + charityLogo +" />");
         
@@ -164,7 +166,7 @@ public class CharityPage extends HttpServlet {
         out.println("</ul>");
         out.println("</nav>"); 
         
-        if((Boolean)session.getAttribute("authorised")){
+        if(session.getAttribute("authorised") != null){
             out.println("<div id=\"faq\">");
             out.println("<p><a href=\"../../Dashboard\">Dashboard</a></p>");
             out.println("</div>");

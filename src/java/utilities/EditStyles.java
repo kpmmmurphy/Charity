@@ -167,8 +167,12 @@ public class EditStyles extends HttpServlet {
         /* Gets the current home directory */
         String homeDir = System.getProperty("user.home");
         
+        
+        
+        
         try {
-            FileWriter fileWriter = new FileWriter(homeDir + "/NetBeansProjects/cs3305/charities/" + DirectoryManager.toLowerCaseAndTrim((String) session.getAttribute("charityName")) + "/homeStyles.css", true);
+            String servletContext = request.getServletContext().getRealPath("/");
+            FileWriter fileWriter = new FileWriter( servletContext + "/charities/" + DirectoryManager.toLowerCaseAndTrim((String) session.getAttribute("charityName")) + "/homeStyles.css", true);
             fileWriter.write("body\n{\n");
             
             /**
@@ -192,7 +196,7 @@ public class EditStyles extends HttpServlet {
                 fileWriter.write("background-image: none;\n"
                                 + "background-color:" + backgroundColor + ";\n");
             } else {
-                fileWriter.write("background-image:url('../images/sos.png');\n");
+                fileWriter.write("background-image:url('../../images/sos.png');\n");
             }
             
             if(!textColor.equals("default")) {
