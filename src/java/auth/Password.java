@@ -78,9 +78,9 @@ public class Password {
      * Source:
      * http://howtodoinjava.com/2013/07/22/how-to-generate-secure-password-hash-md5-sha-pbkdf2-bcrypt-examples/
      *
-     * Hashes values using the SHA1 hash function 
+     * Hashes values using the SHA1 hash function, with 32 bits of entropy. 
      *
-     * @param passwordToHash To be hashed
+     * @param passwordToHash To String value be hashed
      * @param salt           Salt value to be used when hashing
      * @return
      */
@@ -106,11 +106,10 @@ public class Password {
     /**
      * Source: http://howtodoinjava.com/2013/07/22/how-to-generate-secure-password-hash-md5-sha-pbkdf2-bcrypt-examples/
      *
-     * Generates the salt value to be used in when computing 
+     * Generates a random string salt value to be used when computing 
      * the hash value of the given password
      * 
      * @return String 
-     * @throws NoSuchAlgorithmException 
      */
     private static String getSalt(){
         SecureRandom sr;

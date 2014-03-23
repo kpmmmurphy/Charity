@@ -16,13 +16,18 @@ import java.util.logging.Logger;
  */
 public class DBConnect {
 
+    /* The Server address */
     private String dbServer;
+    /* The Data Source Name - Databse Name in our case 'cs3305' */
     private String DSN;
+  
     private String dbUsername;
     private String dbPassword;
 
+    /* IP Address of the machine the system is being deployed on */
     private InetAddress ipAddress = null;
 
+    /* Dr.McCormack's databse class which handles the connection*/
     private final DBClass dbClass;
 
     /**

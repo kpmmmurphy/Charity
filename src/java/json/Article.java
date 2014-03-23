@@ -20,15 +20,21 @@ import org.json.simple.JSONValue;
 import utilities.DirectoryManager;
 
 /**
- *
- * @author Kevin Murphy
+ * Handles the creation of articles and the manipulation of the articles.json file. 
+ * Provides functionality for reading in and writing to the articles.json file, deletion of
+ * articles by id, updating articles by id, inputting user submitted comments and handling tags.
+ * 
+ * @author  Kevin Murphy
+ * @version 1.2
+ * @date    21/2/14
  */
 public class Article extends CustomJSONObject {
 
     /* Debug mechinism for testing */
     private static final boolean DEBUG_ON = true;
-    private static final String CHARITY_NAME_FROM_SESSION = "charityName";
-
+    
+    //Constants associated with articles.json directory locations
+    public static final String CHARITY_NAME_FROM_SESSION = "charityName";
     public static final String ARTICLES_FILE_NAME = "articles.json";
     public static final String CHARITIES_DIR = "charities/";
     public static final String JSON_DIR = "/json/";
@@ -53,7 +59,7 @@ public class Article extends CustomJSONObject {
     private String date;
     /* Image name associated with the article*/
     private String img;
-    /* Type of post - General, Lost and Found, Sponsor etc*/
+    /* Type of post - General, Lost and Found, Sponsorship etc*/
     private String type;
     /* JSONArray for Articles tags */
     private JSONArray tags;
@@ -65,23 +71,24 @@ public class Article extends CustomJSONObject {
     /* The path of the JSON file  */
     private static String jsonPath;
 
-    /*
-     * Constructor
-     * Initialises all attributes
+    /**
+     * Constructor for an Article Object, gives default empty string values for null parameters.
      * 
-     * @param title   The title of the article
-     * @param content The content of the Article
+     * initializes all attributes. If no image was upload, automatically associates the charity's logo image with the article. 
+     * 
+     * @param request   The HttpServletRequest used to identify the Charity, and write/read the file accordingly
+     * @param articleMap A LinkedHashMap containing all the fields associated with an Article
      */
     public Article(HttpServletRequest request, LinkedHashMap articleMap) {
         super();
         initializeDetials(request);
 
         this.id          = generateArticleId(request);
-        this.title       = (articleMap.get("title").toString() != null)       ? articleMap.get("title").toString()       : "";
+        this.title       = (articleMap.get("title").toString()       != null) ? articleMap.get("title").toString()       : "";
         this.description = (articleMap.get("description").toString() != null) ? articleMap.get("description").toString() : "";
-        this.content     = (articleMap.get("content").toString() != null)     ? articleMap.get("content").toString()     : "";
+        this.content     = (articleMap.get("content").toString()     != null) ? articleMap.get("content").toString()     : "";
         this.img         = (!"".equals(articleMap.get("img").toString()))     ? articleMap.get("img").toString()         : Charity.parseJSONtoCharityObj(request).getLogo();
-        this.type        = (articleMap.get("type").toString() != null)        ? articleMap.get("type").toString()        : "general";
+        this.type        = (articleMap.get("type").toString()        != null) ? articleMap.get("type").toString()        : "general";
         SimpleDateFormat sdf = new SimpleDateFormat("dd/M/yyyy");
         this.date            = sdf.format(new Date());
         this.tags            = createJSONTagsArray(articleMap.get("tags").toString());
@@ -92,14 +99,36 @@ public class Article extends CustomJSONObject {
             approved = true;
         }
     }
+    
+     /**
+     * Takes the HttpServletRequest and extracts the session attributes from it, instantiating all
+     * the class attributes required to perform the creating and manipulation of Article objects
+     * @param request 
+     */
+    private void initializeDetials(HttpServletRequest request) {
+        //Get the Session 
+        session = request.getSession(true);
+        //Get the charity name, must initilize when user is viewing each charity 
+        charityName = (String) session.getAttribute("charityName");
+        System.out.println(charityName);
+        //Only admins will be authorised, see Signup or Login session instantiation
+        if (session.getAttribute("authorised") != null) {
+            setAuthorised(true);
+        }
+        //The trimmed and lower case charity name, with spaces removed
+        trimmedCharityName = DirectoryManager.toLowerCaseAndTrim(charityName);
 
-    /*
-     * Handels the writing-out to file of an Article. 
+        /* Gets the path of the articles.json file */
+        jsonPath = getArticlesJSONPath(request);
+    }
+
+    /**
+     * Handles the writing-out to file of an Article. 
      * If no json file exists, it creates one. If one does, it
      * reads it in and appends the new article on to the end
      * of the JSON array housing the already created articles. 
      * 
-     * @param path  The path to be written out to 
+     * @param request  The HttpServletRequest used to identify the Charity, and write/read the file accordingly
      */
     public void writeOutArticle(HttpServletRequest request) {
 
@@ -124,7 +153,7 @@ public class Article extends CustomJSONObject {
     }
 
     /**
-     * Formats the Article's JSON file
+     * Takes all the fields of an article and formats the Article in a JSONObject and returns it 
      *
      * @return JSONObject containing comment attributes
      */
@@ -152,6 +181,14 @@ public class Article extends CustomJSONObject {
         return articleMap;
     }
 
+    /**
+     * Generates an ID for an Article by creating a new entry in the Database table Articles, and then reads the 
+     * newly create row's id value, which is automatically maintained by the auto_increment functionality provided
+     * by our mySQL database
+     * 
+     * @param request The HttpServletRequest used to identify the Charity, and write/read the file accordingly
+     * @return id  
+     */
     private int generateArticleId(HttpServletRequest request) {
         int generatedID = -1;
         //Get the Session 
@@ -224,24 +261,14 @@ public class Article extends CustomJSONObject {
         return getId();
 
     }
-
-    private void initializeDetials(HttpServletRequest request) {
-        //Get the Session 
-        session = request.getSession(true);
-        //Get the charity name, must initilize when user is viewing each charity 
-        charityName = (String) session.getAttribute("charityName");
-        System.out.println(charityName);
-        //Only admins will be authorised, see Signup or Login session instantiation
-        if (session.getAttribute("authorised") != null) {
-            setAuthorised(true);
-        }
-        //The trimmed and lower case charity name, with spaces removed
-        trimmedCharityName = DirectoryManager.toLowerCaseAndTrim(charityName);
-
-        /* Gets the path of the articles.json file */
-        jsonPath = getArticlesJSONPath(request);
-    }
-
+    
+    /**
+     *  Takes a String of tags separated by a space character and uses a RegExp to extract
+     *  each and put them into a JSONarray
+     * 
+     * @param submittedTags
+     * @return 
+     */
     private static JSONArray createJSONTagsArray(String submittedTags) {
 
         JSONArray jsonTagsArray = new JSONArray();
@@ -254,6 +281,13 @@ public class Article extends CustomJSONObject {
         return jsonTagsArray;
     }
 
+    /**
+     * Takes a JSONObject which has a JSONArray called tags and extracts each value and
+     * create a String containing all the values.
+     * 
+     * @param article
+     * @return String of tags
+     */
     public static String getTagsAsString(JSONObject article) {
 
         Object obj = JSONValue.parse(article.get("tags").toString());
@@ -271,6 +305,13 @@ public class Article extends CustomJSONObject {
 
     }
 
+    /**
+     * Retrieves an Article from the charity specific articles.json using it's unique id
+     * 
+     * @param request
+     * @param id
+     * @return JSONObject
+     */
     public static JSONObject getArticleById(HttpServletRequest request, String id) {
         JSONArray articlesArray = getArticlesArrayFromFile(request);
         JSONObject article = new JSONObject();
@@ -286,6 +327,13 @@ public class Article extends CustomJSONObject {
         return article;
     }
 
+    /**
+     * Updates all values of an article identified by it's unique id with the given Map of fields
+     * 
+     * @param request The HttpServletrequest
+     * @param id
+     * @param fields A Map of fields for the Article
+     */
     public static void updateArticleById(HttpServletRequest request, String id, Map fields) {
 
         JSONArray articlesArray = getArticlesArrayFromFile(request);
@@ -295,13 +343,13 @@ public class Article extends CustomJSONObject {
         for (int i = 0; i < articlesArray.size(); i++) {
             selectedArticle = (JSONObject) articlesArray.get(i);
             if (id.equals(selectedArticle.get("id").toString())) {
-                //Get a set of all the entries Key - Value pairs contained in the LinkedHashMap 
+                //Get a set of all the entries Key - Value pairs contained in the Map 
                 Set<Entry<String, Object>> entrySet = fields.entrySet();
 
                 for (Entry<String, Object> entry : entrySet) {
                     String key = entry.getKey();
                     Object value = entry.getValue();
-
+                    
                     if ("tags".equals(key)) {
                         JSONArray tags = new JSONArray();
                         if (value instanceof String) {
@@ -333,6 +381,14 @@ public class Article extends CustomJSONObject {
         writeJsonToFile(articles, jsonPath);
     }
 
+    /**
+     * Deletes an article using it's unique id by looping through each article object
+     * present in the charity specific articles.json file and and creating a new JSONObject 
+     * but excluding the article to be delete, then writes out this newly created JSONObject to file.
+     * 
+     * @param request The HttpServletrequest
+     * @param id 
+     */
     public static void deleteArticleById(HttpServletRequest request, String id) {
         JSONObject articles = new JSONObject();
         JSONArray articlesArray = getArticlesArrayFromFile(request);
@@ -348,7 +404,13 @@ public class Article extends CustomJSONObject {
         String jsonPath = getArticlesJSONPath(request);
         writeJsonToFile(articles, jsonPath);
     }
-
+    
+    /**
+     * Retrieves and returns the JSONArray of Articles from the chairy specific articles.json file
+     * 
+     * @param request The HttpServletrequest
+     * @return JSONArray
+     */
     public static JSONArray getArticlesArrayFromFile(HttpServletRequest request) {
         JSONArray articles = new JSONArray();
         HttpSession session = request.getSession(true);
@@ -366,6 +428,12 @@ public class Article extends CustomJSONObject {
         return articles;
     }
 
+    /**
+     * Returns the charity specific path as a string of the articles.json file
+     * 
+     * @param request The HttpServletrequest
+     * @return The String path of the articles.json file
+     */
     public static String getArticlesJSONPath(HttpServletRequest request) {
         String jsonPath = "";
         HttpSession session = request.getSession(true);
@@ -380,6 +448,12 @@ public class Article extends CustomJSONObject {
         return jsonPath;
     }
 
+    /**
+     * Approves an article by id, so that it will be shown on the charity page.
+     * 
+     * @param request The HttpServletrequest
+     * @param id id of article to be approved
+     */
     public static void approvePost(HttpServletRequest request, String id) {
         JSONArray articlesArray = getArticlesArrayFromFile(request);
         JSONObject articles = new JSONObject();
@@ -399,6 +473,11 @@ public class Article extends CustomJSONObject {
         writeJsonToFile(articles, articlesPath);
     }
 
+    /**
+     * Retrieves all unapproved posts and returns them as a JSONArray
+     * @param request The HttpServletrequest
+     * @return JSONArray of unapproved posts
+     */
     public static JSONArray getUnapprovedPosts(HttpServletRequest request) {
         JSONArray unapprovedPosts = new JSONArray();
         JSONArray articlesArray = getArticlesArrayFromFile(request);
@@ -420,6 +499,12 @@ public class Article extends CustomJSONObject {
         return unapprovedPosts;
     }
 
+    /**
+     * Takes the HttpServletRequest and extracts the parameters 'charity_name', 'post_id', 'commenter_name' and 'comment_textbox' 
+     * and inputs them into the articles.json file in the comment object of the articles object where the article id equals the post_id
+     * 
+     * @param request The HttpServletrequest 
+     */
     public static void inputComment(HttpServletRequest request) {
         String charityName = (request.getParameter("charity_name") == null) ? "" : request.getParameter("charity_name");
         String postID = (request.getParameter("post_id") == null) ? "" : request.getParameter("post_id");
@@ -447,6 +532,12 @@ public class Article extends CustomJSONObject {
 
     }
 
+    /**
+     * Returns a LinkedHashMap containing all the fields of an article instantiated with a default value
+     * 
+     * @param request LinkedHashMap
+     * @return LinkedHashMap<String, String> with default values for each article field
+     */
     public static LinkedHashMap<String, String> getDefaultValueMap(HttpServletRequest request) {
         /* Default values to be displayed when fields are not present */
         String id = "-1";

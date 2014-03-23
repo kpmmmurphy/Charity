@@ -24,7 +24,11 @@ import utilities.Upload;
 /**
  * Handles the entering of the Charity's address, telephone number, domain name,
  * PayPal account email address, their social media page addresses and uploading 
- * a Charity logo image.
+ * a Charity logo image, which is done in a separate multipart form.
+ * 
+ * This servlet is called via an Ajax request. A parameter 'from_setup' indicates what content is 
+ * to be send back to the client, if the from_setup parameter is set, then an valid html page with header and body is 
+ * sent back, if the paremeter is not set, only the forms are sent back. 
  * 
  * @author  Kevin Murphy
  * @version 1.1
@@ -93,9 +97,7 @@ public class Register extends HttpServlet {
                     out.println("<!DOCTYPE html>");
                     out.println("<html>");
                     out.println("<head>");
-                    out.println("<title>Edit Charity Info</title>"); 
-                    
-                    //out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/normalize.css\"/>"); 
+                    out.println("<title>Edit Charity Info</title>");
                     out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/formStyles.css\"/>"); 
                     out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/submit_post.css\"/>"); 
                     out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"styles/ajax_msgs.css\"/>"); 
@@ -152,6 +154,7 @@ public class Register extends HttpServlet {
                 out.println("<p class=\"float\">");
                 out.println("<label for='filename'>Upload Logo Image : </label><input id='file' type='file' name='filename' size='50'/><br/>");
                 out.println("</p>");
+                //Displaying the Logo image if one is present on file
                 if("".equals(logoImage) ||logoImage == null){
                     out.println("<p class=\"float\"> No Image uploaded yet!</p>");
                 }else{
@@ -167,7 +170,6 @@ public class Register extends HttpServlet {
                 out.println("</form>");
                 out.println("</div>");
                 out.println("</div>");
-                
                 
                 if(from_signup){
                     out.println("<div id=\"faq\">");

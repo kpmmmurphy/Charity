@@ -111,6 +111,7 @@ public class Signup extends HttpServlet {
             out.println("<p class=\"claerfix\">");
             out.println("<input type=\"submit\" value=\"Submit\">");
             out.println("<input type=\"reset\" value=\"Clear\">");
+            //Context senstive help
             if(unenteredInput){
                 out.println("<p>Please fill in all fields.</p>");
             }

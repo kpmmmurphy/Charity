@@ -289,3 +289,16 @@ color:black;
 background-color:white;
 }
 
+body
+{
+font-family:serif;
+font-size:12pt;
+background-image:url('../../images/sos.png');
+color:black;
+}
+
+#wrapper
+{
+background-color:white;
+}
+

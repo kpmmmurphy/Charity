@@ -1,0 +1,17 @@
+Server Side==================================================================
+
+	DBClass.java - Dr.Colin McCormack 
+
+	Apache Commons IO
+	Apache Commons Fileuplad
+	Apache Commons Code
+	Source: https://commons.apache.org/
+
+	Password.java, which utilizes two methods, getSalt() which gererates a random salt value string, and get_SHA_1_SecurePassword(), which hashs the password and the salt value give a hightend level of security. 
+	Source: http://howtodoinjava.com/2013/07/22/how-to-generate-secure-password-hash-md5-sha-pbkdf2-bcrypt-examples/
+
+	OWASP Java HTML Sanitizer - Used to escape and sanitize user input and defend against XSS attacks. Used in - Signup.java 
+	Source: https://www.owasp.org/index.php/OWASP_Java_HTML_Sanitizer_Project
+
+	JSON-Simple - For manipulation json files
+	Source: https://code.google.com/p/json-simple/

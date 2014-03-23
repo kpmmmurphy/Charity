@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
+ * 
+ *  Invalidates the user's session, logging them out of the system
  *
  * @author kealan
  * @version 1.1

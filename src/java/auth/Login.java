@@ -94,6 +94,7 @@ public class Login extends HttpServlet {
             out.println("<p class=\"clearfix\">");
             out.println("<input type=\"submit\" value=\"Submit\">");
             out.println("</p>");
+            //Context sensitive help
             if(unenteredInput){
                 out.println("<p>Please fill in all fields.</p>");
             }
@@ -160,7 +161,6 @@ public class Login extends HttpServlet {
         //Checks if all input was entered
         if((username == null  || "".equals(username))
           || (password ==  null || "".equals(password))) {
-            
             unenteredInput = true;
             processRequest(request, response);
         } else {
