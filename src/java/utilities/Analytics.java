@@ -22,8 +22,16 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- *
- * @author kealan
+ * Handles displaying donation and sponsorship analytics for the specific charity. 
+ * 
+ * Requested via AJAX call, this servlet looks up the database tables 'donations' and
+ * 'sponsorships', and prints out two html tables with the dates, amounts and in the case
+ * of sponsorship, the article id associated with the donation. It also computes the total
+ * amount of each. 
+ * 
+ * @author  Kealan Smyth
+ * @version 1.2
+ * @date    10/3/14
  */
 
 @WebServlet(name = "Analytics", urlPatterns = {"/Analytics"})

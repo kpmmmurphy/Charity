@@ -1,3 +1,18 @@
+/**
+ * Functions asscoiated with PayPal donation handling
+ * 
+ * @author Kevin Murphy
+ * @version 1.1
+ * @date 5/3/14
+ */
+
+/**
+ * Generates the PayPal donation form and displays it using ColorBox, a JQuery pop-out
+ * Source: http://www.jacklmoore.com/colorbox/
+ * 
+ * @param {type} id
+ * @returns {undefined}
+ */
 function getPayPalDonationForm(id){
     
     if(id === null){

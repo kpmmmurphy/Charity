@@ -16,8 +16,14 @@ import javax.servlet.http.HttpServletResponse;
 import json.Article;
 
 /**
- *
- * @author kpmmmurphy
+ * Handles the posting of comments to an article identified by its id number.
+ * 
+ * Comments are posted via AJAX POST requests to this serlvet,and input into the articles.json
+ * file by calling the method inputComment() of the Article.java class.
+ * 
+ * @author  Kevin Murphy
+ * @version 1.0
+ * @data    12/3/14
  */
 @WebServlet(name = "PostComment", urlPatterns = {"/PostComment"})
 public class PostComment extends HttpServlet {

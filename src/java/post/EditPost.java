@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package post;
 
 import java.io.IOException;
@@ -21,8 +15,16 @@ import utilities.DirectoryManager;
 import utilities.Upload;
 
 /**
- *
- * @author kealan
+ * Handles Editing of posts/articles, called via AJAX requests
+ * 
+ * On GET, with the post/article id as a parameter: Outputs a HTML form with all the fields of a post/article filled in with 
+ * the original post/article values, allowing the charity admin to alter them and 
+ * save the updated values when complete
+ * 
+ * On POST with the multi-part form data passed the data to the Upload.java servlet, which uploads the update image, and passes back the regular 
+ * form data, which is then updated using the method updateArticleById() in the Article.java class
+ * 
+ * @author Kevin Murphy
  * @version 1.0
  * @date 16/2/14
  */
@@ -34,10 +36,8 @@ public class EditPost extends HttpServlet {
     
     private String charityName;
     private String trimmedCharityName;
-    private String servletContext;
-    private String servletPath;
     
-    
+    /* Strig values for reselecting the type of post/article automaticallt */
     private String generalSelected      = "";
     private String lostAndFoundSelected = "";
     private String sponsorshipSelected  = "";
@@ -93,11 +93,8 @@ public class EditPost extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        
         HashMap formFieldMap = Upload.processMultipartForm(request, charityName, false);
         String idOfPostToUpdate = formFieldMap.get("id").toString();
-        System.out.println("IMg from map in Editpost " + formFieldMap.get("img").toString());
         Article.updateArticleById(request, idOfPostToUpdate,formFieldMap );
     }
 
@@ -120,13 +117,16 @@ public class EditPost extends HttpServlet {
 
         //Trim, set to lower case and remove white spaces
         trimmedCharityName = DirectoryManager.toLowerCaseAndTrim(charityName);
-        
-        servletContext = request.getContextPath();
-        servletPath    = request.getServletPath();
     }
     
    
-    
+    /**
+     * Creates a HTML form with all the values of the article to be edited
+     * 
+     * @param request The HttpSevletRequest 
+     * @param out     The PrintWriter
+     * @param idOfPostToEdit  Id of post/article
+     */
     private void renderPostToBeEdited(HttpServletRequest request, PrintWriter out,String idOfPostToEdit){
         String id;
         String title;
@@ -148,8 +148,7 @@ public class EditPost extends HttpServlet {
         date        = article.get("date").toString();
         tags        = Article.getTagsAsString(article);
         
-        /* Just the HTML for the form, gotten with an JQuery AJAX call*/
-                
+        /* Just the HTML for the form, gotten with an JQuery AJAX call */
         out.println("<div id='submit_container'>");
         out.println("<form method='POST' id='edit_post' enctype='multipart/form-data' >");
         out.println("<fieldset>");
@@ -183,15 +182,15 @@ public class EditPost extends HttpServlet {
         out.println("</fieldset>");
         out.println("</form>");
         out.println("</div>");
-        
-
-
-        
            
      }
     
     
-    
+    /**
+     * Helper method to automatically select the original type of the article
+     * 
+     * @param type The original type of the post/article
+     */
     private void selectChosenType(String type){
         if(type.equals("general")){
             generalSelected = "selected";

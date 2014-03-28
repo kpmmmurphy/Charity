@@ -1,3 +1,20 @@
+/**
+ * Houses functions for the Dashboard Post/Article management. 
+ * Also provides functions for taking the charity admin to our OAuth 
+ * scripts on cs1.ucc.ie in a new pop-out window.
+ * 
+ * AJAX caching is turned off in each individual function.
+ * 
+ * @author Kevin Murphy
+ * @version 1.1
+ * @date 23/2/14
+ */
+
+/**
+ * Make an AJAX GET request to the CreatePost.java servlet and renders it to the browser.
+ * 
+ * @returns {undefined}
+ */
 function getCreatePost() {
     $.ajaxSetup({ cache: false });
     ajaxLoadingPrompt("#main", "Loading...");
@@ -12,6 +29,11 @@ function getCreatePost() {
     
 }
 
+/**
+ * Make an AJAX GET request to the ApprovePost.java servlet and renders it to the browser.
+ * 
+ * @returns {undefined}
+ */
 function getApprovePost() {
     
     $.ajaxSetup({ cache: false });
@@ -21,6 +43,13 @@ function getApprovePost() {
     });
 }
 
+/**
+ * Make an AJAX POST request to the ApprovePost.java servlet with the id of the post/article to be approved, and then renders a success or fail prompt to
+ * notify the user. 
+ * 
+ * @param {type} id
+ * @returns {undefined}
+ */
 function ajaxApprovePost(id){
     
     $.ajaxSetup({ cache: false });
@@ -33,6 +62,11 @@ function ajaxApprovePost(id){
     });
 }
 
+/**
+ * Make an AJAX GET request to the ListPost.java servlet and render the output to the browser
+ * 
+ * @returns {undefined}
+ */
 function getListPosts() {
     
     $.ajaxSetup({ cache: false });
@@ -42,6 +76,12 @@ function getListPosts() {
     });
 }
 
+/**
+ *  Make an AJAX GET request to the EditPost.java servlet and render the output to the browser
+ * 
+ * @param {type} id
+ * @returns {undefined}
+ */
 function getEditPost(id) {
     
     $.ajaxSetup({ cache: false });
@@ -51,6 +91,12 @@ function getEditPost(id) {
     });
 }
 
+/**
+ * Make an AJAX POST request to the EditPost.java servlet with the fields to be changed of the post/article, and then renders a success or fail prompt to
+ * notify the user. 
+ * 
+ * @returns {undefined}
+ */
 function ajaxSubmitEditedPost(){
     
     $.ajaxSetup({ cache: false });
@@ -92,14 +138,37 @@ function ajaxSubmitEditedPost(){
     });
 }
 
+/**
+ * Display a loading mesage to the user on the specified html section.
+ * 
+ * @param {type} loadingSection
+ * @param {type} text
+ * @returns {undefined}
+ */
 function ajaxLoadingPrompt(loadingSection, text){
     $(loadingSection).html("<section class='ajax_loading'><img src='./images/ajax-loader.gif'/><p>" + text + "</p></section>");
 }
 
+/**
+ * Display a success mesage to the user on the specified html section.
+ * 
+ * @param {type} loadingSection
+ * @param {type} text
+ * @param {type} fadeInTime
+ * @param {type} fadeOutTime
+ * @returns {undefined}
+ */
 function ajaxSuccessPrompt(loadingSection, text, fadeInTime, fadeOutTime){
     $(loadingSection).html("<section class='ajax_success'><p>" + text + "<p></section>").fadeIn(fadeInTime).fadeOut(fadeOutTime);
 }
 
+/**
+ * Make an AJAX POST request to the DeletePost.java servlet with the id to be changed of the post/article to be deleted, and then renders a success or fail prompt to
+ * notify the user.
+ * 
+ * @param {type} id
+ * @returns {undefined}
+ */
 function getDeletePost(id) {
     
     $.ajaxSetup({ cache: false });
@@ -117,16 +186,44 @@ function getDeletePost(id) {
     
 }
 
+
+/**
+ * Creates a new pop-out window and requests the url of my Twitter OAuth Script which 
+ * sits on cs1.ucc.ie. It passes all the nessasary parameters along with the request
+ * in order to create the status/tweet
+ * 
+ * @param {type} article_title
+ * @param {type} charity_name
+ * @param {type} article_id
+ * @returns {undefined}
+ */
 function createTwitterOAuthWindow(article_title, charity_name, article_id) {
     window.open("http://cs1.ucc.ie/~kpm2/TwitterOAuth/inittwitteroauth.php?title=" + article_title + "&charity_name=" + charity_name + "&article_id=" + article_id + "", "Post Article To Twitter", "width=400,height=400");
 
 }
 
+/**
+ * Creates a new pop-out window and requests the url of my Facebook OAuth Script which 
+ * sits on cs1.ucc.ie. It passes all the nessasary parameters along with the request
+ * in order to create the status/tweet
+ * 
+ * @param {type} article_title
+ * @param {type} charity_name
+ * @param {type} article_id
+ * @returns {undefined}
+ */
 function createFacebookOAuthWindow(article_title, charity_name, article_id) {
     window.open("http://cs1.ucc.ie/~kpm2/FacebookOAuth/facebookoauth.php?title=" + article_title + "&charity_name=" + charity_name + "&article_id=" + article_id + "", "Post Article To Facebook", "width=400,height=400");
 
 }
 
+/**
+ * Handles AJAX submitting of new posts/articles.
+ * Uses the FormData object to pass multi-part form data to the CreatePost.java servlet.
+ * 
+ * @param {type} homepage
+ * @returns {undefined}
+ */
 function ajaxPostSubmit(homepage) {
 
     $.ajaxSetup({ cache: false });

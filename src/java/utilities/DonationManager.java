@@ -23,12 +23,25 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
 
 /**
- *
- * @author kpmmmurphy
+ * Facilitates the tracking of Donations to individual charities by reading in 
+ * parameters passed back to it by a PayPal callback. 
+ * 
+ * The parameters it reads in are: amount, charity_id and article_id. If an article_id is 
+ * given, then the donation is entered in the sponsorships table along with the other details. 
+ * If no article_id is found in the request, then the donation is simply entered in the donations table
+ * 
+ * This method of tracking transactions is no the most idea solution. In deployment, it would be 
+ * a much better choice to use PayPal's new IPN(Instant Payment Notification) system, which ensures 
+ * correct payment tracking and handles all security involved.
+ * 
+ * @author  Kevin Murphy
+ * @version 1.1
+ * @date    27/2/14
  */
 @WebServlet(name = "DonationManager", urlPatterns = {"/DonationManager"})
 public class DonationManager extends HttpServlet {
     
+    /* Debig Mechinism */
     private static final boolean DEBUG_ON = true;
 
     /**
@@ -77,6 +90,9 @@ public class DonationManager extends HttpServlet {
         String encodedCharityID = request.getParameter("charity_id");
         String articleID   = ("undefined".equals(request.getParameter("article_id").toString())) ? "0" : request.getParameter("article_id");
         
+        //Base64 decode the paramaters that are passed back. This encoding was to offer
+        //increased security. In real life deployment, this method would have to involve a more complex cipher
+        //for strongerv security 
         byte[] decodedAmountBytes    = Base64.decodeBase64(encodedAmount);
         byte[] decodedCharityIDBytes = Base64.decodeBase64(encodedCharityID);
         

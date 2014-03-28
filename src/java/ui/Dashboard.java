@@ -11,8 +11,13 @@ import javax.servlet.http.HttpSession;
 import json.Charity;
 import utilities.DirectoryManager;
 /**
- *
- * @author kealan
+ * Administrator Dashboard, giving access to all functionality of our system.
+ * 
+ * The implementation of this servlet utilizes AJAX calls to request individually designed elements
+ * which are then rendered to the browser in a dynamic main section. A static html nav element which makes the AJAX calls
+ * is output to the browser when this servlet is requested. 
+ * 
+ * @author Kevin Murphy and Kealan Smyth
  * @version 1.1
  * @date 16/2/14
  */

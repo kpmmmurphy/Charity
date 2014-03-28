@@ -203,7 +203,11 @@ public class Upload extends HttpServlet {
         
     }
     
-    
+    /**
+     * Process A FileItem and enters it into a global Map which will be returned 
+     * for further processing
+     * @param item The FileItem to be entered in the Map
+     */
     public static void processFormField(FileItem item){
         
         String name  = item.getFieldName();
@@ -222,6 +226,21 @@ public class Upload extends HttpServlet {
         
     }
     
+    /**
+     * Facilitates the uploading of the Files, in our case used for uploading images.
+     * Relies on the Apache commons IO and FileUpload libraries.
+     * 
+     * Uploads the file to the charity specific uploads folder which can be found
+     * in all charity directories. 
+     * 
+     * It also handles the inputting of the uploaded files name when the isLogoImage
+     * into the charity's charity.json file under the key 'logo'. 
+     *  
+     * @param request
+     * @param item
+     * @param isLogoImage
+     * @return 
+     */
     private static String processUpload(HttpServletRequest request, FileItem item,  boolean isLogoImage){
         
         String imgTimestamp = "";
@@ -262,6 +281,10 @@ public class Upload extends HttpServlet {
         return imgTimestamp;
     }
     
+    /**
+     * Initializes the class attributes required by methods of this class
+     * @param request 
+     */
     private static void initializeDetials(HttpServletRequest request){
         
         //Get the Session, or create one if does not exsists 
@@ -284,6 +307,7 @@ public class Upload extends HttpServlet {
     }
     
     /**
+     * Returns the fieldHashMap which will be populated with all none file input parameters
      * 
      * @return HashMap
      */

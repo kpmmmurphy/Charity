@@ -22,27 +22,31 @@ import utilities.DirectoryManager;
 import utilities.Upload;
 
 /**
- *
+ * Handles the approving and rendering in HTML of user submitted posts/articles, allowing charity 
+ * admins to view the fields associated with the unapproved posts/articles.
+ * 
+ * Called via an AJAXs requests, on GET outputs all unapproved posts in individual Article tags with approve buttons, 
+ * on POST approves post/article corresponding to the article id of the post/article as a parameter
+ * 
  * @author Kevin Murphy and Kealan Smyth
+ * @version 1.0
+ * @date 18/2/14
  */
 
 @WebServlet(name = "ApprovePost", urlPatterns = {"/ApprovePost"})
 public class ApprovePost extends HttpServlet {
     
+    /* Debug Mechinism */
     private final boolean DEBUG_ON = true;
 
     private HttpSession session;
-    
     private String charityName;
     private String trimmedCharityName;
+    
+    /* The current servlet's context*/
     private String servletContext;
-    private String absoluteServletContext;
-    private String servletPath;
     
-    private String articlesPath;
-    
-    private JSONObject articlesObj;
-    private JSONArray  articlesArray;
+    /* JSONArray to house all unapproived posts*/
     private JSONArray  unapprovedPosts;
     
     /**
@@ -130,21 +134,19 @@ public class ApprovePost extends HttpServlet {
 
         //Get the relative servlet context path - /cs3305/
         servletContext = request.getContextPath();
-        
-        //Servlets relitive name
-        servletPath    = request.getServletPath();
-
-
-            
-       
     }
      
      
-     
+     /**
+      * Creates individual HTML div elements containing all the fields to be displayed by the browser of unapproved posts/articles
+      * 
+      * @param request The HttpServletRequest which is use to identify the charity currently logged into the system
+      * @param out     The PrintWriter to write the resulting HTML out to the browser
+      * @param unapprovedPosts The array of unapproved posts, gotten from calling the getUnapprovedPost of the Article.java class.
+      */
      private void renderUnapprovedPosts(HttpServletRequest request, PrintWriter out,JSONArray unapprovedPosts){
         
         LinkedHashMap<String, String> fieldsMap;
-        System.out.println(unapprovedPosts.size());
         if(unapprovedPosts.size() != 0 ){
             for(int i = 0; i < unapprovedPosts.size(); i++ ){
                 fieldsMap = Article.getDefaultValueMap(request);
@@ -164,13 +166,11 @@ public class ApprovePost extends HttpServlet {
                 
                 out.println("<article class='unapprovedPost'>");
                 out.println("<hr/>");
-                
                 if("".equals(fieldsMap.get("img"))){
                     out.println("<div class='postImg'><p>No Image Uploaded!</p></div>");
                 }else{
                     out.println("<div class='postImg'><img src='" + servletContext  + "/" +Article.CHARITIES_DIR + trimmedCharityName + Upload.UPLOADS_DIR + fieldsMap.get("img") + "'/></div>");
                 }
-                
                 out.println("<div class='postDetials'>");
                 out.println("<p>Title: " + fieldsMap.get("title") + "</p>");
                 out.println("<p>Description : " + fieldsMap.get("description") + "</p>");

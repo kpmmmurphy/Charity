@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package utilities;
 
 import java.io.FileWriter;
@@ -17,8 +11,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- *
- * @author kealan
+ * Allows the charity admin to alter the individual charity specific homeStyles.css present 
+ * in the charity's directory, give the charity home page a unique look. 
+ * 
+ * It works by concatenation the updated style to the existing 
+ * style sheet, and the browser simply overrides the previous styling.
+ * 
+ * @author Kealan Smyth
  * @version 1.2
  * @date 15/03/14
  */

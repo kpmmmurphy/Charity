@@ -20,12 +20,12 @@ import utilities.Upload;
  * displayed on the charity's page.  
  * 
  * Provides methods for converting Charity Objects to and 
- * from JSON files
+ * from JSONObjects and .json files
  * 
- * Extends the abstract class CustomJSONObject, which provides
+ * Extends the abstract class CustomJSONObject, which provides IO
  * write and read methods for JSON files.
- * @author kpm2
- * @version 1
+ * @author Kevin Murphy
+ * @version 1.0
  * @date 2/2/14
  */
 public class Charity extends CustomJSONObject{
@@ -33,8 +33,8 @@ public class Charity extends CustomJSONObject{
     /* Debug mechinism for testing */
     private static boolean DEBUG_ON = true;
     
-     private static final String CHARITY_NAME_FROM_SESSION = "charityName";
-    
+    /* Contants for building the path to the charity.json file*/
+    private static final String CHARITY_NAME_FROM_SESSION = "charityName";
     public static final String CHARITY_FILE_NAME = "charity.json";
     public static final String CHARITIES_DIR = "charities/";
     public static final String JSON_DIR = "/json/";
@@ -59,8 +59,18 @@ public class Charity extends CustomJSONObject{
     private String logo = "";
     
     
-    /*
-     * Constructor
+    /**
+     * Constructor for a Charity Object which is stored in each individual charity directory inside their 
+     * json directory in a file called charity.json
+     * 
+     * @param name String value of the name of the charity
+     * @param description String description of the charity
+     * @param address String address of the charity
+     * @param telephone String value of the charity's telephone number
+     * @param facebook  String value of the charity's facebook url
+     * @param twitter   String value of the charity's twitter url
+     * @param googleplus String value of the charity's google+ url
+     * @param logo       String value of the name of the charity's logo image, which is stored in the charity specific uploads directory 
      */
     public Charity( String name, String description, String address, String telephone, String facebook, String twitter, String googleplus, String logo) {
         super();
@@ -74,12 +84,13 @@ public class Charity extends CustomJSONObject{
         this.logo = logo;
     }
     
-    /*
+    /**
      * Handles the creation of the a JSONObject which holds 
      * the Charity's class attributes and writes them out to a 
      * specified file
      * 
-     * @param path  The write path
+     * @param servletContext
+     * @throws java.io.FileNotFoundException
      */
     public void createCharityJSONFile(String servletContext) throws FileNotFoundException{
         
@@ -108,12 +119,12 @@ public class Charity extends CustomJSONObject{
     }
     
     
-    /*
+    /**
      * Reads in JSON file from disk and converts it to a Charity
      * Object
      * 
-     * @param path  The path of the JSON file to be parsed and converted
      * 
+     * @param request the HttpServletContext used to identify the currently logged in charity
      * @return  Charity object
      */
     public static Charity parseJSONtoCharityObj(HttpServletRequest request){
@@ -142,12 +153,12 @@ public class Charity extends CustomJSONObject{
         return new Charity(charityName, desc, address, tele, face, twit, google, logo);
     }
     
-    /*
-     * Overloaded - Reads in JSON file from disk and converts it to a Charity
+    /**
+     * Overloaded - Reads in JSON file using the specified path parameter from disk and converts it to a Charity
      * Object
      * 
-     * @param path  The path of the JSON file to be parsed and converted
      * 
+     * @param jsonFilePath The specified path of the charity.json file
      * @return  Charity object
      */
     public static Charity parseJSONtoCharityObj(String jsonFilePath){
@@ -173,6 +184,13 @@ public class Charity extends CustomJSONObject{
         return new Charity(charityName, desc, address, tele, face, twit, google, logo);
     }
     
+    /**
+     * Parses in the charity.json file using the HttpServletRequest for a specific 
+     * charity and returns the JSONObject within the charity.json file
+     * 
+     * @param request the HttpServletContext used to identify the currently logged in charity
+     * @return 
+     */
      public static JSONObject parseJSON(HttpServletRequest request ){
          
         //The path where the JSON file will be output to
@@ -180,9 +198,15 @@ public class Charity extends CustomJSONObject{
         JSONObject jsonCharity = readJsonFile(jsonFilePath);
         
         return jsonCharity;
-    }
-     
-     public static String getCharityJSONPath(HttpServletRequest request){
+     }
+    
+     /**
+      * Returns a String representing the charity specific path to their charity.json file
+      * 
+      * @param request the HttpServletContext used to identify the currently logged in charity
+      * @return 
+      */
+    public static String getCharityJSONPath(HttpServletRequest request){
         String jsonPath = "";
         HttpSession session = request.getSession(true);
         String charityName = (String)session.getAttribute(CHARITY_NAME_FROM_SESSION);
@@ -194,6 +218,12 @@ public class Charity extends CustomJSONObject{
         return jsonPath;
     }
      
+    /**
+     * Gets the charity specific path to the charity's upload directory
+     * 
+     * @param request the HttpServletContext used to identify the currently logged in charity
+     * @return 
+     */
      public static String getCharityUploadsPath(HttpServletRequest request){
         String jsonPath = "";
         HttpSession session = request.getSession(true);

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package auth;
+package utilities;
 
 import database.DBConnect;
 import java.io.IOException;
@@ -27,8 +27,11 @@ import org.owasp.html.PolicyFactory;
 import utilities.GoogleMail;
 
 /**
- *
- * @author kealan
+ * Allows the charity admin to reset their password in the database by supplying their
+ * original password and their newly chosen password.
+ * 
+ 
+ * @author Kealan Smyth
  * @version 1.0
  * @date 6/3/14
  */

@@ -16,8 +16,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- *
- * @author kealan
+ * Dashboard UI Element for managing charity accounts, which is requested via an AJAX call. 
+ * 
+ * Provides links to the servlets Register.java, ChangePassoword.java, and
+ * DeleteAccount.java.
+ * 
+ * @author Kealan Smyth
  * @version 1.0
  * @date 09/03/14
  */
@@ -67,11 +71,6 @@ public class EditDetails extends HttpServlet {
             out.println("<h3>Remove your account and charity page</h3>");
             out.println("</article>");
             out.println("</a>");
-            /*
-            out.println("<footer>");
-            out.println("<small>CMS 2014 - Team 9</small>");
-            out.println("</footer>");
-            */
             
         }
     }

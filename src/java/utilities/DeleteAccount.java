@@ -23,8 +23,10 @@ import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 
 /**
- *
- * @author kealan
+ * Facilitates the deletion of a charity's account from the database, deleting the corresponding values
+ * of each related table field accordingly 
+ * 
+ * @author Kealan Smyth
  * @version 1.0
  * @date 09/03/14
  */

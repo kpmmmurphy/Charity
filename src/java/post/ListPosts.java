@@ -24,8 +24,11 @@ import utilities.PayPal;
 import utilities.Upload;
 
 /**
- *
+ * List all posts/articles present in a charity specific articles.json file
+ * 
  * @author Kevin Murphy
+ * @version 1.0
+ * @date 17/2/14
  */
 @WebServlet(name = "ListPosts", urlPatterns = {"/ListPosts"})
 public class ListPosts extends HttpServlet {
@@ -33,14 +36,8 @@ public class ListPosts extends HttpServlet {
     private HttpSession session;
     
     private String charityName;
-    private String trimmedCharityName;
     private String servletContext;
-    private String absoluteServletContext;
-    private String servletPath;
     
-    private String articlesPath;
-    
-    private JSONObject articlesObj;
     private JSONArray  articlesArray;
 
     /**
@@ -100,6 +97,10 @@ public class ListPosts extends HttpServlet {
         return "Short description";
     }// </editor-fold>
     
+    /**
+     * Initilizes all class attributes used in subsequent methods
+     * @param request The HttpSevletRequest 
+     */ 
     private void init(HttpServletRequest request){
          
         session = request.getSession(true);
@@ -107,15 +108,9 @@ public class ListPosts extends HttpServlet {
         //Get Charity Name from Session
         charityName = (String)session.getAttribute("charityName");
 
-        //Trim, set to lower case and remove white spaces
-        trimmedCharityName = DirectoryManager.toLowerCaseAndTrim(charityName);
-
-
         //Get the relative servlet context path - /cs3305/
         servletContext = request.getContextPath();
         
-        //Servlets relitive name
-        servletPath    = request.getServletPath();
 
         //Get the articles JSONArray from the object created in the previous line
         articlesArray = Article.getArticlesArrayFromFile(request);
@@ -124,6 +119,14 @@ public class ListPosts extends HttpServlet {
        
     }
     
+    /**
+     * Create HTML article elements for each post/article present in the article.json file 
+     * of the given charity
+     * 
+     * @param request The HttpServlet request used to identify the specific charity
+     * @param out The PrintWriter
+     * @param articles The JSONArray of articles from the articles.json file
+     */
     private void renderPosts(HttpServletRequest request, PrintWriter out,JSONArray articles){
         String id;
         String title;

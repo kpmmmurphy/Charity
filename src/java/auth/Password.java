@@ -8,7 +8,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Password class housing methods for password hashing and salt generation
+ * Password class housing methods for password hashing and salt generation.
+ * 
+ * The methods, getSalt and get_SHA_1_SecurePassword were taken from the following source
+ * and modified slightly to work correctly with our system.
+ * 
+ * Salting and hashing passwords is a nessecary security step to protect users in
+ * the event of a data breach.
+ * 
+ * Source:http://howtodoinjava.com/2013/07/22/how-to-generate-secure-password-hash-md5-sha-pbkdf2-bcrypt-examples/
  *
  *
  * @author Kevin Murphy

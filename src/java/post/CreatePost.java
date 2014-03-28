@@ -21,28 +21,37 @@ import utilities.DirectoryManager;
 import utilities.Upload;
 
 /**
- *
- * @author kealan
+ * Generates new post/article creation multi-part forms via AJAX calls, and outputs 
+ * links on submission to post a link to social media via OAuth of the new article.  
+ * 
+ * Handles the passing of new posts/articles multi-part form data to the Upload.java class which 
+ * uploads the article image, and passes back a hash map of the article's form field parameters,
+ * which are in turn passed to the Article.java class where they are written to file
+ * 
+ * @author Kevin Murphy and Kealan Smyth
  * @version 1.1
  * @date 16/2/14
  */
 @WebServlet(name = "CreatePost", urlPatterns = {"/CreatePost"})
 public class CreatePost extends HttpServlet {
 
+    /* Debug Mechinism */
     private boolean DEBUG_ON = true;
 
     private String charityName;
     private String trimmedCharityName;
-    private String servletContext;
-    private String articleImg;
 
     private HttpSession session;
 
+    /* Map of all fields of a new Article */
     private LinkedHashMap formFieldMap;
+    private String articleImg;
 
     /**
+     * Request via an AJAX call, only the form required is output to the browser
+     * 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
+     * methods. 
      *
      * @param request servlet request
      * @param response servlet response
@@ -60,8 +69,6 @@ public class CreatePost extends HttpServlet {
         if (session.getAttribute("charityName") == null) {
             response.sendRedirect("Login");
         } else {
-            String servletContext = request.getContextPath();
-            String servletPath = request.getServletPath();
 
             try (PrintWriter out = response.getWriter()) {
                 /* Just the HTML for the form, gotten with an JQuery AJAX call*/
@@ -124,6 +131,9 @@ public class CreatePost extends HttpServlet {
 
     /**
      * Handles the HTTP <code>POST</code> method.
+     * 
+     * Called via an AJAX POST request, passes the multipart form data to the Upload.java servlet, and outputs
+     * HTML links to OAuth social media posting functionality. 
      *
      * @param request servlet request
      * @param response servlet response
@@ -179,6 +189,12 @@ public class CreatePost extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
+    /**
+     * Instantiates all necessary servlet attributes - session, charityName, trimmedCharitName
+     * 
+     * @param request
+     * @return 
+     */
     private boolean init(HttpServletRequest request) {
         boolean success = true;
         session = request.getSession(false);

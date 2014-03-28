@@ -21,11 +21,11 @@ import org.json.simple.parser.ParseException;
  * 
  * @author  Kevin Murphy
  * @version 1.0
- * @date    12/2/14
+ * @date    2/2/14
  */
 public abstract class CustomJSONObject extends JSONObject{
     
-    /*
+    /**
      * Takes a LinkedHashMap representing a JSON file(Key, Value) and
      * performs the static writeJSONString which handles all formatting,
      * and writes it straight to the specified file
@@ -48,7 +48,7 @@ public abstract class CustomJSONObject extends JSONObject{
          }  
     }
      
-     /*
+     /**
      * Reads a .json file from a directory and parses it, creating and 
      * returning a JSONObject
      * 

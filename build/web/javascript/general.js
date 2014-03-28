@@ -1,3 +1,18 @@
+/**
+ * General functions 
+ * 
+ * @author Kevin Murphy and Teng Yu
+ * @version 1.1
+ * @date 10/3/14
+
+ */
+
+/**
+ * Makes an AJAX GET request to the file homepage_faq.json, parses it and renders it to
+ * the browser. 
+ * 
+ * @returns {undefined}
+ */
 function getFAQ(){
     var article = document.createElement("article");
     article.className = "faq";

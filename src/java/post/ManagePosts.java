@@ -15,9 +15,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * Dashboard UI elements, request via an AJAX GET request, offering the charity admin functionality for managing posts/articles
  *
- * @author kpmmmurphy
+ * @author Kevin Murphy
+ * @version 1.0
+ * @date    28/2/14
  */
+
 @WebServlet(name = "ManagePosts", urlPatterns = {"/ManagePosts"})
 public class ManagePosts extends HttpServlet {
 

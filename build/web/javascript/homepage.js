@@ -1,7 +1,25 @@
+/*
+ * This file provides the main client side functionality.
+ * It handles the rendering and filtering of articles, generation of the donation forms,
+ * generation of FAQs, initilising the charity specific index.html page, and posting of
+ * user submited comments and posts via AJAX requests. 
+ * 
+ * @author Kevin Murphy
+ * @version 1.1
+ * @date 5/3/14
+ *
+ */
+
 var showContent = false;
 var toggleComments = false;
 
-
+/**
+ * Generated the HTML img element of the article
+ * 
+ * @param {type} charityName
+ * @param {type} img
+ * @returns {processImg.imgElement|Element}Ren
+ */
 function processImg(charityName, img) {
     var div = document.createElement("div");
     div.className = "post_img_div";
@@ -13,6 +31,13 @@ function processImg(charityName, img) {
     return imgElement;
 }
 
+/**
+ * Generated the HTML commenting form and attaches an AJAX listener to perform the submission
+ * 
+ * @param {type} charityName
+ * @param {type} id
+ * @returns {createCommentingForm.section|Element}
+ */
 function createCommentingForm(charityName, id) {
 
     var section = document.createElement("section");
@@ -68,6 +93,15 @@ function createCommentingForm(charityName, id) {
     return section;
 }
 
+/**
+ * Facilitated AJAX form submission
+ * 
+ * @param {type} form
+ * @param {type} submit
+ * @param {type} section
+ * @param {type} id
+ * @returns {undefined}
+ */
 function ajaxSubmit(form, submit, section, id) {
     $.ajaxSetup({ cache: false });
     $(submit).click(function() {
@@ -109,6 +143,14 @@ function ajaxSubmit(form, submit, section, id) {
 }
 
 
+/**
+ * Creates the commenting section of each individual charity article/post
+ * 
+ * @param {type} charityName
+ * @param {type} comments
+ * @param {type} id
+ * @returns {processComments.section|Element}
+ */
 function processComments(charityName, comments, id) {
 
 
@@ -146,6 +188,16 @@ function processComments(charityName, comments, id) {
     return section;
 }
 
+/**
+ * Creates a comment and displays it onto the existing comment section, showing the user
+ * their newly posted comment
+ * 
+ * @param {type} name
+ * @param {type} comment
+ * @param {type} container
+ * @param {type} section
+ * @returns {undefined}
+ */
 function createComment(name, comment, container, section) {
     var currentComment = document.createElement("article");
     currentComment.className = "comment";
@@ -170,6 +222,12 @@ function createComment(name, comment, container, section) {
 
 }
 
+/**
+ * Toggles the comments section, i.e. shows or hides it.
+ * 
+ * @param {type} id
+ * @returns {undefined}
+ */
 function showComments(id) {
     $(".comments_" + id).slideToggle();
     $("#submit_comment_" + id).slideToggle();
@@ -187,6 +245,13 @@ function showComments(id) {
 
 
 var showContent = true;
+/**
+ * Generates the HTML section element to house the contents section of an article
+ * 
+ * @param {type} content
+ * @param {type} id
+ * @returns {processContent.section|Element}
+ */
 function processContent(content, id) {
     var section = document.createElement("section");
     section.className = "content_section";
@@ -201,6 +266,12 @@ function processContent(content, id) {
     return section;
 }
 
+/**
+ * Shows or hides the contents section of an article/post
+ * 
+ * @param {type} id
+ * @returns {undefined}
+ */
 function toggleContentSection(id) {
     $("#content_section_" + id).slideToggle();
 
@@ -216,6 +287,12 @@ function toggleContentSection(id) {
     showContent = !showContent;
 }
 
+/**
+ * Processes the individual tags and displays them for each article.
+ * 
+ * @param {type} tags
+ * @returns {processTags.section|Element}
+ */
 function processTags(tags) {
     var tagsString = "";
     for (var i = 0; i < tags.length; i++) {
@@ -240,7 +317,15 @@ function processTags(tags) {
 }
 
 
-
+/**
+ * This is the main function used to handle the generation for post/articles 
+ * of charity's on the clide side. It dynamically reads the charity's article.json file
+ * via an JQuery AJAX call and renders them to the browser.
+ * 
+ * @param {type} charityName
+ * @param {type} display_type
+ * @returns {undefined}
+ */
 function getArticles(charityName, display_type) {
     $.ajaxSetup({ cache: false });
     var jsonPath = "../../charities/" + charityName.replace(" ", "").trim().toLowerCase() + "/json/articles.json";
@@ -350,6 +435,12 @@ function getArticles(charityName, display_type) {
     });
 }
 
+/**
+ * Gets the charity.json file of the current charity and builds a section containing
+ * its basic details, which is seen when a user first visits the charity's homepage(index.html)
+ * 
+ * @returns {undefined}
+ */
 function getCharityDetails(){
     $.ajaxSetup({ cache: false });
     var description, address, telephone, facebook, twitter, googleplus;
@@ -436,6 +527,14 @@ function getCharityDetails(){
     });
 }
 
+/**
+ * Generates the donation section of the homepage, rendered when a visitor
+ * clicks the 'Donate' nav link. Calls the function, getPayPalForm() from the 
+ * file paypalfunctions.js, which uses an AJAX call to get the PayPal html form 
+ * from the PayPal.java servlet. 
+ * 
+ * @returns {undefined}
+ */
 function getDonate() {
 
     var article = document.createElement("article");
@@ -462,6 +561,14 @@ function getDonate() {
 
 }
 
+/**
+ * This function is invoked when the body of the index.html page specific to the 
+ * charity is loaded. It retrieves the relitivce charity.json file, and and passed the charity name
+ * to the CharityPage.java servlet, which then passes back the dynamically generated html nav element with
+ * links to each client side function of the system. The CharityPage.java servlet manages session tracking.
+ * 
+ * @returns {undefined}
+ */
 function init() {
     $.ajaxSetup({ cache: false });
     var charity_name;
@@ -480,6 +587,12 @@ function init() {
 
 }
 
+/**
+ * Gets the Create Post html form via an ajax call to the CreatePost.java servlet, and 
+ * renders it to the browser.
+ * 
+ * @returns {undefined}
+ */
 function getSubmitForm() {
     $.get("../../CreatePost", function(data) {
         
@@ -492,6 +605,12 @@ function getSubmitForm() {
 
 }
 
+/**
+ * Takes the FAQ, which is housed in a JSON file under the document root, parses
+ * it and generates a html section of nested lists containing the questions and answers. 
+ * 
+ * @returns {undefined}
+ */
 function getFAQ(){
     var article = document.createElement("article");
     article.className = "faq";
@@ -558,7 +677,3 @@ function getFAQ(){
     });
 }
 
-/*
-
-
-*/

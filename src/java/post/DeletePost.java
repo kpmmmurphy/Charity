@@ -16,8 +16,14 @@ import javax.servlet.http.HttpServletResponse;
 import json.Article;
 
 /**
- *
- * @author kpmmmurphy
+ * Handles the Deletion of an article by a given id
+ * 
+ * Performed by an AJAX Post request with the id of the article to be deleted as a parameter and
+ * utilizes the deleteArticleById() method in the Article.java class.
+ * 
+ * @author  Kevin Murphy
+ * @version 1.0
+ * @date    18/2/14
  */
 @WebServlet(name = "DeletePost", urlPatterns = {"/DeletePost"})
 public class DeletePost extends HttpServlet {
@@ -35,16 +41,7 @@ public class DeletePost extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet DeletePost</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet DeletePost at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+          
         }
     }
 

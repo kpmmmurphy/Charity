@@ -1,11 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+package utilities;
 
-package auth;
-
+import auth.Password;
 import database.DBConnect;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,8 +19,9 @@ import org.owasp.html.HtmlPolicyBuilder;
 import org.owasp.html.PolicyFactory;
 
 /**
- *
- * @author kealan
+ * Facilitates the changing of a charity's password in the database
+ * 
+ * @author Kealan Smyth
  * @version 1.3
  * @date 06/03/14
  */

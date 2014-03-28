@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package utilities;
 
 import com.sun.mail.smtp.SMTPTransport;
@@ -18,7 +12,13 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 /**
- *
+ * Modified by Kealan Smyth.
+ * 
+ * Handles connecting to the Google Mail server with the given credentials,
+ * and sending the message with the newly generated password. 
+ * 
+ * Source: http://stackoverflow.com/questions/3649014/send-email-using-java
+ * 
  * @author doraemon
  */
 public class GoogleMail {

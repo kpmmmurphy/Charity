@@ -24,12 +24,33 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /**
- *
- * @author kpmmmurphy
+ * Facilitates the creation of PayPal donation forms using  PayPal's paypal-button.min.js library
+ * Source: https://www.paypalobjects.com/js/external/paypal-button.min.js.
+ * 
+ * This implementation allows individual charity accounts to associate individual PayPal
+ * accounts in order to receive direct donations. Making a donation is a two step process, 
+ * the first allows the user to input an amount and select a currency, the second is a review
+ * where the dynamic PayPal donation button is created and the user can review their donation and
+ * proceed by clicking the generated button.This will take them away to the PayPal website, handling the
+ * transaction. 
+ * 
+ * The implementation relies on the old transaction tracking method of passing parameters
+ * to the PayPal server and then back to our own server. A better implementation would be
+ * to use PayPals new IPN service, which handles secure transaction tracking. 
+ * 
+ * On the client side UI, both steps are presented using Colorbox, a JQuery popout plugin
+ * Source: http://www.jacklmoore.com/colorbox/
+ * 
+ * This servlet is called using an AJAX request
+ * 
+ * @author  Kevin Murphy
+ * @version 1.1
+ * @date    5/3/14
  */
 @WebServlet(name = "PayPal", urlPatterns = {"/PayPal"})
 public class PayPal extends HttpServlet {
     
+    /* Debug Mechinism */
     private static final boolean DEBUG_ON = true;
 
     /**
@@ -117,12 +138,22 @@ public class PayPal extends HttpServlet {
         return "Short description";
     }// </editor-fold>
     
+    /**
+     * Dynamically builds the PayPal form with PayPal's paypal-button.min.js library,
+     * it passed the amount,charity name and optional article id with the callback url for when the transaction is 
+     * complete and returned to the DonationManager.java servlet, which extracts the parameters
+     * and logs them in the database.
+     * 
+     * 
+     * @param request The HttpServletRequest to identify the charity logged in
+     * @param out     The PrintWriter to send the html back to the browser 
+     */
     public static void buildPayPalForm(HttpServletRequest request, PrintWriter out ){
         
         String merchantIDorEmail = "";
-        String returnUrl       = "http://localhost:8080/cs3305/DonationManager";
-        //String callbackUrl         = "http://localhost:8080/cs3305/HomePage.html";
-        String cancelReturnUrl         = "http://localhost:8080/cs3305/HomePage.html";
+        String returnUrl         = "http://localhost:8080/cs3305/DonationManager";
+        //String callbackUrl     = "http://localhost:8080/cs3305/HomePage.html";
+        String cancelReturnUrl   = "http://localhost:8080/cs3305/HomePage.html";
         String amount            = "10.00";
         String currency          = "EUR";
         
@@ -201,6 +232,7 @@ public class PayPal extends HttpServlet {
                 Logger.getLogger(PayPal.class.getName()).log(Level.SEVERE, null, ex);
             }
             
+            /* Encoding the values as a security measure, in a real deployment the should be encrypted */
             byte[] encodedAmountinBytes = Base64.encodeBase64(amount.getBytes());
             byte[] encodedCharityIDinBytes = Base64.encodeBase64(new Integer(charityID).toString().getBytes());
             String encodedAmount = new String(encodedAmountinBytes);
@@ -215,6 +247,10 @@ public class PayPal extends HttpServlet {
                 }
                 System.out.println(returnUrl);
                 
+                /* Uses Paypals https://www.paypalobjects.com/js/external/paypal-button.min.js 
+                 * Which automatically generates the paypal donate button with the attributes given to the script, which
+                 * can be viewed below
+                 */
                 out.println("<article class='paypal_form'>");                
                 out.println("<h1>Review Donation</h1>");                
                 out.println("<p>Dontaion Amount : " + amount   + "</p>");

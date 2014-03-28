@@ -11,6 +11,8 @@ import org.apache.commons.io.FileUtils;
  * files paths right now, not Windows.
  * 
  * @author Kevin Murphy
+ * @version 1.1
+ * @date 14/2/14
  */
 public class DirectoryManager {
     
@@ -19,7 +21,7 @@ public class DirectoryManager {
     /* the charity's name, use for crearing the directory */
     private static String charityName; 
     
-    /*
+    /**
      * Constructor 
      * 
      * @param charityName  The name of the charity, which will be used as the 
@@ -82,6 +84,13 @@ public class DirectoryManager {
         
     }
     
+    /**
+     * Trims, changes to lowercase and removes white spaces of the charity's name,
+     * to be used when creating the path of the charity's directory
+     * 
+     * @param charityName
+     * @return Thse trimmed, lowercase charity name with white spaces removed
+     */
     public static String toLowerCaseAndTrim(String charityName){
         return charityName.toLowerCase().trim().replaceAll("\\s+","");
     }
